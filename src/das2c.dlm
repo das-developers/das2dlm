@@ -1,0 +1,8 @@
+MODULE das2c
+DESCRIPTION IDL bindings for das2c
+VERISON  0.1
+SOURCE  Das Developers
+BUILD_DATE 2020-02-08
+FUNCTION  das2c_readhttp 0 IDL_MAXPARAMS
+
+ 
