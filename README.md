@@ -53,8 +53,9 @@ One way to do so follows.
 cd dlm
 IDL_DLM_PATH="${PWD}:<IDL_DEFAULT>"
 export IDL_DLM_PATH
-
+```
 Now run IDL as follows:
+
 ```
 $ idl
 IDL> s = 'http://planet.physics.uiowa.edu/das/das2Server?server=dataset'
