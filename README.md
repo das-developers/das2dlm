@@ -2,16 +2,17 @@
 IDL binary extension das2 client (in development)
 
 ## What works and what doesn't
+This project is far from ready for prime time.  It's early days yet.
+here's what's working.
 
- # The das2C error and log message system has been hooked into IDL via 
-   callabacks.
+  * The das2C error and log message system has been hooked into IDL via 
+    callabacks.
 
- # Data can be downloaded but das2 datastructures are not converted to
-   IDL structures yet.
+  * Data can be downloaded via the das2c_readhttp command, but das2
+    datastructures are not converted to IDL structures yet.
 	
- # Authentication bindings haven't been added, only freely available 
-   das2 sources may be used.
-
+  * Authentication bindings haven't been added, only freely available 
+    das2 sources may be used.
 
 ## Build
 
@@ -24,7 +25,6 @@ itself has been built and tested on Windows 7 and 10.
 First download and build [das2C](https://github.com/das-developers/das2C) on
 your system.
 
-
 The DLM uses static libs for portability when ever possible.  Install these
 packages first.  Instruction are also included in the makefile.
 ```build
@@ -33,7 +33,6 @@ sudo yum install expat-devel expat-static
 sudo yum install openssl-devel openssl-static
 sudo yum install zlib-devel
 ```
-
 Open the file `makefile` and adjust `SYSLIB_DIR`, `L_DAS2` and `I_DAS2` as 
 indicated in the comments.  For Debian based systems, `SYSLIB_DIR` will be
 `/usr/lib` instead of `/usr/lib64`.  The values of the other two varibles 
