@@ -12,7 +12,7 @@ here's what's working.
     datastructures are not converted to IDL structures yet.
 	
   * Authentication bindings haven't been added, only freely available 
-    das2 sources may be used.
+    das2 data sources may be tested.
 
 ## Build
 
