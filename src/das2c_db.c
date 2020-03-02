@@ -55,11 +55,6 @@ typedef struct das2_idl_db{
 } DasIdlDbEnt;
 
 
-/* TODO: Make thread safe! */
-static DasIdlDbEnt** g_pDasIdlDb;
-static size_t        g_uDasIdlDb;
-static int           g_nLastQueryId;
-
 void _das2c_free_ent(DasIdlDbEnt* pEnt)
 {
 	if(pEnt == NULL) return;
@@ -77,16 +72,25 @@ void _das2c_free_ent(DasIdlDbEnt* pEnt)
 	if(pEnt->sQuery != NULL) free(pEnt->sQuery);
 	
 	free(pEnt);
+	
+	g_nDbStored -= 1;
 }
 
 /* ************************************************************************* */
 /* Initalize the db (only call this once) */
 
+/* TODO: Make thread safe! */
+static DasIdlDbEnt** g_pDasIdlDb;      /* Pointer to result array */
+static size_t        g_uDasIdlDbSz;    /* Size of the results storage array */
+static int           g_nDbStored;      /* Number of results stored */
+static int           g_nLastQueryId;   /* Last query ID used       */
+
 static bool _das2c_db_init(size_t uLen){
 	
 	g_nLastQueryId = 0;
+	g_nDbStored = 0;
 	
-	g_uDasIdlDb = uLen;
+	g_uDasIdlDbSz = uLen;
 	g_pDasIdlDb = (DasIdlDbEnt**) calloc(g_uDas2Db, sizeof(char*));
 	if(g_aDas2Db == NULL){
 		das_error(DLMERR, "Could not allocate internal DB memory");
@@ -105,7 +109,7 @@ static bool _das2c_db_init(size_t uLen){
 static DasIdlDbEnt* _das2c_db_newEnt()
 {
 	size_t u = 0;
-	for(u = 0; u < g_uDasIdlDb; ++u){
+	for(u = 0; u < g_uDasIdlDbSz; ++u){
 		if(g_pDasIdlDb[u] == NULL){
 			g_pDasIdlDb[u] = (DasIdlDbEnt*) calloc(1, sizeof(DasIdlDbEnt));
 			if(g_pDasIdlDb[u] == NULL){
@@ -113,14 +117,16 @@ static DasIdlDbEnt* _das2c_db_newEnt()
 				return NULL;
 			}
 			else{ 
-				g_nLastQueryId += 1;
+				g_nLastQueryId += 1;  /* 0 is never a valid ID */
+				g_nDbStored += 1;
+				
 				g_pDasIdlDb[u] = g_nLastQueryId;
 				return g_pDasIdlDb[u];
 			}
 		}
 	}
 	/* Okay no room in the inn */
-	DasIdlDbEnt** pTmp = (DasIdlDbEnt**) realloc(g_pDasIdlDb, g_uDasIdlDb*2);
+	DasIdlDbEnt** pTmp = (DasIdlDbEnt**) realloc(g_pDasIdlDb, g_uDasIdlDbSz*2);
 	if(pTmp == NULL){
 		das_error(DLMERR, "Could not re-allocate new DB entry");
 		return NULL;
@@ -128,10 +134,10 @@ static DasIdlDbEnt* _das2c_db_newEnt()
 	
 	g_pDasIdlDb = pTmp;
 	/* Assumes NULL = 0, not strictly in the C99 standard */
-	memset(g_pDasIdlDb + g_uDasIdlDb, 0, g_uDasIdlDb*sizeof(char*));
+	memset(g_pDasIdlDb + g_uDasIdlDbSz, 0, g_uDasIdlDbSz*sizeof(char*));
 	
-	u = g_uDasIdlDb;
-	g_uDasIdlDb *= 2;
+	u = g_uDasIdlDbSz;
+	g_uDasIdlDbSz *= 2;
 	
 	/* Now try to make an entry */
 	g_pDasIdlDb[u] = (DasIdlDbEnt*) calloc(1, sizeof(DasIdlDbEnt));
@@ -142,6 +148,8 @@ static DasIdlDbEnt* _das2c_db_newEnt()
 	}
 	
 	g_nLastQueryId += 1;
+	g_nDbStored += 1;
+	
 	g_pDasIdlDb[u] = g_nLastQueryId;
 	return g_pDasIdlDb[u];
 }
@@ -152,10 +160,10 @@ static DasIdlDbEnt* _das2c_db_newEnt()
 /* Return true if the entry existed, false otherwise */
 static bool _das2c_db_free_ent(int nQueryId)
 {
-	if((g_pDasIdlDb == NULL)||(g_uDasIdlDb = 0)) return false;
+	if((g_pDasIdlDb == NULL)||(g_uDasIdlDbSz = 0)) return false;
 	
 	DasIdlDbEnt* pEnt = NULL;
-	for(size_t u = 0; u < g_uDasIdlDb; ++u){
+	for(size_t u = 0; u < g_uDasIdlDbSz; ++u){
 		pEnt = g_pDasIdlDb[u];
 		if(pEnt->nQueryId == nQueryId){
 			_das2c_free_ent(pEnt);

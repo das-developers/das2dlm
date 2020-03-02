@@ -43,9 +43,9 @@
 ;    'source':   String,  ; The data source ID string on the server, if known
 ;    'begin':    String,  ; The min time value
 ;    'end':      String,  ; the max time value
-;    'res':      String,  ; The resolution requested
+;    'res':      String,  ; The resolution requested if any
 ;    'extra':    String,  ; Any extra arguments sent to the server
-;    'size':     Long,    ; The total number of values in the query result
+;    'size':     Long64,  ; The total number of values in the query result
 ;
 ; EXAMPLES:
 ;  List summary information on all stored results
@@ -59,12 +59,151 @@
 ;-
 */
 
+/* Output structure definition */
+static IDL_STRUCT_TAG_DEF _das2c_queries_tags[] = {
+	{"id",       {0}, (void*)IDL_TYP_LONG},
+	{"datasets", {0}, (void*)IDL_TYP_LONG},
+	{"server",   {0}, (void*)IDL_TYP_STRING},
+	{"source",   {0}, (void*)IDL_TYP_STRING},
+	{"begin",    {0}, (void*)IDL_TYP_STRING},
+	{"end",      {0}, (void*)IDL_TYP_STRING},
+	{"res",      {0}, (void*)IDL_TYP_STRING},
+	{"extra",    {0}, (void*)IDL_TYP_STRING},
+	{"size",     {0}, (void*)IDL_TYP_LONG64},
+	{0}
+};
+
+typedef struct _das2c_queries_ret{
+	IDL_LONG   id;
+	IDL_LONG   datasets;
+	IDL_STRING server;
+	IDL_STRING source;
+	IDL_STRING begin;
+	IDL_STRING end;
+	IDL_STRING res;
+	IDL_STRING extra;
+	IDL_LONG64 size;
+} _das2c_queries_ret_s;
+		
 #define D2C_QUERY_MINA 0
 #define D2C_QUERY_MAXA 1
 #define D2C_QUERY_FLAG 0 
-
+		
 static IDL_VPTR das2c_queries(int argc, IDL_VPTR* argv)
 {
+	/* If no queries are stored, return the !NULL variable */
+	if(g_nDbStored == 0) return IDL_GettmpNULL();
+	
+	IDL_LONG nQueryId = 0;
+	if((argc > 0)
 	
 	
+	size_t u;
+	int nFound = 0;     /* used to cut off the search early */
+	for(u = 0; u < g_nLastQueryId && nFound < g_nDbStored; ++u){		
+		if(g_pDasIdlDb[u] == NULL) continue;
+		
+		if((nQueryId == 0){ ++nFound; }
+		else{
+			if(g_pDasIdlDb[u]->nQueryId == nQueryId){
+				++nFound;
+				break;
+			}
+		}
+	}
+	
+	if(nFound == 0) return IDL_GettmpNULL();
+	
+	/* We have data to return, define the structure (I wonder if I can
+	 * save this?) */
+	IDL_StructDefPtr pDef;
+	pDef = IDL_MakeStruct("D2C_QUERIES", _das2c_queries_tags);
+	
+	IDL_MEMINT dims = nFound;
+	
+	IDL_VPTR pRet;
+	
+	/* Returns pRet->value.s.arr.data, if _das2c_queries_ret_s and
+	 * _das2c_queries_tags are correct */
+	_das2c_queries_ret_s* pData = IDL_MakeTempStruct(
+		pDef,   /* The opaque structure definition */
+		1,      /* Number of dimesions */
+		&dims,  /* Size of each dimension, (only one dimension) */
+		&pRet,  /* The actual structure variable */
+		TRUE    /* Zero out the array */
+	);
+	
+	/* Now fill in the values.  Pray that some other thread hasn't
+	   screwed up the query database */
+	int nFound = 0;
+	
+	DasIdlDbEnt* pEnt = NULL;
+	size_t v = 0;
+	const DasDs* pDs = NULL;
+	size_t d = 0;
+	const DasAry* pAry = NULL;
+	size_t a = 0;
+	size_t uTotSize = 0;
+	for(u = 0; u < g_nLastQueryId && nFound < g_nDbStored; ++u){		
+		if(g_pDasIdlDb[u] == NULL) continue;
+		pEnt = g_pDasIdlDb[u];
+		
+		if((nQueryId == 0)||(pEnt->nQueryId == nQueryId)){
+			pData->id = pEnt->nQueryId;
+			
+			
+			pData->datasets = (IDL_LONG) pEnt->uDs;
+			
+			/* TODO: Add path component */
+			if(pEnt->sHost) IDL_StrStore(pData->server, pEnt->sHost);
+			
+			/* Loop over the params, pulling out ones of interest */
+			for(v = 0; v < pEnt->uParam; ++v){
+				
+				/* WARNING: Knowledge of das2 server interface used here
+				            may need updates for das2.3 compatability */
+				if(strcmp(psKey[v], "dataset") == 0){
+					if(psVal[v] != NULL) 
+						IDL_StrStore(pData->source, psVal[v]);
+				}
+				if(strcmp(psKey[v], "start_time") == 0){
+					if(psVal[v] != NULL) 
+						IDL_StrStore(pData->begin, psVal[v]);
+				}
+				if(strcmp(psKey[v], "end_time") == 0){
+					if(psVal[v] != NULL) 
+						IDL_StrStore(pData->end, psVal[v]);
+				}
+				if(strcmp(psKey[v], "resolution") == 0){
+					if(psVal[v] != NULL) 
+						IDL_StrStore(pData->res, psVal[v]);
+				}
+				if(strcmp(psKey[v], "interval") == 0){
+					if(psVal[v] != NULL) 
+						IDL_StrStore(pData->res, psVal[v]);
+				}
+				if(strcmp(psKey[v], "params") == 0){
+					if(psVal[v] != NULL) 
+						IDL_StrStore(pData->extra, psVal[v]);
+				}
+			}
+			
+			/* Now compute the total number of values in all arrays in
+			   in all datasets */
+			pData->size = 0;
+			for(d = 0; d < pEnt->uDs; ++d){
+				pDs = pEnt->lDs[d];
+				for(a = 0; a < pDs->uArrays; ++i){
+					pAry = pDs->lArrays[a];
+					pData->size += DasAry_size(pAry);
+				}
+			}
+			
+			++pData;
+			++nFound;
+			if(nQueryId != 0) break;
+		}
+	}
+	
+	return pRet;
 }

@@ -83,8 +83,9 @@ int IDL_Load(void){
 	/* Initialize das2, send das2 longs to the IDL message system */
 	das_init("das2c DLM", DASERR_DIS_RET, 0, DASLOG_INFO, _das2c_log2idl);
 	
-	/* Initialze the query result database */
-	if(! _das2c_db_init(1024) ) return FALSE;
+	/* Initialze the query result database.  Searches are linear so
+	 * start small */
+	if(! _das2c_db_init(64) ) return FALSE;
 	
 	/* Override printing errors to stderr, save them instead */
 	das_save_error(DASIDL_ERR_MSG_SZ);
