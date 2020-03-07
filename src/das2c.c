@@ -38,10 +38,17 @@
 /* Include C files directly since the module is composed almost entirely of  */
 /* static functions.                                                         */
 
-#include "das2c_message.c"
+#include "das2c_message.c"   /* Infastructure */
 #include "das2c_db.c"
-/* #include "das2c_convert.c" */
-#include "das2c_read.c"
+
+#include "das2c_queries.c"   /* exported functions */
+/*#include "das2c_dsinfo.c"
+#include "das2c_datasets.c"
+#include "das2c_vars.c"
+#include "das2c_props.c"
+#include "das2c_array.c"
+#include "das2c_free.c"*/
+#include "das2c_readhttp.c"
 
 /* ************************************************************************* */
 /* Load the module definition tables.
@@ -50,19 +57,23 @@
    must be identical to that contained in das2c.dlm. */
 int IDL_Load(void){
 
+	/* Define our structures */
+	g_pDas2c_query_sdef = das2c_query_sdef();
+
+
  	static IDL_SYSFUN_DEF2 function_addr[] = {
 		
 		/* the "database" functions, since manipulating IDL_TYP_PTR and
 		   IDL_TYP_OBJREF are illegal (grrr....) */
 		{ (IDL_SYSRTN_GENERIC)das2c_queries,  "DAS2C_QUERIES",  D2C_QUERIES_MINA,  D2C_QUERIES_MAXA,  D2C_QUERIES_FLAGS,  NULL},
-		{ (IDL_SYSRTN_GENERIC)das2c_dsinfo,   "DAS2C_DSINFO",   D2C_DSINFO_MINA,   D2C_DSINFO_MAXA,   D2C_DSINFO_FLAGS,   NULL},
+/*		{ (IDL_SYSRTN_GENERIC)das2c_dsinfo,   "DAS2C_DSINFO",   D2C_DSINFO_MINA,   D2C_DSINFO_MAXA,   D2C_DSINFO_FLAGS,   NULL},
 		{ (IDL_SYSRTN_GENERIC)das2c_datasets, "DAS2C_DATASETS", D2C_DATASETS_MINA, D2C_DATASETS_MAXA, D2C_DATASETS_FLAGS, NULL},
 		{ (IDL_SYSRTN_GENERIC)das2c_physdims, "DAS2C_PHYSDIMS", D2C_PHYSDIMS_MINA, D2C_PHYSDIMS_MAXA, D2C_PHYSDIMS_FLAGS, NULL},
 		{ (IDL_SYSRTN_GENERIC)das2c_vars,     "DAS2C_VARS",     D2C_VARS_MINA,     D2C_VARS_MAXA,     D2C_VARS_FLAGS,     NULL},
 		{ (IDL_SYSRTN_GENERIC)das2c_props,    "DAS2C_PROPS",    D2C_PROPS_MINA,    D2C_PROPS_MAXA,    D2C_PROPS_FLAGS,    NULL},
 		{ (IDL_SYSRTN_GENERIC)das2c_array,    "DAS2C_ARRAY",    D2C_ARRAY_MINA,    D2C_ARRAY_MAXA,    D2C_ARRAY_FLAGS,    NULL},
 		{ (IDL_SYSRTN_GENERIC)das2c_free,     "DAS2C_FREE",     D2C_FREE_MINA,     D2C_FREE_MAXA,     D2C_FREE_FLAGS,     NULL},
-					
+*/				
 		/* The "get data" functions, only one for now */
 		{ (IDL_SYSRTN_GENERIC)das2c_readhttp, "DAS2C_READHTTP", D2C_READHTTP_MINA, D2C_READHTTP_MAXA, D2C_READHTTP_FLAGS, NULL}
 		

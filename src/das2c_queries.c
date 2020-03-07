@@ -87,7 +87,17 @@ typedef struct _das2c_queries_ret{
 		
 #define D2C_QUERY_MINA 0
 #define D2C_QUERY_MAXA 1
-#define D2C_QUERY_FLAG 0 
+#define D2C_QUERY_FLAG 0
+
+
+static IDL_StructDefPtr g_pDas2c_query_sdef;
+
+static IDL_StructDefPtr das2c_query_sdef()
+{
+	IDL_StructDefPtr pDef;
+	IDL_StructDefPtr pDef = IDL_MakeStruct("DAS2C_QUERY", _das2c_queries_tags);
+	return pDef;
+}
 		
 static IDL_VPTR das2c_queries(int argc, IDL_VPTR* argv)
 {
@@ -113,12 +123,7 @@ static IDL_VPTR das2c_queries(int argc, IDL_VPTR* argv)
 	}
 	
 	if(nFound == 0) return IDL_GettmpNULL();
-	
-	/* We have data to return, define the structure (I wonder if I can
-	 * save this?) */
-	IDL_StructDefPtr pDef;
-	pDef = IDL_MakeStruct("D2C_QUERIES", _das2c_queries_tags);
-	
+		
 	IDL_MEMINT dims = nFound;
 	
 	IDL_VPTR pRet;
@@ -126,7 +131,7 @@ static IDL_VPTR das2c_queries(int argc, IDL_VPTR* argv)
 	/* Returns pRet->value.s.arr.data, if _das2c_queries_ret_s and
 	 * _das2c_queries_tags are correct */
 	_das2c_queries_ret_s* pData = IDL_MakeTempStruct(
-		pDef,   /* The opaque structure definition */
+		g_pDas2c_query_sdef,   /* The opaque structure definition */
 		1,      /* Number of dimesions */
 		&dims,  /* Size of each dimension, (only one dimension) */
 		&pRet,  /* The actual structure variable */
