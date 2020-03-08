@@ -37,11 +37,17 @@ DYN_LIBS=-lz -lm -lpthread
 
 P_SUFFIX=linux.x86_64.so
 
+# Sources #####################################################################
+
+# Warning: keep das2c.c first in the list below!  Since we are usin a wierd
+#          #include scheme
+SRCS=das2c.c das2c_db.c  das2c_message.c  das2c_queries.c  das2c_readhttp.c
+SRCS_IN=$(patsubst %, src/%, $(SRCS))
+
 # Composite Defs ##############################################################
 
 CC=gcc
 CFLAGS=-g -std=c99 -Wall -fPIC -I$(IDL_DIR)/external/include -I$(I_DAS2)
-
 
 STATIC_LIBS=$(L_DAS2) $(L_FFTW3) $(L_EXPAT) $(L_SSL) $(L_CRYPTO) $(L_Z)
 LFLAGS=-Wall -fPIC -shared -Wl,-Bsymbolic $(STATIC_LIBS) $(DYN_LIBS)
@@ -63,16 +69,13 @@ $(DLMD):
 	@if [ ! -e "$(DLMD)" ]; then echo mkdir $(DLMD); \
         mkdir $(DLMD); chmod g+w $(DLMD); fi
 	   
-$(BD)/das2c.o:src/das2c.c $(L_DAS2)
+$(BD)/das2c.o:$(SRCS_IN) $(L_DAS2) 
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(DLMD)/das2c.$(P_SUFFIX):$(BD)/das2c.o 
 	$(CC) -o $@ $^ $(LFLAGS)
-	
-$(DLMD)/das2c.dlm:src/das2c.dlm
-	cp $< $@
 
 clean:
 	rm -r $(BD) 
-	rm $(DLMD)/das2c.$(P_SUFFIX) $(DLMD)/das2c.dlm
+	rm $(DLMD)/das2c.$(P_SUFFIX)
 
