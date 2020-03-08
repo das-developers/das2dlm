@@ -8,11 +8,11 @@ here's what's working.
   * The das2C error and log message system has been hooked into IDL via 
     callabacks.
 
-  * Data can be downloaded via the das2c_readhttp command, but das2
+  * Data can be downloaded via the das2c_readhttp() function, but das2
     datastructures are not converted to IDL structures yet.
 	
-  * Authentication bindings haven't been added, only freely available 
-    das2 data sources may be tested.
+  * Stored query results can be listed using the das2c_queries()
+    function.
 
 ## Build
 
@@ -58,43 +58,77 @@ Now run IDL as follows:
 
 ```
 $ idl
-IDL> s = 'http://planet.physics.uiowa.edu/das/das2Server?server=dataset'
+IDL> s = 'http://planet.physics.uiowa.edu/das/das2Server?server=dataset' + $
 IDL> '&dataset=Galileo/PWS/Survey_Electric&start_time=2001-001&end_time=2001-002'
-IDL> n = das2c_readhttp(s)
-IDL> n = das2c_readhttp(s)  ! not a typo, issue the command twice
+IDL> query_id = das2c_readhttp(s)
+IDL> query_id = das2c_readhttp(s)  ! not a typo, issue the command twice
 ```
 
 You should get the output:
-```
+```idl
 % DAS2C_READHTTP: Redirected to http://jupiter.physics.uiowa.edu/das/server?server=dataset&dataset=Galileo/PWS/Survey_Electri
                   c&start_time=2001-001&end_time=2001-002
-                  
-% DAS2C_READHTTP: Output not yet implemented, the following dataset was aquired:
-                  Dataset: 'electric_10' from group 'electric' | i:0..4483, j:0..152
-                     Property: String | title | Galileo PWS - LRS Electric
-                  
-                     Data Dimension: electric
-                        Property: String | label | Spectral Density (V!a2!n m!a-2!n Hz!a-1!n)
-                        Property: String | scaleType | log
-                        Property: DatumRange | range | 1.0e-17 to 1.0e-4 V**2 m**-2 Hz**-1
-                        Property: double | fill | 0.0
-                     
-                        Variable: center | electric[i][j] V**2 m**-2 Hz**-1 | i:0..4483, j:0..152
-                     
-                     Coordinate Dimension: time
-                        Property: Datum | tagWidth | 80 s
-                        Property: DatumRange | cacheRange | 2001-01-01T00:00:00.000 to 2001-01-02T00:00:00.000 UTC
-                        Property: String | label | %{RANGE}
-                     
-                        Variable: center | time[i] us2000 | i:0..4483, j:-
-                     
-                     Coordinate Dimension: frequency
-                        Property: String | label | Frequency (Hz)
-                        Property: String | scaleType | log
-                        Property: DatumRange | range | 5 to 6000000 Hz
-                        Property: Datum | tagWidth | 1.4 lo
 ```
 
-There is a bug in the URL string argument parsing for `das2c_readhttp`, that fixes
-itself on the second issue of the command (not a good sign).  Hence the duplicate
-command above.
+Using the query id, get more info about the stored result:
+```idl
+IDL> das2c_queries(query_id)
+{
+    "id": 1,
+    "datasets": 1,
+    "server": "jupiter.physics.uiowa.edu",
+    "source": "Galileo/PWS/Survey_Electric",
+    "begin": "2001-001",
+    "end": "2001-002",
+    "res": "",
+    "extra": "",
+    "size": 686051
+}
+```
+We see that this query returned one dataset.  Datasets are *not* broken up
+by time.  A dataset does *not* represent a "files worth" of data.  Files 
+don't exist as an exposed concept for das2 clients.
+
+Rather, a dataset is a set of arrays that are correlated in index space.
+Most das2 queries will return a single dataset, but that is not required
+and should not be expected by clients.
+
+The Juno Waves Survey data source is an example of a das2 data source that 
+usually returns multiple datasets for a single query.  Often all electric field
+data are desired for a given time period; however, Waves has multiple receiver
+bands.  Each band is taking measurements at different times, thus four
+different time value arrays are needed to hold the values for the four
+different amplitude arrays.  A single datasets groups together the time,
+frequency, and amplitude arrays for a given band.  Thus Waves E-field data
+are transmitted as four diffent datasets.
+
+Human readable information about a single dataset is provided by the 
+das2c_dsinfo() function, for example:
+
+```idl
+IDL> print, das2c_dsinfo(query_id, 0) 
+Dataset: 'electric_10' from group 'electric' | i:0..4483, j:0..152
+   Property: String | title | Galileo PWS - LRS Electric
+
+   Data Dimension: electric
+      Property: String | label | Spectral Density (V!a2!n m!a-2!n Hz!a-1!n)
+      Property: String | scaleType | log
+      Property: DatumRange | range | 1.0e-17 to 1.0e-4 V**2 m**-2 Hz**-1
+      Property: double | fill | 0.0
+   
+      Variable: center | electric[i][j] V**2 m**-2 Hz**-1 | i:0..4483, j:0..152
+   
+   Coordinate Dimension: time
+      Property: Datum | tagWidth | 80 s
+      Property: DatumRange | cacheRange | 2001-01-01T00:00:00.000 to 2001-01-02T00:00:00.000 UTC
+      Property: String | label | %{RANGE}
+   
+      Variable: center | time[i] us2000 | i:0..4483, j:-
+   
+   Coordinate Dimension: frequency
+      Property: String | label | Frequency (Hz)
+      Property: String | scaleType | log
+      Property: DatumRange | range | 5 to 6000000 Hz
+      Property: Datum | tagWidth | 1.4 lo
+```
+
