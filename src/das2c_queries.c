@@ -60,20 +60,20 @@
 */
 
 /* Output structure definition */
-static IDL_STRUCT_TAG_DEF _das2c_queries_tags[] = {
-	{"id",       {0}, (void*)IDL_TYP_LONG},
-	{"datasets", {0}, (void*)IDL_TYP_LONG},
-	{"server",   {0}, (void*)IDL_TYP_STRING},
-	{"source",   {0}, (void*)IDL_TYP_STRING},
-	{"begin",    {0}, (void*)IDL_TYP_STRING},
-	{"end",      {0}, (void*)IDL_TYP_STRING},
-	{"res",      {0}, (void*)IDL_TYP_STRING},
-	{"extra",    {0}, (void*)IDL_TYP_STRING},
-	{"size",     {0}, (void*)IDL_TYP_LONG64},
+static IDL_STRUCT_TAG_DEF _das2c_result_tags[] = {
+	{"id",       0, (void*)IDL_TYP_LONG},
+	{"datasets", 0, (void*)IDL_TYP_LONG},
+	{"server",   0, (void*)IDL_TYP_STRING},
+	{"source",   0, (void*)IDL_TYP_STRING},
+	{"begin",    0, (void*)IDL_TYP_STRING},
+	{"end",      0, (void*)IDL_TYP_STRING},
+	{"res",      0, (void*)IDL_TYP_STRING},
+	{"extra",    0, (void*)IDL_TYP_STRING},
+	{"size",     0, (void*)IDL_TYP_LONG64},
 	{0}
 };
 
-typedef struct _das2c_queries_ret{
+typedef struct _das2c_result_s{
 	IDL_LONG   id;
 	IDL_LONG   datasets;
 	IDL_STRING server;
@@ -83,20 +83,18 @@ typedef struct _das2c_queries_ret{
 	IDL_STRING res;
 	IDL_STRING extra;
 	IDL_LONG64 size;
-} _das2c_queries_ret_s;
+} das2c_Result;
 		
-#define D2C_QUERY_MINA 0
-#define D2C_QUERY_MAXA 1
-#define D2C_QUERY_FLAG 0
+#define D2C_QUERIES_MINA 0
+#define D2C_QUERIES_MAXA 1
+#define D2C_QUERIES_FLAG 0
 
 
-static IDL_StructDefPtr g_pDas2c_query_sdef;
+static IDL_StructDefPtr g_das2c_pResultDef;
 
-static IDL_StructDefPtr das2c_query_sdef()
+static void DAS2C_QUERY_def()
 {
-	IDL_StructDefPtr pDef;
-	IDL_StructDefPtr pDef = IDL_MakeStruct("DAS2C_QUERY", _das2c_queries_tags);
-	return pDef;
+	g_das2c_pResultDef = IDL_MakeStruct("DAS2C_QUERY", _das2c_result_tags);
 }
 		
 static IDL_VPTR das2c_queries(int argc, IDL_VPTR* argv)
@@ -105,15 +103,23 @@ static IDL_VPTR das2c_queries(int argc, IDL_VPTR* argv)
 	if(g_nDbStored == 0) return IDL_GettmpNULL();
 	
 	IDL_LONG nQueryId = 0;
-	if((argc > 0)
-	
+	IDL_VPTR pTmpVar = NULL;
+	if(argc > 0){
+		/* They only want to ask about a specific query */
+		
+		/* the idl function calls ensure simple in the background so we know that
+ 		   we don't have an array variable, though handling that should probably
+		   be done at some point. */
+		pTmpVar = IDL_BasicTypeConversion(1, argv, IDL_TYP_LONG);
+		nQueryId = pTmpVar->value.l;
+	}
 	
 	size_t u;
 	int nFound = 0;     /* used to cut off the search early */
 	for(u = 0; u < g_nLastQueryId && nFound < g_nDbStored; ++u){		
 		if(g_pDasIdlDb[u] == NULL) continue;
 		
-		if((nQueryId == 0){ ++nFound; }
+		if(nQueryId == 0){ ++nFound; }
 		else{
 			if(g_pDasIdlDb[u]->nQueryId == nQueryId){
 				++nFound;
@@ -130,8 +136,8 @@ static IDL_VPTR das2c_queries(int argc, IDL_VPTR* argv)
 	
 	/* Returns pRet->value.s.arr.data, if _das2c_queries_ret_s and
 	 * _das2c_queries_tags are correct */
-	_das2c_queries_ret_s* pData = IDL_MakeTempStruct(
-		g_pDas2c_query_sdef,   /* The opaque structure definition */
+	das2c_Result* pData = (das2c_Result*) IDL_MakeTempStruct(
+		g_das2c_pResultDef,   /* The opaque structure definition */
 		1,      /* Number of dimesions */
 		&dims,  /* Size of each dimension, (only one dimension) */
 		&pRet,  /* The actual structure variable */
@@ -140,7 +146,7 @@ static IDL_VPTR das2c_queries(int argc, IDL_VPTR* argv)
 	
 	/* Now fill in the values.  Pray that some other thread hasn't
 	   screwed up the query database */
-	int nFound = 0;
+	nFound = 0;
 	
 	DasIdlDbEnt* pEnt = NULL;
 	size_t v = 0;
@@ -148,7 +154,6 @@ static IDL_VPTR das2c_queries(int argc, IDL_VPTR* argv)
 	size_t d = 0;
 	const DasAry* pAry = NULL;
 	size_t a = 0;
-	size_t uTotSize = 0;
 	for(u = 0; u < g_nLastQueryId && nFound < g_nDbStored; ++u){		
 		if(g_pDasIdlDb[u] == NULL) continue;
 		pEnt = g_pDasIdlDb[u];
@@ -160,36 +165,36 @@ static IDL_VPTR das2c_queries(int argc, IDL_VPTR* argv)
 			pData->datasets = (IDL_LONG) pEnt->uDs;
 			
 			/* TODO: Add path component */
-			if(pEnt->sHost) IDL_StrStore(pData->server, pEnt->sHost);
+			if(pEnt->sHost) IDL_StrStore(&(pData->server), pEnt->sHost);
 			
 			/* Loop over the params, pulling out ones of interest */
 			for(v = 0; v < pEnt->uParam; ++v){
 				
 				/* WARNING: Knowledge of das2 server interface used here
 				            may need updates for das2.3 compatability */
-				if(strcmp(psKey[v], "dataset") == 0){
-					if(psVal[v] != NULL) 
-						IDL_StrStore(pData->source, psVal[v]);
+				if(strcmp(pEnt->psKey[v], "dataset") == 0){
+					if(pEnt->psVal[v] != NULL) 
+						IDL_StrStore(&(pData->source), pEnt->psVal[v]);
 				}
-				if(strcmp(psKey[v], "start_time") == 0){
-					if(psVal[v] != NULL) 
-						IDL_StrStore(pData->begin, psVal[v]);
+				if(strcmp(pEnt->psKey[v], "start_time") == 0){
+					if(pEnt->psVal[v] != NULL) 
+						IDL_StrStore(&(pData->begin), pEnt->psVal[v]);
 				}
-				if(strcmp(psKey[v], "end_time") == 0){
-					if(psVal[v] != NULL) 
-						IDL_StrStore(pData->end, psVal[v]);
+				if(strcmp(pEnt->psKey[v], "end_time") == 0){
+					if(pEnt->psVal[v] != NULL) 
+						IDL_StrStore(&(pData->end), pEnt->psVal[v]);
 				}
-				if(strcmp(psKey[v], "resolution") == 0){
-					if(psVal[v] != NULL) 
-						IDL_StrStore(pData->res, psVal[v]);
+				if(strcmp(pEnt->psKey[v], "resolution") == 0){
+					if(pEnt->psVal[v] != NULL) 
+						IDL_StrStore(&(pData->res), pEnt->psVal[v]);
 				}
-				if(strcmp(psKey[v], "interval") == 0){
-					if(psVal[v] != NULL) 
-						IDL_StrStore(pData->res, psVal[v]);
+				if(strcmp(pEnt->psKey[v], "interval") == 0){
+					if(pEnt->psVal[v] != NULL) 
+						IDL_StrStore(&(pData->res), pEnt->psVal[v]);
 				}
-				if(strcmp(psKey[v], "params") == 0){
-					if(psVal[v] != NULL) 
-						IDL_StrStore(pData->extra, psVal[v]);
+				if(strcmp(pEnt->psKey[v], "params") == 0){
+					if(pEnt->psVal[v] != NULL) 
+						IDL_StrStore(&(pData->extra), pEnt->psVal[v]);
 				}
 			}
 			
@@ -198,7 +203,7 @@ static IDL_VPTR das2c_queries(int argc, IDL_VPTR* argv)
 			pData->size = 0;
 			for(d = 0; d < pEnt->uDs; ++d){
 				pDs = pEnt->lDs[d];
-				for(a = 0; a < pDs->uArrays; ++i){
+				for(a = 0; a < pDs->uArrays; ++a){
 					pAry = pDs->lArrays[a];
 					pData->size += DasAry_size(pAry);
 				}

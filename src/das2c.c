@@ -58,24 +58,23 @@
 int IDL_Load(void){
 
 	/* Define our structures */
-	g_pDas2c_query_sdef = das2c_query_sdef();
-
+	DAS2C_QUERY_def();
 
  	static IDL_SYSFUN_DEF2 function_addr[] = {
 		
 		/* the "database" functions, since manipulating IDL_TYP_PTR and
 		   IDL_TYP_OBJREF are illegal (grrr....) */
-		{ (IDL_SYSRTN_GENERIC)das2c_queries,  "DAS2C_QUERIES",  D2C_QUERIES_MINA,  D2C_QUERIES_MAXA,  D2C_QUERIES_FLAGS,  NULL},
-/*		{ (IDL_SYSRTN_GENERIC)das2c_dsinfo,   "DAS2C_DSINFO",   D2C_DSINFO_MINA,   D2C_DSINFO_MAXA,   D2C_DSINFO_FLAGS,   NULL},
-		{ (IDL_SYSRTN_GENERIC)das2c_datasets, "DAS2C_DATASETS", D2C_DATASETS_MINA, D2C_DATASETS_MAXA, D2C_DATASETS_FLAGS, NULL},
-		{ (IDL_SYSRTN_GENERIC)das2c_physdims, "DAS2C_PHYSDIMS", D2C_PHYSDIMS_MINA, D2C_PHYSDIMS_MAXA, D2C_PHYSDIMS_FLAGS, NULL},
-		{ (IDL_SYSRTN_GENERIC)das2c_vars,     "DAS2C_VARS",     D2C_VARS_MINA,     D2C_VARS_MAXA,     D2C_VARS_FLAGS,     NULL},
-		{ (IDL_SYSRTN_GENERIC)das2c_props,    "DAS2C_PROPS",    D2C_PROPS_MINA,    D2C_PROPS_MAXA,    D2C_PROPS_FLAGS,    NULL},
-		{ (IDL_SYSRTN_GENERIC)das2c_array,    "DAS2C_ARRAY",    D2C_ARRAY_MINA,    D2C_ARRAY_MAXA,    D2C_ARRAY_FLAGS,    NULL},
-		{ (IDL_SYSRTN_GENERIC)das2c_free,     "DAS2C_FREE",     D2C_FREE_MINA,     D2C_FREE_MAXA,     D2C_FREE_FLAGS,     NULL},
+		{ {(IDL_SYSRTN_GENERIC)das2c_queries},  "DAS2C_QUERIES",  D2C_QUERIES_MINA,  D2C_QUERIES_MAXA,  D2C_QUERIES_FLAG,  NULL},
+/*		{ (IDL_SYSRTN_GENERIC)das2c_dsinfo,   "DAS2C_DSINFO",   D2C_DSINFO_MINA,   D2C_DSINFO_MAXA,   D2C_DSINFO_FLAG,   NULL},
+		{ (IDL_SYSRTN_GENERIC)das2c_datasets, "DAS2C_DATASETS", D2C_DATASETS_MINA, D2C_DATASETS_MAXA, D2C_DATASETS_FLAG, NULL},
+		{ (IDL_SYSRTN_GENERIC)das2c_physdims, "DAS2C_PHYSDIMS", D2C_PHYSDIMS_MINA, D2C_PHYSDIMS_MAXA, D2C_PHYSDIMS_FLAG, NULL},
+		{ (IDL_SYSRTN_GENERIC)das2c_vars,     "DAS2C_VARS",     D2C_VARS_MINA,     D2C_VARS_MAXA,     D2C_VARS_FLAG,     NULL},
+		{ (IDL_SYSRTN_GENERIC)das2c_props,    "DAS2C_PROPS",    D2C_PROPS_MINA,    D2C_PROPS_MAXA,    D2C_PROPS_FLAG,    NULL},
+		{ (IDL_SYSRTN_GENERIC)das2c_array,    "DAS2C_ARRAY",    D2C_ARRAY_MINA,    D2C_ARRAY_MAXA,    D2C_ARRAY_FLAG,    NULL},
+		{ (IDL_SYSRTN_GENERIC)das2c_free,     "DAS2C_FREE",     D2C_FREE_MINA,     D2C_FREE_MAXA,     D2C_FREE_FLAG,     NULL},
 */				
 		/* The "get data" functions, only one for now */
-		{ (IDL_SYSRTN_GENERIC)das2c_readhttp, "DAS2C_READHTTP", D2C_READHTTP_MINA, D2C_READHTTP_MAXA, D2C_READHTTP_FLAGS, NULL}
+		{ {(IDL_SYSRTN_GENERIC)das2c_readhttp}, "DAS2C_READHTTP", D2C_READHTTP_MINA, D2C_READHTTP_MAXA, D2C_READHTTP_FLAG, NULL}
 		
 		/* The ancillary functions, none so far */
 	};
@@ -92,11 +91,11 @@ int IDL_Load(void){
 	if(msg_block == NULL) return IDL_FALSE;
 
 	/* Initialize das2, send das2 longs to the IDL message system */
-	das_init("das2c DLM", DASERR_DIS_RET, 0, DASLOG_INFO, _das2c_log2idl);
+	das_init("das2c DLM", DASERR_DIS_RET, 0, DASLOG_INFO, das2c_log2idl);
 	
 	/* Initialze the query result database.  Searches are linear so
 	 * start small */
-	if(! _das2c_db_init(64) ) return FALSE;
+	if(! das2c_db_init(64) ) return FALSE;
 	
 	/* Override printing errors to stderr, save them instead */
 	das_save_error(DASIDL_ERR_MSG_SZ);

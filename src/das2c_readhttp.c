@@ -84,12 +84,11 @@ static IDL_VPTR das2c_readhttp(int argc, IDL_VPTR* argv)
 			IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP,"HTTP GET URL string not provided"
 		);
 	
-	sInitialUrl = IDL_VarGetString(argv[0]);
+	const char* sInitialUrl = IDL_VarGetString(argv[0]);
 	
 	/* TODO: Allow setting the user agent via a keyword */
 	const char* sUserAgent = "das2dlm/" DAS2DLM_S_VER;
-	if(argv > 1)
-		sUserAgent = IDL_VarGetString(argv[1]);
+	if(argc > 1) sUserAgent = IDL_VarGetString(argv[1]);
 		
 	float rConSec = DASHTTP_TO_MIN * DASHTTP_TO_MULTI;
 
