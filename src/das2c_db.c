@@ -93,9 +93,13 @@ void das2c_free_ent(DasIdlDbEnt* pEnt)
    if(pEnt->sHost != NULL) free(pEnt->sHost);
    if(pEnt->sPort != NULL) free(pEnt->sPort);
    if(pEnt->sPath != NULL) free(pEnt->sPath);
+	
+	/* These contain internal pointers, free the top level array but NOT what
+	   the elements point to! */
    if(pEnt->psKey != NULL) free(pEnt->psKey);
    if(pEnt->psVal != NULL) free(pEnt->psVal);
-   if(pEnt->sQuery != NULL) free(pEnt->sQuery);
+   
+	if(pEnt->sQuery != NULL) free(pEnt->sQuery);
 
    free(pEnt);
 
@@ -218,11 +222,18 @@ static DasIdlDbEnt* das2c_db_addHttpEnt(
 	char c = '\0';
 	
 	if(pEnt->sQuery != NULL){
+		/* field terminated by separators.  Seps are & and \0.  
+		   Skip repeated seps */
+		
+		/* if first item isn't sep, you have a param */
+		if((*p != '\0')&&(*p != '&')) pEnt->uParam = 1;
+		
+		/* Now find the rest ... */
 		while(*p != '\0'){
 			if(*p == '&'){ 
-				/* Look ahead by 1 make sure no trailing & */
+				/* Look ahead by 1 next item isn't a sep */
 				c = *(p+1);
-				if(c != '\0') pEnt->uParam += 1;
+				if((c != '\0')&&(c != '&')) pEnt->uParam += 1;
 			}
 			++p;
 		}

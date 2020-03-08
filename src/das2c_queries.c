@@ -112,6 +112,7 @@ static IDL_VPTR das2c_queries(int argc, IDL_VPTR* argv)
 		   be done at some point. */
 		pTmpVar = IDL_BasicTypeConversion(1, argv, IDL_TYP_LONG);
 		nQueryId = pTmpVar->value.l;
+		IDL_Deltmp(pTmpVar);
 	}
 	
 	size_t u;
