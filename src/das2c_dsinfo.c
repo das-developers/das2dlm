@@ -18,6 +18,47 @@
  * version 2.1 along with libdas2; if not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+;+
+; FUNCTION:
+;  das2c_dsinfo
+;
+; PURPOSE:
+;  Output summary information string about a dataset
+;
+; CALLING SEQUENCE:
+;  Result = das2c_dsinfo(query_id, ds_index)
+;
+; INPUTS:
+;  query_id: The identification integer for the stored query result as
+;            returned by das2c_readhttp() or das2c_queries.
+;
+; OPTIONAL INPUTS:
+;  ds_index: Output information on only a single dataset from the query
+;            Most queries will output only a single dataset at index 0,
+;            Though common sources such as Juno Waves output more than 1.
+;
+; OUTPUT:
+;  This function returns an array of structures providing an overview of
+;  each stored result.  Output structures have the fields:
+;
+;    'idx':      Long    ; The index of this dataset, starts from 0
+;    'name':     String  ; The name of this dataset
+;    'physdims': Long    ; The number of physical dimensions in the dataset
+;    'props':    Long    ; The number of metadata properties in the dataset
+;    'size':     Long64  ; The total number of values in the dataset   
+;
+; EXAMPLES:
+;  List summary information on all datasets from a query with ID 27
+;    das2c_datasets(27)
+;
+;  List summary information on the first dataset from query ID 27
+;    das2c_queries(27, 0);
+;
+; MODIFICATION HISTORY:
+;  Written by: Chris Piker, 2020-03-09
+;-
+*/
 
 #define D2C_DSINFO_MINA 2
 #define D2C_DSINFO_MAXA 2

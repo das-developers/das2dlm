@@ -24,7 +24,12 @@ das2c_datasets()            ; Bad calls, test error handling
 das2c_datasets('kitty', 78)
 das2c_datasets(0, 'wattie')
 
-das2c_datasets(nId)         ; Good calls, test bothe versions
+das2c_datasets(nId)         ; Good calls, test both versions
 das2c_datasets(nId, 0)
+
+das2c_physdims(nId, 0)      ; Good calls, test both versions
+das2c_physdims(nId, 0, 1)
+
+
 
 exit

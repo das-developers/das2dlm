@@ -27,12 +27,17 @@
 ;  List stored datasets in a das2 query result
 ;
 ; CALLING SEQUENCE:
-;  Result = das2c_datasets(ds_index)
+;  Result = das2c_datasets(query_id, ds_index)
+;
+; INPUTS:
+;  query_id: The identification integer for the stored query result as
+;            returned by das2c_readhttp() or das2c_queries.
 ;
 ; OPTIONAL INPUTS:
-;  ds_index: Output information on only a single dataset from the query
-;            Most queries will output only a single dataset at index 0,
-;            Though common sources such as Juno Waves output more than 1.
+;  ds_index: The dataset index. Only required if information about a single
+;            dataset is desired. Most query results only contain a single
+;            dataset at index 0. However, some common ones such as the
+;            Juno Waves Survey data source return more that one.
 ;
 ; OUTPUT:
 ;  This function returns an array of structures providing an overview of
@@ -138,7 +143,7 @@ static IDL_VPTR das2c_datasets(int argc, IDL_VPTR* argv)
 	);
 
 	DasDs* pDs = NULL;
-	size_t iAry = 0;
+	size_t uAry = 0;
 	DasAry* pAry = NULL;
 	for(size_t u = 0; u < pEnt->uDs; ++u){
 		
@@ -156,8 +161,8 @@ static IDL_VPTR das2c_datasets(int argc, IDL_VPTR* argv)
 			IDL_StrStore(&(pData->name), DasDs_id(pDs));
 		
 		pData->size = 0;
-		for(iAry = 0; iAry < pDs->uArrays; ++iAry){
-			pAry = pDs->lArrays[iAry];
+		for(uAry = 0; uAry < pDs->uArrays; ++uAry){
+			pAry = pDs->lArrays[uAry];
 			pData->size += DasAry_size(pAry);
 		}
 		
@@ -166,23 +171,3 @@ static IDL_VPTR das2c_datasets(int argc, IDL_VPTR* argv)
 	
 	return pRet;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

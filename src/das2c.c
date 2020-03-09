@@ -44,6 +44,7 @@
 #include "das2c_queries.c"   /* exported functions */
 #include "das2c_dsinfo.c"
 #include "das2c_datasets.c" 
+#include "das2c_physdims.c"
 /* #include "das2c_vars.c"
 #include "das2c_props.c"
 #include "das2c_array.c"
@@ -60,7 +61,8 @@ int IDL_Load(void){
 	/* Define our structures */
 	DAS2C_QUERY_def();
 	DAS2C_DATASET_def();
-
+	DAS2C_PHYSDIM_def();
+		
  	static IDL_SYSFUN_DEF2 function_addr[] = {
 		
 		/* the "database" functions, since manipulating IDL_TYP_PTR and

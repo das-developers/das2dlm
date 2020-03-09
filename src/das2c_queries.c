@@ -27,11 +27,11 @@
 ;  List stored das2 query results
 ;
 ; CALLING SEQUENCE:
-;  Result = das2c_queries(Id)
+;  Result = das2c_queries(query_id)
 ;
 ; OPTIONAL INPUTS:
-;  Id: Output information on only a single stored query instead of all that
-;      are loaded.
+;  query_id: Output information on only a single stored query instead of
+;            all that are loaded.
 ;
 ; OUTPUT:
 ;  This function returns an array of structures providing an overview of
