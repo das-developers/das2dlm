@@ -32,37 +32,38 @@ static IDL_VPTR das2c_dsinfo(int argc, IDL_VPTR* argv)
 	if(argc < 1) das2c_IdlMsgExit("Query ID not provided");	
 	if(argc < 2) das2c_IdlMsgExit("Dataset number not provided");	
 	
-	int nQueryId;
-	int nDsNum;
+	int iQueryId;
+	int iDsIdx;
 	
 	IDL_VPTR pTmpVar = NULL;
 	pTmpVar = IDL_BasicTypeConversion(1, argv, IDL_TYP_LONG);
-	nQueryId = pTmpVar->value.l;
+	iQueryId = pTmpVar->value.l;
 	IDL_DELTMP(pTmpVar);
 	
 	pTmpVar = IDL_BasicTypeConversion(1, argv + 1, IDL_TYP_LONG);
-	nDsNum = pTmpVar->value.l;
+	iDsIdx = pTmpVar->value.l;
 	IDL_DELTMP(pTmpVar);
+	if(iDsIdx < 0) das2c_IdlMsgExit("Invalid dataset index %d", iDsIdx);
 	
-	const DasIdlDbEnt* pEnt = das2c_db_getent(nQueryId);
+	const DasIdlDbEnt* pEnt = das2c_db_getent(iQueryId);
 	
 	/* Check args valid */
 	if(pEnt == NULL)
-		das2c_IdlMsgExit("No query result has ID %d", nQueryId);
+		das2c_IdlMsgExit("No query result has ID %d", iQueryId);
 	
-	if(nDsNum >= pEnt->uDs){
+	if(iDsIdx >= pEnt->uDs){
 		if(pEnt->uDs == 0)
 			das2c_IdlMsgExit(
-				"Query result %d doesn't contain any datasets", nQueryId
+				"Query result %d doesn't contain any datasets", iQueryId
 			);
 		else
 			das2c_IdlMsgExit(
 				"Query result %d dataset indices are 0 to %zu", 
-				nQueryId, pEnt->uDs - 1
+				iQueryId, pEnt->uDs - 1
 			);
 	}
 		
-	DasDs* pDs = pEnt->lDs[nDsNum];
+	DasDs* pDs = pEnt->lDs[iDsIdx];
 	if(pDs == NULL) das2c_IdlMsgExit("Logic error, das2c_dsinfo.c");
 	
 	DasDs_toStr(pDs, sBuf, nBuf);

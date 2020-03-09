@@ -20,4 +20,11 @@ das2c_dsinfo(13, 12)
 
 das2c_dsinfo(nId, 0)        ; Good call
 
+das2c_datasets()            ; Bad calls, test error handling
+das2c_datasets('kitty', 78)
+das2c_datasets(0, 'wattie')
+
+das2c_datasets(nId)         ; Good calls, test bothe versions
+das2c_datasets(nId, 0)
+
 exit

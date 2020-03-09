@@ -28,11 +28,11 @@ das2c_queries()
 {'id': 357, 'datasets': 1, 'server': , 'source': , 'begin': , 'end': , 'res': , 'extra': , 'size': }
 
 das2c_datasets(357)
-{'id': 0, 'name':'dataset0', 'physdims':3}
-{'id': 1, 'name':'dataset1', 'physdims':3}
+{'idx': 0, 'name':'dataset0', 'physdims':3}
+{'idx': 1, 'name':'dataset1', 'physdims':3}
 
 das2c_physdims(357, 0)
-{'id': 0, 'name':'time', 'n_props':4, 'n_vars':1}
+{'index': 0, 'name':'time', 'n_props':4, 'n_vars':1}
 
 das2c_vars(357, 0, 'time')
 
