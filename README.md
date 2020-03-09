@@ -131,4 +131,21 @@ Dataset: 'electric_10' from group 'electric' | i:0..4483, j:0..152
       Property: DatumRange | range | 5 to 6000000 Hz
       Property: Datum | tagWidth | 1.4 lo
 ```
+The following call provides a summary of all the datasets in the query result.
+(output manually collapsed)
+```idl
+IDL> das2c_datasets()
+{"idx": 0, "name": "electric_10", "physdims": 3, "props": 1, "size": 686051 }
+```
+The following call will provide a summary of all physical dimensions involved in the 0th
+dataset. (output manually collapsed)
+```idl
+IDL> das2c_physdims(nId, 0)
+[
+  {"idx": 0, "name": "time", "vars": 1, "props": 3, "size": 4483 },
+  {"idx": 1, "name": "frequency", "vars": 1, "props": 4, "size": 152 },
+  {"idx": 2, "name": "electric", "vars": 1, "props": 4, "size": 681416 }
+]
+```
+
 
