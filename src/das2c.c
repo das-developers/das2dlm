@@ -41,12 +41,15 @@
 #include "das2c_message.c"   /* Infastructure */
 #include "das2c_db.c"
 
+/* used in structure definitions for index_map and relate shape items */
+static IDL_MEMINT g_aShape8[2];
+
 #include "das2c_queries.c"   /* exported functions */
 #include "das2c_dsinfo.c"
 #include "das2c_datasets.c" 
 #include "das2c_physdims.c"
-/* #include "das2c_vars.c"
-#include "das2c_props.c"
+#include "das2c_vars.c"
+/*#include "das2c_props.c"
 #include "das2c_array.c"
 #include "das2c_free.c"*/
 #include "das2c_readhttp.c"
@@ -58,10 +61,14 @@
    must be identical to that contained in das2c.dlm. */
 int IDL_Load(void){
 
+	/* Define the shape8 struct def array */
+	g_aShape8[0] = 1;  g_aShape8[1] = 8;
+
 	/* Define our structures */
 	DAS2C_QUERY_def();
 	DAS2C_DATASET_def();
 	DAS2C_PHYSDIM_def();
+	DAS2C_VAR_def();
 		
  	static IDL_SYSFUN_DEF2 function_addr[] = {
 		
@@ -71,8 +78,8 @@ int IDL_Load(void){
 		{ {(IDL_SYSRTN_GENERIC)das2c_dsinfo},   "DAS2C_DSINFO",   D2C_DSINFO_MINA,   D2C_DSINFO_MAXA,   D2C_DSINFO_FLAG,   NULL},
 		{ {(IDL_SYSRTN_GENERIC)das2c_datasets}, "DAS2C_DATASETS", D2C_DATASETS_MINA, D2C_DATASETS_MAXA, D2C_DATASETS_FLAG, NULL},
 		{ {(IDL_SYSRTN_GENERIC)das2c_physdims}, "DAS2C_PHYSDIMS", D2C_PHYSDIMS_MINA, D2C_PHYSDIMS_MAXA, D2C_PHYSDIMS_FLAG, NULL},
-/*		{ {(IDL_SYSRTN_GENERIC)das2c_vars},     "DAS2C_VARS",     D2C_VARS_MINA,     D2C_VARS_MAXA,     D2C_VARS_FLAG,     NULL},
-		{ {(IDL_SYSRTN_GENERIC)das2c_props},    "DAS2C_PROPS",    D2C_PROPS_MINA,    D2C_PROPS_MAXA,    D2C_PROPS_FLAG,    NULL},
+		{ {(IDL_SYSRTN_GENERIC)das2c_vars},     "DAS2C_VARS",     D2C_VARS_MINA,     D2C_VARS_MAXA,     D2C_VARS_FLAG,     NULL},
+/*		{ {(IDL_SYSRTN_GENERIC)das2c_props},    "DAS2C_PROPS",    D2C_PROPS_MINA,    D2C_PROPS_MAXA,    D2C_PROPS_FLAG,    NULL},
 		{ {(IDL_SYSRTN_GENERIC)das2c_array},    "DAS2C_ARRAY",    D2C_ARRAY_MINA,    D2C_ARRAY_MAXA,    D2C_ARRAY_FLAG,    NULL},
 		{ {(IDL_SYSRTN_GENERIC)das2c_free},     "DAS2C_FREE",     D2C_FREE_MINA,     D2C_FREE_MAXA,     D2C_FREE_FLAG,     NULL},
 */				

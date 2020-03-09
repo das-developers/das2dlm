@@ -50,11 +50,14 @@
 ;  This function returns an array of structures providing an overview of
 ;  each stored result.  Output structures have the fields:
 ;
-;    'idx':      Long    ; The index of this dataset, starts from 0
+;    'id':       Long    ; The ID number of this dataset, starts from 0
+;
 ;    'name':     String  ; The name of this physical dimension, ex: 'time'
+;
 ;    'vars':     Long    ; The number of variables carring data values for this
 ;                        ; physical dimension.
 ;    'props':    Long    ; The number of metadata properties for this dimension
+;
 ;    'size':     Long64  ; The total number of values in the variables for 
 ;                        ; this dimension
 ;
@@ -76,7 +79,7 @@
 
 /* Output structure definition */
 static IDL_STRUCT_TAG_DEF _das2c_physdim_tags[] = {
-	{"idx",      0, (void*)IDL_TYP_LONG},
+	{"id",       0, (void*)IDL_TYP_LONG},
 	{"name",     0, (void*)IDL_TYP_STRING},
 	{"vars",     0, (void*)IDL_TYP_LONG},
 	{"props",    0, (void*)IDL_TYP_LONG},
@@ -85,7 +88,7 @@ static IDL_STRUCT_TAG_DEF _das2c_physdim_tags[] = {
 };	
 
 typedef struct _das2c_pdim_sum{
-	IDL_LONG   idx;
+	IDL_LONG   id;
 	IDL_STRING name;
 	IDL_LONG   vars;
 	IDL_LONG   props;
@@ -203,7 +206,7 @@ static IDL_VPTR das2c_physdims(int argc, IDL_VPTR* argv)
 		
 		/* TODO:  Consider adding a DasDim_getPointVar() call to flatten
 		          waveform data. */
-		pData->idx      = u;
+		pData->id       = u;
 		pData->vars     = pIterDim->uVars;
 		pData->props    = DasDesc_length((DasDesc*)pIterDim);
 		

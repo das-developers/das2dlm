@@ -43,11 +43,19 @@
 ;  This function returns an array of structures providing an overview of
 ;  each stored result.  Output structures have the fields:
 ;
-;    'idx':      Long    ; The index of this dataset, starts from 0
-;    'name':     String  ; The name of this dataset
-;    'physdims': Long    ; The number of physical dimensions in the dataset
-;    'props':    Long    ; The number of metadata properties in the dataset
-;    'size':     Long64  ; The total number of values in the dataset   
+;    'id':       Long     ; The ID number of this dataset, starts from 0
+;
+;    'name':     String   ; The name of this dataset, dataset names are not
+;                         ; usually unique.  This limits thier utility.
+;
+;    'physdims': Long     ; The number of physical dimensions in the dataset
+;
+;    'props':    Long     ; The number of metadata properties in the dataset
+;
+;    'shape':    8 Long64 ; The extents of this dataset in index space.
+;		
+;    'size':     Long64   ; The total number of values in the dataset may be
+;                         ; less that nth  
 ;
 ; EXAMPLES:
 ;  List summary information on all datasets from a query with ID 27
@@ -60,22 +68,24 @@
 ;  Written by: Chris Piker, 2020-03-09
 ;-
 */
-
+		
 /* Output structure definition */
 static IDL_STRUCT_TAG_DEF _das2c_dataset_tags[] = {
-	{"idx",      0, (void*)IDL_TYP_LONG},
-	{"name",     0, (void*)IDL_TYP_STRING},
-	{"physdims", 0, (void*)IDL_TYP_LONG},
-	{"props",    0, (void*)IDL_TYP_LONG},
-	{"size",     0, (void*)IDL_TYP_LONG64},
+	{"id",       NULL,      (void*)IDL_TYP_LONG},
+	{"name",     NULL,      (void*)IDL_TYP_STRING},
+	{"physdims", NULL,      (void*)IDL_TYP_LONG},
+	{"props",    NULL,      (void*)IDL_TYP_LONG},
+	{"shape",    g_aShape8, (void*)IDL_TYP_LONG64},
+	{"size",     NULL,      (void*)IDL_TYP_LONG64},
 	{0}
 };
 
 typedef struct _das2c_ds_sum{
-	IDL_LONG   idx;
+	IDL_LONG   id;
 	IDL_STRING name;
 	IDL_LONG   physdims;
 	IDL_LONG   props;
+	IDL_LONG64 shape[8];
 	IDL_LONG64 size;
 } das2c_DsSummary;
 
@@ -145,6 +155,8 @@ static IDL_VPTR das2c_datasets(int argc, IDL_VPTR* argv)
 	DasDs* pDs = NULL;
 	size_t uAry = 0;
 	DasAry* pAry = NULL;
+	ptrdiff_t shape[16] = {0};
+	int r = 0;  
 	for(size_t u = 0; u < pEnt->uDs; ++u){
 		
 		if((iDs > -1)&&(iDs != u)) continue;
@@ -153,12 +165,16 @@ static IDL_VPTR das2c_datasets(int argc, IDL_VPTR* argv)
 		if(pDs == NULL) das2c_IdlMsgExit("Logic error, das2c_datasets.c");
 		
 		/* Write into IDL memory using parallel structure pointer */
-		pData->idx      = u;
+		pData->id       = u;
 		pData->physdims = DasDs_numDims(pDs, DASDIM_COORD) + 
 				            DasDs_numDims(pDs, DASDIM_DATA);
 		pData->props    = DasDesc_length((DasDesc*)pDs);
 		if(DasDs_id(pDs) != NULL) 
 			IDL_StrStore(&(pData->name), DasDs_id(pDs));
+		
+		/* Need to flag ragged datesets somehow */
+		int nRank = DasDs_shape(pDs, shape);
+		for(r = 0; r < nRank; ++r) pData->shape[r] = shape[r];
 		
 		pData->size = 0;
 		for(uAry = 0; uAry < pDs->uArrays; ++uAry){

@@ -106,7 +106,9 @@ Human readable information about a single dataset is provided by the
 das2c_dsinfo() function, for example:
 
 ```idl
-IDL> print, das2c_dsinfo(query_id, 0) 
+IDL> print, das2c_dsinfo(query_id, 0)
+```
+```
 Dataset: 'electric_10' from group 'electric' | i:0..4483, j:0..152
    Property: String | title | Galileo PWS - LRS Electric
 
@@ -135,16 +137,16 @@ The following call provides a summary of all the datasets in the query result.
 (output manually collapsed)
 ```idl
 IDL> das2c_datasets()
-{"idx": 0, "name": "electric_10", "physdims": 3, "props": 1, "size": 686051 }
+{"id": 0, "name": "electric_10", "physdims": 3, "props": 1, "shape": (4483,152), "size": 686051 }
 ```
 The following call will provide a summary of all physical dimensions involved in the 0th
 dataset. (output manually collapsed)
 ```idl
-IDL> das2c_physdims(nId, 0)
+IDL> das2c_physdims(query_id, 0)
 [
-  {"idx": 0, "name": "time", "vars": 1, "props": 3, "size": 4483 },
-  {"idx": 1, "name": "frequency", "vars": 1, "props": 4, "size": 152 },
-  {"idx": 2, "name": "electric", "vars": 1, "props": 4, "size": 681416 }
+  {"id": 0, "name": "time", "vars": 1, "props": 3, "size": 4483 },
+  {"id": 1, "name": "frequency", "vars": 1, "props": 4, "size": 152 },
+  {"id": 2, "name": "electric", "vars": 1, "props": 4, "size": 681416 }
 ]
 ```
 
