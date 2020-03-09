@@ -1,3 +1,4 @@
 build.*
-dlm
+dlm/*.so
+dlm/*.dll
 *.swp
