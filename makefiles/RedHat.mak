@@ -16,12 +16,12 @@ I_DAS2=$(HOME)/git/das2C
 # We have to make a "fat shared object" so that the IDL DLM will be self 
 # contained.  This means that almost everything has to be staticlly linked.
 
-SYSLIB_DIR=/usr/lib64
+SYSLIB_DIR=/usr/lib
 
-# yum install fftw-devel fftw-static    (Fixme: Add Debian hints)
+# yum install fftw-devel fftw-static 
 L_FFTW3=$(SYSLIB_DIR)/libfftw3.a
 
-# yum install expat-devel expat-static  (Fixme: Add Debian hints)
+# yum install expat-devel expat-static
 L_EXPAT=$(SYSLIB_DIR)/libexpat.a
 
 # yum install openssl-devel openssl-static

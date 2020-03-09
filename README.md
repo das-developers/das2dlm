@@ -40,7 +40,7 @@ will depend on where your built/install das2C.
 
 Build the DLM by running the command:
 ```bash
-$ make
+$ make -f makefiles/Debian.mak  # Or other suitable makefile in makefiles
 ```
 
 Output is in the `dlm` subdirectory.
