@@ -137,7 +137,7 @@ Dataset: 'electric_10' from group 'electric' | i:0..4483, j:0..152
       Property: DatumRange | range | 5 to 6000000 Hz
       Property: Datum | tagWidth | 1.4 lo
 		
-		Variable: center | frequency[j] Hz | i:-, j:0..152
+      Variable: center | frequency[j] Hz | i:-, j:0..152
 ```
 The following call provides a summary of all the datasets in the query result.
 (output manually collapsed)
@@ -202,23 +202,23 @@ IDL> das2c_dsprops(query_id, 0)
 
 IDL> das2c_dimprops(query_id, 0, 'electric')
 [
-  {"key":"label", "type":"String, "value":"Spectral Density (V!a2!n m!a-2!n Hz!a-1!n)"},
-  {"key":"scaleType", "type":"String, "value":"log"},
+  {"key":"label", "type":"String", "value":"Spectral Density (V!a2!n m!a-2!n Hz!a-1!n)"},
+  {"key":"scaleType", "type":"String", "value":"log"},
   {"key":"range", "type":"DatumRange", "value":"1.0e-17 to 1.0e-4 V**2 m**-2 Hz**-1"},
   {"key":"fill", "type":"double", "value":"0.0"}
 ]
 
 IDL> das2c_dimprops(query_id, 0, 'time')
 [
-	{"key":"tagWidth", "type":"Datum"; "value":"80 s"},
-	{"key":"cacheRange", "type":"DatumRange",
-	 "value":"2001-01-01T00:00:00.000 to 2001-01-02T00:00:00.000 UTC"
-	},
+   {"key":"tagWidth", "type":"Datum"; "value":"80 s"},
+   {"key":"cacheRange", "type":"DatumRange",
+    "value":"2001-01-01T00:00:00.000 to 2001-01-02T00:00:00.000 UTC"
+   },
 ]
 IDL> das2c_dimprops(query_id, 0, 'frequency')
 [
-	{"key":"label", "type":"String, "value":"Frequency (Hz)"},
-	{"key":"scaleType", "type":"String, "value":"log"},
-	{"key":"range", "type":"DatumRange", "value":"5 to 6000000 Hz"}
+   {"key":"label", "type":"String", "value":"Frequency (Hz)"},
+   {"key":"scaleType", "type":"String", "value":"log"},
+   {"key":"range", "type":"DatumRange", "value":"5 to 6000000 Hz"}
 ]
 ```
