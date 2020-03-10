@@ -18,6 +18,13 @@
  * version 2.1 along with libdas2; if not, see <http://www.gnu.org/licenses/>.
  */
 
+/* ************************************************************************* */
+/* API Function, careful with changes! */
+
+#define D2C_DSINFO_MINA 2
+#define D2C_DSINFO_MAXA 2
+#define D2C_DSINFO_FLAG 0
+
 /*
 ;+
 ; FUNCTION:
@@ -49,14 +56,6 @@
 ;  Written by: Chris Piker, 2020-03-10
 ;-
 */
-
-/* ************************************************************************* */
-/* API Function, careful with changes! */
-
-#define D2C_DSINFO_MINA 2
-#define D2C_DSINFO_MAXA 2
-#define D2C_DSINFO_FLAG 0
-
 static IDL_VPTR das2c_api_dsinfo(int argc, IDL_VPTR* argv)
 {
 	char sBuf[1024] = {'\0'};

@@ -18,82 +18,6 @@
  * version 2.1 along with libdas2; if not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
-;+
-; FUNCTION:
-;  das2c_vars
-;
-; PURPOSE:
-;  List the variables present in a physical dimension, in a das2 dataset.
-;
-; CALLING SEQUENCE:
-;  Result = das2c_vars(query_id, ds_index, pdim, var)
-;
-; INPUTS:
-;  query_id: The identification integer for the stored query result as
-;            returned by das2c_readhttp() or das2c_queries.
-;
-;  ds_index: The dataset index, often 0.  See das2c_datasets() for details.
-;
-;  pdim:     Either the physical dimension index (long), or the dimension's
-;            name (string).  For more infor see das2c_physdims().
-;
-; OPTIONAL INPUTS:
-;  var:      Either the role name (string) or the var index (long).  This
-;            argument is only required if summary information on a single 
-;            variable is desired.
-;
-;            Variable role names are standardized.  The most common one is
-;            'center' which represents the central point of a measurement
-;            in a particular physical dimension.  The full set is:
-;
-;            'center', 'offest', 'min', 'max', 'width', 'mean', 'median',
-;            'mode', 'reference', 'offset', 'max_error', 'min_error',
-;            'uncertainty',  'std_dev', 'point_spread', 'weight'
-;
-; OUTPUT:
-;  This function returns an array of structures providing an overview of
-;  each stored result.  Output structures have the fields:
-;
-;    'id':     Long     ; The ID number for this variable.  Usage of
-;                       ; role names instead of numbers is recommended.
-;	
-;    'name':   String   ; The name of the physical dimension for this variable
-;
-;    'role':   String   ; The role for this variable, for example 'max_error'
-;
-;    'units':  String   ; The units for values from this variable.
-;
-;    'shape':  8 Long64 ; The extent of this variable in the dataset indices.
-;                       ; Values less than 0 mean the variable is degenerate
-;                       ; or ragged in an index.
-;
-;    'size':   Long64   ; If this variable is directly backed by an array this
-;                       ; is the total number of values in that array.  This
-;                       ; value is 0 for virtual variables.
-;
-; TODO:
-;  Should this function return !NULL if a requested role doesn't exist in a
-;  physical dimension?
-;
-; EXAMPLES:
-;  List summary of all variable roles for the 'time' dimension in dataset 0 of
-;  query result 27
-;    das2c_vars(27, 0, 'time')
-;
-;  List summary information of the 'center' variable for 'time' in dataset 0 for
-;  query result 27
-;    das2c_vars(27, 0, 'time', 'center')
-;
-;  List summary information for the first variable in the first physical
-;  physical dimension of the first datasets, what ever it happens to be.
-;    das2c_vars(27, 0, 0, 0)
-;
-; MODIFICATION HISTORY:
-;  Written by: Chris Piker, 2020-03-10
-;-
-*/
-		
 /* Output structure definition */
 static IDL_STRUCT_TAG_DEF _das2c_var_tags[] = {
 	{"id",      NULL,     (void*)IDL_TYP_LONG},
@@ -205,6 +129,83 @@ static const DasVar* das2c_check_var_id(
 #define D2C_VARS_MAXA 4
 #define D2C_VARS_FLAG 0
 
+/*
+;+
+; FUNCTION:
+;  das2c_vars
+;
+; PURPOSE:
+;  List the variables present in a physical dimension, in a das2 dataset.
+;
+; CALLING SEQUENCE:
+;  Result = das2c_vars(query_id, ds_index, pdim, var)
+;
+; INPUTS:
+;  query_id: The identification integer for the stored query result as
+;            returned by das2c_readhttp() or das2c_queries.
+;
+;  ds_index: The dataset index, often 0.  See das2c_datasets() for details.
+;
+;  pdim:     Either the physical dimension index (long), or the dimension's
+;            name (string).  For more infor see das2c_physdims().
+;
+; OPTIONAL INPUTS:
+;  var:      Either the role name (string) or the var index (long).  This
+;            argument is only required if summary information on a single 
+;            variable is desired.
+;
+;            Variable role names are standardized.  The most common one is
+;            'center' which represents the central point of a measurement
+;            in a particular physical dimension.  The full set is:
+;
+;            'center', 'offest', 'min', 'max', 'width', 'mean', 'median',
+;            'mode', 'reference', 'offset', 'max_error', 'min_error',
+;            'uncertainty',  'std_dev', 'point_spread', 'weight'
+;
+; OUTPUT:
+;  This function returns an array of structures providing an overview of
+;  each stored result.  Output structures have the fields:
+;
+;    'id':     Long     ; The ID number for this variable.  Usage of
+;                       ; role names instead of numbers is recommended.
+;	
+;    'name':   String   ; The name of the physical dimension for this variable
+;
+;    'type':   String   ; The IDL datatype of the values in this variable.
+;
+;    'role':   String   ; The role for this variable, for example 'max_error'
+;
+;    'units':  String   ; The units for values from this variable.
+;
+;    'shape':  8 Long64 ; The extent of this variable in the dataset indices.
+;                       ; Values less than 0 mean the variable is degenerate
+;                       ; or ragged in an index.
+;
+;    'size':   Long64   ; If this variable is directly backed by an array this
+;                       ; is the total number of values in that array.  This
+;                       ; value is 0 for virtual variables.
+;
+; TODO:
+;  Should this function return !NULL if a requested role doesn't exist in a
+;  physical dimension?
+;
+; EXAMPLES:
+;  List summary of all variable roles for the 'time' dimension in dataset 0 of
+;  query result 27
+;    das2c_vars(27, 0, 'time')
+;
+;  List summary information of the 'center' variable for 'time' in dataset 0 for
+;  query result 27
+;    das2c_vars(27, 0, 'time', 'center')
+;
+;  List summary information for the first variable in the first physical
+;  physical dimension of the first datasets, what ever it happens to be.
+;    das2c_vars(27, 0, 0, 0)
+;
+; MODIFICATION HISTORY:
+;  Written by: Chris Piker, 2020-03-10
+;-
+*/
 static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 {
 	/* Get/check Query ID */
