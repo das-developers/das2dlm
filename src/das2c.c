@@ -35,9 +35,19 @@
    the max IDL index, if not code in das2c_vars, das2c_array and 
 	das2c_datasets will need to change */
 
+#if IDL_MAX_ARRAY_DIM != 8
+#error IDL has changed, DLM code need to be updated
+#endif
+
 #if IDL_MAX_ARRAY_DIM > DASIDX_MAX
 #error das2C has changed, DLM code need to be updated
 #endif
+
+
+
+/* For any rank array outputs, set placeholder for values outside
+   the rank of the dataset */
+#define D2C_OVER_RANK_FLAG -99
 
 /* Set the version number advertised in user agent strings by default */
 #define DAS2DLM_S_VER "0.2"
@@ -50,7 +60,14 @@
 #include "das2c_db.c"
 
 /* used in structure definitions for index_map and relate shape items */
-static IDL_MEMINT g_aShape[2];
+static IDL_MEMINT g_aShape1[2];
+static IDL_MEMINT g_aShape2[2];
+static IDL_MEMINT g_aShape3[2];
+static IDL_MEMINT g_aShape4[2];
+static IDL_MEMINT g_aShape5[2];
+static IDL_MEMINT g_aShape6[2];
+static IDL_MEMINT g_aShape7[2];
+static IDL_MEMINT g_aShape8[2];
 
 #include "das2c_queries.c"   /* exported functions */
 #include "das2c_datasets.c" 
@@ -69,8 +86,15 @@ static IDL_MEMINT g_aShape[2];
    must be identical to that contained in das2c.dlm. */
 int IDL_Load(void){	
 
-	/* Define the shape8 struct def array */
-	g_aShape[0] = 1;  g_aShape[1] = IDL_MAX_ARRAY_DIM;
+	/* Define the shape 1-8 struct def array */
+	g_aShape1[0] = 1;  g_aShape1[1] = 1;
+	g_aShape2[0] = 1;  g_aShape2[1] = 2;
+	g_aShape3[0] = 1;  g_aShape3[1] = 3;
+	g_aShape4[0] = 1;  g_aShape4[1] = 4;
+	g_aShape5[0] = 1;  g_aShape5[1] = 5;
+	g_aShape6[0] = 1;  g_aShape6[1] = 6;
+	g_aShape7[0] = 1;  g_aShape7[1] = 7;
+	g_aShape8[0] = 1;  g_aShape8[1] = 8;
 
 	/* Define our structures */
 	DAS2C_QUERY_def();
@@ -112,8 +136,8 @@ int IDL_Load(void){
 			{(IDL_SYSRTN_GENERIC)das2c_api_array},    "DAS2C_ARRAY",
 			D2C_ARRAY_MINA,    D2C_ARRAY_MAXA,    D2C_ARRAY_FLAG,    NULL
 		},
-		{
-/*			{(IDL_SYSRTN_GENERIC)das2c_api_free},     "DAS2C_FREE",
+/*		{
+			{(IDL_SYSRTN_GENERIC)das2c_api_free},     "DAS2C_FREE",
 			D2C_FREE_MINA,     D2C_FREE_MAXA,     D2C_FREE_FLAG,     NULL
 		},*/
 		/* The "get data" functions, only one for now */

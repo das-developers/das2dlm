@@ -21,10 +21,9 @@
 /* ************************************************************************* */
 /* API Function, careful with changes! */
 
-#define D2C_DSINFO_MINA 2
-#define D2C_DSINFO_MAXA 2
-#define D2C_DSINFO_FLAG 0
-
+#define D2C_ARRAY_MINA 4
+#define D2C_ARRAY_MAXA 5
+#define D2C_ARRAY_FLAG 0
 
 
 /*
@@ -35,7 +34,7 @@
 ;                       ; overall datest index space.  A -1 means array values
 ;                       ; are degenerate in a given dataset index.
 */
-
+		
 /*
 ;+
 ; FUNCTION:
@@ -94,3 +93,8 @@
 ;  Written by: Chris Piker, 2020-03-10
 ;-
 */
+static IDL_VPTR das2c_api_array(int argc, IDL_VPTR* argv)
+{
+	
+	return IDL_GettmpNULL();
+}

@@ -107,6 +107,7 @@ IDL_VPTR das2c_props_from_desc(const DasDesc* pDesc, const char* sKey)
 		IDL_StrStore(&(pData->key),   sKey);
 		IDL_StrStore(&(pData->type),  sType);
 		IDL_StrStore(&(pData->value), sVal);
+		++pData;
 	}
 	
 	return pRet;

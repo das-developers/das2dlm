@@ -18,31 +18,189 @@
  * version 2.1 along with libdas2; if not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Output structure definition */
-static IDL_STRUCT_TAG_DEF _das2c_var_tags[] = {
-	{"id",      NULL,     (void*)IDL_TYP_LONG},
-	{"name",    NULL,     (void*)IDL_TYP_STRING},
-	{"role",    NULL,     (void*)IDL_TYP_STRING},
-	{"units",   NULL,     (void*)IDL_TYP_STRING},
-	{"shape",   g_aShape, (void*)IDL_TYP_LONG64},
-	{"size",    NULL,     (void*)IDL_TYP_LONG64},
+/* Output structure definition.  Since only variables from the same dataset
+   are used together we can trim the shape array, unfortunatly IDL DLMs have
+	can't access LIST() or MAP() so have to repeate var definitions for every
+	dataset size.  */
+static IDL_STRUCT_TAG_DEF _das2c_var_tags_1[] = {
+	{"ID",      NULL,     (void*)IDL_TYP_LONG},
+	{"NAME",    NULL,     (void*)IDL_TYP_STRING},
+	{"ROLE",    NULL,     (void*)IDL_TYP_STRING},
+	{"UNITS",   NULL,     (void*)IDL_TYP_STRING},
+	{"SHAPE",   g_aShape1, (void*)IDL_TYP_LONG64},
+	{"SIZE",    NULL,     (void*)IDL_TYP_LONG64},
+	{0}
+};
+static IDL_STRUCT_TAG_DEF _das2c_var_tags_2[] = {
+	{"ID",      NULL,     (void*)IDL_TYP_LONG},
+	{"NAME",    NULL,     (void*)IDL_TYP_STRING},
+	{"ROLE",    NULL,     (void*)IDL_TYP_STRING},
+	{"UNITS",   NULL,     (void*)IDL_TYP_STRING},
+	{"SHAPE",   g_aShape2, (void*)IDL_TYP_LONG64},
+	{"SIZE",    NULL,     (void*)IDL_TYP_LONG64},
+	{0}
+};
+static IDL_STRUCT_TAG_DEF _das2c_var_tags_3[] = {
+	{"ID",      NULL,     (void*)IDL_TYP_LONG},
+	{"NAME",    NULL,     (void*)IDL_TYP_STRING},
+	{"ROLE",    NULL,     (void*)IDL_TYP_STRING},
+	{"UNITS",   NULL,     (void*)IDL_TYP_STRING},
+	{"SHAPE",   g_aShape3, (void*)IDL_TYP_LONG64},
+	{"SIZE",    NULL,     (void*)IDL_TYP_LONG64},
+	{0}
+};
+static IDL_STRUCT_TAG_DEF _das2c_var_tags_4[] = {
+	{"ID",      NULL,     (void*)IDL_TYP_LONG},
+	{"NAME",    NULL,     (void*)IDL_TYP_STRING},
+	{"ROLE",    NULL,     (void*)IDL_TYP_STRING},
+	{"UNITS",   NULL,     (void*)IDL_TYP_STRING},
+	{"SHAPE",   g_aShape4, (void*)IDL_TYP_LONG64},
+	{"SIZE",    NULL,     (void*)IDL_TYP_LONG64},
+	{0}
+};
+static IDL_STRUCT_TAG_DEF _das2c_var_tags_5[] = {
+	{"ID",      NULL,     (void*)IDL_TYP_LONG},
+	{"NAME",    NULL,     (void*)IDL_TYP_STRING},
+	{"ROLE",    NULL,     (void*)IDL_TYP_STRING},
+	{"UNITS",   NULL,     (void*)IDL_TYP_STRING},
+	{"SHAPE",   g_aShape5, (void*)IDL_TYP_LONG64},
+	{"SIZE",    NULL,     (void*)IDL_TYP_LONG64},
+	{0}
+};
+static IDL_STRUCT_TAG_DEF _das2c_var_tags_6[] = {
+	{"ID",      NULL,     (void*)IDL_TYP_LONG},
+	{"NAME",    NULL,     (void*)IDL_TYP_STRING},
+	{"ROLE",    NULL,     (void*)IDL_TYP_STRING},
+	{"UNITS",   NULL,     (void*)IDL_TYP_STRING},
+	{"SHAPE",   g_aShape6, (void*)IDL_TYP_LONG64},
+	{"SIZE",    NULL,     (void*)IDL_TYP_LONG64},
+	{0}
+};
+static IDL_STRUCT_TAG_DEF _das2c_var_tags_7[] = {
+	{"ID",      NULL,     (void*)IDL_TYP_LONG},
+	{"NAME",    NULL,     (void*)IDL_TYP_STRING},
+	{"ROLE",    NULL,     (void*)IDL_TYP_STRING},
+	{"UNITS",   NULL,     (void*)IDL_TYP_STRING},
+	{"SHAPE",   g_aShape7, (void*)IDL_TYP_LONG64},
+	{"SIZE",    NULL,     (void*)IDL_TYP_LONG64},
+	{0}
+};
+static IDL_STRUCT_TAG_DEF _das2c_var_tags_8[] = {
+	{"ID",      NULL,     (void*)IDL_TYP_LONG},
+	{"NAME",    NULL,     (void*)IDL_TYP_STRING},
+	{"ROLE",    NULL,     (void*)IDL_TYP_STRING},
+	{"UNITS",   NULL,     (void*)IDL_TYP_STRING},
+	{"SHAPE",   g_aShape8, (void*)IDL_TYP_LONG64},
+	{"SIZE",    NULL,     (void*)IDL_TYP_LONG64},
 	{0}
 };
 
-typedef struct _das2c_var_sum{
+typedef struct _das2c_var_sum_1{
 	IDL_LONG   id;
 	IDL_STRING name;
 	IDL_STRING role;
 	IDL_STRING units;
-	IDL_LONG64 shape[IDL_MAX_ARRAY_DIM];
+	IDL_LONG64 shape[1];
 	IDL_LONG64 size;
-} das2c_VarSummary;
+} das2c_VarSummary_1;
 
-static IDL_StructDefPtr g_das2c_pVarSumDef;
+typedef struct _das2c_var_sum_2{
+	IDL_LONG   id;
+	IDL_STRING name;
+	IDL_STRING role;
+	IDL_STRING units;
+	IDL_LONG64 shape[2];
+	IDL_LONG64 size;
+} das2c_VarSummary_2;
+
+typedef struct _das2c_var_sum_3{
+	IDL_LONG   id;
+	IDL_STRING name;
+	IDL_STRING role;
+	IDL_STRING units;
+	IDL_LONG64 shape[3];
+	IDL_LONG64 size;
+} das2c_VarSummary_3;
+
+typedef struct _das2c_var_sum_4{
+	IDL_LONG   id;
+	IDL_STRING name;
+	IDL_STRING role;
+	IDL_STRING units;
+	IDL_LONG64 shape[4];
+	IDL_LONG64 size;
+} das2c_VarSummary_4;
+
+typedef struct _das2c_var_sum_5{
+	IDL_LONG   id;
+	IDL_STRING name;
+	IDL_STRING role;
+	IDL_STRING units;
+	IDL_LONG64 shape[5];
+	IDL_LONG64 size;
+} das2c_VarSummary_5;
+
+typedef struct _das2c_var_sum_6{
+	IDL_LONG   id;
+	IDL_STRING name;
+	IDL_STRING role;
+	IDL_STRING units;
+	IDL_LONG64 shape[6];
+	IDL_LONG64 size;
+} das2c_VarSummary_6;
+
+typedef struct _das2c_var_sum_7{
+	IDL_LONG   id;
+	IDL_STRING name;
+	IDL_STRING role;
+	IDL_STRING units;
+	IDL_LONG64 shape[7];
+	IDL_LONG64 size;
+} das2c_VarSummary_7;
+
+typedef struct _das2c_var_sum_8{
+	IDL_LONG   id;
+	IDL_STRING name;
+	IDL_STRING role;
+	IDL_STRING units;
+	IDL_LONG64 shape[8];
+	IDL_LONG64 size;
+} das2c_VarSummary_8;
+
+static IDL_StructDefPtr g_das2c_pVarSumDef_1;
+static IDL_StructDefPtr g_das2c_pVarSumDef_2;
+static IDL_StructDefPtr g_das2c_pVarSumDef_3;
+static IDL_StructDefPtr g_das2c_pVarSumDef_4;
+static IDL_StructDefPtr g_das2c_pVarSumDef_5;
+static IDL_StructDefPtr g_das2c_pVarSumDef_6;
+static IDL_StructDefPtr g_das2c_pVarSumDef_7;
+static IDL_StructDefPtr g_das2c_pVarSumDef_8;
 
 static void DAS2C_VAR_def()
 {
-	g_das2c_pVarSumDef = IDL_MakeStruct("DAS2C_VAR", _das2c_var_tags);
+	g_das2c_pVarSumDef_1 = IDL_MakeStruct("DAS2C_VAR_1", _das2c_var_tags_1);
+	g_das2c_pVarSumDef_2 = IDL_MakeStruct("DAS2C_VAR_2", _das2c_var_tags_2);
+	g_das2c_pVarSumDef_3 = IDL_MakeStruct("DAS2C_VAR_3", _das2c_var_tags_3);
+	g_das2c_pVarSumDef_4 = IDL_MakeStruct("DAS2C_VAR_4", _das2c_var_tags_4);
+	g_das2c_pVarSumDef_5 = IDL_MakeStruct("DAS2C_VAR_5", _das2c_var_tags_5);
+	g_das2c_pVarSumDef_6 = IDL_MakeStruct("DAS2C_VAR_6", _das2c_var_tags_6);
+	g_das2c_pVarSumDef_7 = IDL_MakeStruct("DAS2C_VAR_7", _das2c_var_tags_7);
+	g_das2c_pVarSumDef_8 = IDL_MakeStruct("DAS2C_VAR_8", _das2c_var_tags_8);
+}
+
+static IDL_StructDefPtr das2c_get_varsum_def(int nRank)
+{
+	switch(nRank){
+	case 1: return g_das2c_pVarSumDef_1;
+	case 2: return g_das2c_pVarSumDef_2;
+	case 3: return g_das2c_pVarSumDef_3;
+	case 4: return g_das2c_pVarSumDef_4;
+	case 5: return g_das2c_pVarSumDef_5;
+	case 6: return g_das2c_pVarSumDef_6;
+	case 7: return g_das2c_pVarSumDef_7;
+	case 8: return g_das2c_pVarSumDef_8;
+	default:return NULL;
+	}
 }
 
 /* ************************************************************************* */
@@ -116,7 +274,7 @@ static const DasVar* das2c_check_var_id(
 		for(i = 0; i < pDim->uVars; ++i){
 			if(pDim->aVars[i] == pVar) *iVar = i;
 		}
-		if(*iVar == -1) das2c_IdlMsgExit("Logic error das2c_check_var_id");
+		if(*iVar == -1) das2c_IdlMsgExit("Logic error1 das2c_check_var_id");
 	}
 	
 	return pVar;
@@ -177,9 +335,17 @@ static const DasVar* das2c_check_var_id(
 ;
 ;    'units':  String   ; The units for values from this variable.
 ;
-;    'shape':  8 Long64 ; The extent of this variable in the dataset indices.
-;                       ; Values less than 0 mean the variable is degenerate
-;                       ; or ragged in an index.
+;    'shape':  N Long64 ; The extent of this variable in the dataset indices.
+;                       ; Certian flag values have special meanings:
+;                       ;
+;                       ;   -3 : The variable is degenerate in this index. I.e.
+;                       ;        any value used here will not affect the output.
+;                       ;
+;                       ;   -1 : This is a virtual variable that has no internal
+;                       ;        storage but rather generates a value based
+;                       ;        on the index provided.  See Das2 Virtual
+;                       ;        variables for more information.
+;
 ;
 ;    'size':   Long64   ; If this variable is directly backed by an array this
 ;                       ; is the total number of values in that array.  This
@@ -214,6 +380,8 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 	
 	/* Get/check dataset ID */
 	int iDs = das2c_args_ds_id(argc, argv, 1);
+	const DasDs* pDs = das2c_check_ds_id(pEnt, iDs);
+	int nDsRank = DasDs_rank(pDs);
 	
 	/* Get/check physical dimension ID/Name */
 	char sDim[128] = {'\0'};
@@ -235,46 +403,156 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 	
 	IDL_VPTR pRet;  /* the to-be-returned structure */
 	
+	/* AGGG! Lack of access to IDL_TYP_OBJREF rases it's ugly head again!  */
+	/* We need different code paths because there are 8 different possible */
+	/* casts for the data pointer!!!! */
+
 	/* Returns pRet->value.s.arr.data */
-	das2c_VarSummary* pData = (das2c_VarSummary*) IDL_MakeTempStruct(
-		g_das2c_pVarSumDef, /* The opaque structure definition */
+	void* pData = IDL_MakeTempStruct(
+		das2c_get_varsum_def(nDsRank),  /* The opaque structure definition */
 		1,                   /* Number of dimesions */
 		&dims,               /* Size of each dimension, (only one dimension) */
 		&pRet,               /* The actual structure variable */
 		TRUE                 /* Zero out the array */
 	);
 	
+	das2c_VarSummary_1* pData1 = NULL;
+	das2c_VarSummary_2* pData2 = NULL;
+	das2c_VarSummary_3* pData3 = NULL;
+	das2c_VarSummary_4* pData4 = NULL;
+	das2c_VarSummary_5* pData5 = NULL;
+	das2c_VarSummary_6* pData6 = NULL;
+	das2c_VarSummary_7* pData7 = NULL;
+	das2c_VarSummary_8* pData8 = NULL;
+	switch(nDsRank){
+	case 1: pData1 = (das2c_VarSummary_1*)pData; break;
+	case 2: pData2 = (das2c_VarSummary_2*)pData; break;
+	case 3: pData3 = (das2c_VarSummary_3*)pData; break;
+	case 4: pData4 = (das2c_VarSummary_4*)pData; break;
+	case 5: pData5 = (das2c_VarSummary_5*)pData; break;
+	case 6: pData6 = (das2c_VarSummary_6*)pData; break;
+	case 7: pData7 = (das2c_VarSummary_7*)pData; break;
+	case 8: pData8 = (das2c_VarSummary_8*)pData; break;
+	default: das2c_IdlMsgExit("Logic error2, das2c_vars");  break;
+	}
+	
 	const DasVar* pVar = NULL;
 	const DasAry* pAry = NULL;
 	size_t u = 0, r = 0;
-	int nRank = -1;
+	/*int nRank = -1; */
 	ptrdiff_t shape[DASIDX_MAX] = DASIDX_INIT_UNUSED;
 	
 	for(u = 0; u < pDim->uVars; ++u){
 		pVar = pDim->aVars[u];
-		if(pVar == NULL) das2c_IdlMsgExit("Logic error, das2c_vars");
+		if(pVar == NULL) das2c_IdlMsgExit("Logic error3, das2c_vars");
 		
 		/* If we have a single role to report and this ain't it, continue */
 		if((pTheVar != NULL)&&(pVar != pTheVar)) continue;
 		
-		pData->id = u;
-		IDL_StrStore(&(pData->name), pDim->sId);
-		IDL_StrStore(&(pData->role), pDim->aRoles[u]);
-		IDL_StrStore(&(pData->units), Units_toStr(pVar->units));
+		DasVar_shape(pVar, shape);
 		
-		nRank = DasVar_shape(pVar, shape);
-		for(r = 0; r < IDL_MAX_ARRAY_DIM; ++r){ 
-			if(r < nRank) pData->shape[r] = shape[r];
-			else pData->shape[r] = DASIDX_UNUSED;
+		switch(nDsRank){
+		
+		case 1:
+		pData1->id = u;
+		pData1->size = 0;	
+		IDL_StrStore(&(pData1->name), pDim->sId);
+		IDL_StrStore(&(pData1->role), pDim->aRoles[u]);
+		IDL_StrStore(&(pData1->units), Units_toStr(pVar->units));	
+		for(r = 0; r < nDsRank; ++r) pData1->shape[(nDsRank - 1) - r] = shape[r];
+		if((pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)
+			pData1->size += DasAry_size(pAry);
+		++pData1;
+		break;
+		
+		case 2:
+		pData2->id = u;
+		pData2->size = 0;	
+		IDL_StrStore(&(pData2->name), pDim->sId);
+		IDL_StrStore(&(pData2->role), pDim->aRoles[u]);
+		IDL_StrStore(&(pData2->units), Units_toStr(pVar->units));	
+		for(r = 0; r < nDsRank; ++r) pData2->shape[(nDsRank - 1) - r] = shape[r];
+		if((pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)
+			pData2->size += DasAry_size(pAry);
+		++pData2;
+		break;
+
+		case 3:
+		pData3->id = u;
+		pData3->size = 0;	
+		IDL_StrStore(&(pData3->name), pDim->sId);
+		IDL_StrStore(&(pData3->role), pDim->aRoles[u]);
+		IDL_StrStore(&(pData3->units), Units_toStr(pVar->units));	
+		for(r = 0; r < nDsRank; ++r) pData3->shape[(nDsRank - 1) - r] = shape[r];
+		if((pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)
+			pData3->size += DasAry_size(pAry);
+		++pData3;
+		break;
+		
+		case 4:
+		pData4->id = u;
+		pData4->size = 0;	
+		IDL_StrStore(&(pData4->name), pDim->sId);
+		IDL_StrStore(&(pData4->role), pDim->aRoles[u]);
+		IDL_StrStore(&(pData4->units), Units_toStr(pVar->units));	
+		for(r = 0; r < nDsRank; ++r) pData4->shape[(nDsRank - 1) - r] = shape[r];
+		if((pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)
+			pData4->size += DasAry_size(pAry);
+		++pData4;
+		break;
+
+		case 5:
+		pData5->id = u;
+		pData5->size = 0;	
+		IDL_StrStore(&(pData5->name), pDim->sId);
+		IDL_StrStore(&(pData5->role), pDim->aRoles[u]);
+		IDL_StrStore(&(pData5->units), Units_toStr(pVar->units));	
+		for(r = 0; r < nDsRank; ++r) pData5->shape[(nDsRank - 1) - r] = shape[r];
+		if((pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)
+			pData5->size += DasAry_size(pAry);
+		++pData5;
+		break;
+
+		case 6:
+		pData6->id = u;
+		pData6->size = 0;	
+		IDL_StrStore(&(pData6->name), pDim->sId);
+		IDL_StrStore(&(pData6->role), pDim->aRoles[u]);
+		IDL_StrStore(&(pData6->units), Units_toStr(pVar->units));	
+		for(r = 0; r < nDsRank; ++r) pData6->shape[(nDsRank - 1) - r] = shape[r];
+		if((pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)
+			pData6->size += DasAry_size(pAry);
+		++pData6;
+		break;
+
+		case 7:
+		pData7->id = u;
+		pData7->size = 0;	
+		IDL_StrStore(&(pData7->name), pDim->sId);
+		IDL_StrStore(&(pData7->role), pDim->aRoles[u]);
+		IDL_StrStore(&(pData7->units), Units_toStr(pVar->units));	
+		for(r = 0; r < nDsRank; ++r) pData7->shape[(nDsRank - 1) - r] = shape[r];
+		if((pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)
+			pData7->size += DasAry_size(pAry);
+		++pData7;
+		break;
+
+		case 8:
+		pData8->id = u;
+		pData8->size = 0;	
+		IDL_StrStore(&(pData8->name), pDim->sId);
+		IDL_StrStore(&(pData8->role), pDim->aRoles[u]);
+		IDL_StrStore(&(pData8->units), Units_toStr(pVar->units));	
+		for(r = 0; r < nDsRank; ++r) pData8->shape[(nDsRank - 1) - r] = shape[r];
+		if((pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)
+			pData8->size += DasAry_size(pAry);
+		++pData8;
+		break;
+		
+		default: das2c_IdlMsgExit("Logic error4, das2c_vars");
 		}
 		
-		/* Add real value size for non-virtual variables */
-		pData->size = 0;
-		if( (pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)
-			pData->size += DasAry_size(pAry);
-				
 		if(pTheVar != NULL) break;
-		++pData;
 	}
 	
 	return pRet;

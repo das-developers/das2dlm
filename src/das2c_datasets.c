@@ -18,65 +18,16 @@
  * version 2.1 along with libdas2; if not, see <http://www.gnu.org/licenses/>.
  */
  
-/*
-;+
-; FUNCTION:
-;  das2c_datasets
-;
-; PURPOSE:
-;  List stored datasets in a das2 query result
-;
-; CALLING SEQUENCE:
-;  Result = das2c_datasets(query_id, ds_index)
-;
-; INPUTS:
-;  query_id: The identification integer for the stored query result as
-;            returned by das2c_readhttp() or das2c_queries.
-;
-; OPTIONAL INPUTS:
-;  ds_index: The dataset index. Only required if information about a single
-;            dataset is desired. Most query results only contain a single
-;            dataset at index 0. However, some common ones such as the
-;            Juno Waves Survey data source return more that one.
-;
-; OUTPUT:
-;  This function returns an array of structures providing an overview of
-;  each stored result.  Output structures have the fields:
-;
-;    'id':       Long     ; The ID number of this dataset, starts from 0
-;
-;    'name':     String   ; The name of this dataset, dataset names are not
-;                         ; usually unique.  This limits thier utility.
-;
-;    'physdims': Long     ; The number of physical dimensions in the dataset
-;
-;    'props':    Long     ; The number of metadata properties in the dataset
-;
-;    'shape':    8 Long64 ; The extents of this dataset in index space.
-;		
-;    'size':     Long64   ; The total number of values in the dataset may be
-;                         ; less that nth  
-;
-; EXAMPLES:
-;  List summary information on all datasets from a query with ID 27
-;    das2c_datasets(27)
-;
-;  List summary information on the first dataset from query ID 27
-;    das2c_queries(27, 0);
-;
-; MODIFICATION HISTORY:
-;  Written by: Chris Piker, 2020-03-09
-;-
-*/
 		
-/* Output structure definition */
+/* Output structure definitions.*/
 static IDL_STRUCT_TAG_DEF _das2c_dataset_tags[] = {
-	{"id",       NULL,      (void*)IDL_TYP_LONG},
-	{"name",     NULL,      (void*)IDL_TYP_STRING},
-	{"physdims", NULL,      (void*)IDL_TYP_LONG},
-	{"props",    NULL,      (void*)IDL_TYP_LONG},
-	{"shape",    g_aShape,  (void*)IDL_TYP_LONG64},
-	{"size",     NULL,      (void*)IDL_TYP_LONG64},
+	{"ID",       NULL,      (void*)IDL_TYP_LONG},
+	{"NAME",     NULL,      (void*)IDL_TYP_STRING},
+	{"PHYSDIMS", NULL,      (void*)IDL_TYP_LONG},
+	{"PROPS",    NULL,      (void*)IDL_TYP_LONG},
+	{"RANK",     NULL,      (void*)IDL_TYP_LONG},
+	{"SHAPE",    g_aShape8, (void*)IDL_TYP_LONG64},
+	{"SIZE",     NULL,      (void*)IDL_TYP_LONG64},
 	{0}
 };
 
@@ -85,7 +36,8 @@ typedef struct _das2c_ds_sum{
 	IDL_STRING name;
 	IDL_LONG   physdims;
 	IDL_LONG   props;
-	IDL_LONG64 shape[IDL_MAX_ARRAY_DIM];
+	IDL_LONG   rank;
+	IDL_LONG64 shape[8];
 	IDL_LONG64 size;
 } das2c_DsSummary;
 
@@ -137,6 +89,71 @@ static const DasDs* das2c_check_ds_id(const DasIdlDbEnt* pEnt, int iDs)
 #define D2C_DATASETS_MAXA 2
 #define D2C_DATASETS_FLAG 0
 
+/*
+;+
+; FUNCTION:
+;  das2c_datasets
+;
+; PURPOSE:
+;  List stored datasets in a das2 query result
+;
+; CALLING SEQUENCE:
+;  Result = das2c_datasets(query_id, ds_index)
+;
+; INPUTS:
+;  query_id: The identification integer for the stored query result as
+;            returned by das2c_readhttp() or das2c_queries.
+;
+; OPTIONAL INPUTS:
+;  ds_index: The dataset index. Only required if information about a single
+;            dataset is desired. Most query results only contain a single
+;            dataset at index 0. However, some common ones such as the
+;            Juno Waves Survey data source return more that one.
+;
+; OUTPUT:
+;  This function returns an array of structures providing an overview of
+;  each stored result.  Output structures have the fields:
+;
+;    'id':       Long     ; The ID number of this dataset, starts from 0
+;
+;    'name':     String   ; The name of this dataset, dataset names are not
+;                         ; usually unique.  This limits thier utility.
+;
+;    'physdims': Long     ; The number of physical dimensions in the dataset
+;
+;    'props':    Long     ; The number of metadata properties in the dataset
+;
+;    'rank':     Long     ; The number of entries in 'shape' that matter.  
+;                         ; Since IDL uses a 'first index fastest' memory layout
+;                         ; only the last 'rank' values of 'shape' actually
+;                         ; matter.
+;
+;    'shape':    8 Long64 ; The extents of this dataset in the full IDL index
+;                         ; space.  
+;                         ;
+;                         ; Ideally this array would be of length 'rank', 
+;                         ; however due to limitations on DLMs, this array is
+;                         ; always 8 elements long. An example of trimming
+;                         ; the shape array is provided in EXAMPLES below.
+;
+;    'size':     Long64   ; The total number of values in the dataset may be
+;                         ; less that nth  
+;
+; EXAMPLES:
+;  List summary information on all datasets from a query with ID 27
+;    das2c_datasets(27)
+;
+;  List summary information on the first dataset from query ID 27
+;    das2c_queries(27, 0);
+;
+;  Trim the shape array down to the actual rank of the dataset.
+;    ds = das2c_queries(27, 0);
+;    shape = ds.shape[8 - ds.rank : -1 ]
+;
+; MODIFICATION HISTORY:
+;  Written by: Chris Piker, 2020-03-10
+;-
+*/
 static IDL_VPTR das2c_api_datasets(int argc, IDL_VPTR* argv)
 {
 	
@@ -188,9 +205,12 @@ static IDL_VPTR das2c_api_datasets(int argc, IDL_VPTR* argv)
 		
 		/* Need to flag ragged datesets somehow */
 		nRank = DasDs_shape(pDs, shape);
+		
+		pData->rank    = nRank;
+		
 		for(r = 0; r < IDL_MAX_ARRAY_DIM; ++r){ 
-			if(r < nRank) pData->shape[r] = shape[r];
-			else pData->shape[r] = DASIDX_UNUSED;
+			if(r < nRank) pData->shape[(IDL_MAX_ARRAY_DIM - 1) - r] = shape[r];
+			else pData->shape[(IDL_MAX_ARRAY_DIM - 1) - r] = D2C_OVER_RANK_FLAG;
 		}
 		
 		pData->size = 0;

@@ -83,11 +83,11 @@
 
 /* Output structure definition */
 static IDL_STRUCT_TAG_DEF _das2c_physdim_tags[] = {
-	{"id",       0, (void*)IDL_TYP_LONG},
-	{"name",     0, (void*)IDL_TYP_STRING},
-	{"vars",     0, (void*)IDL_TYP_LONG},
-	{"props",    0, (void*)IDL_TYP_LONG},
-	{"size",     0, (void*)IDL_TYP_LONG64},
+	{"ID",       0, (void*)IDL_TYP_LONG},
+	{"NAME",     0, (void*)IDL_TYP_STRING},
+	{"VARS",     0, (void*)IDL_TYP_LONG},
+	{"PROPS",    0, (void*)IDL_TYP_LONG},
+	{"SIZE",     0, (void*)IDL_TYP_LONG64},
 	{0}
 };	
 

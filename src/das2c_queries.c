@@ -17,59 +17,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * version 2.1 along with libdas2; if not, see <http://www.gnu.org/licenses/>.
  */
- 
-/*
-;+
-; FUNCTION:
-;  das2c_queries
-;
-; PURPOSE:
-;  List stored das2 query results
-;
-; CALLING SEQUENCE:
-;  Result = das2c_queries(query_id)
-;
-; OPTIONAL INPUTS:
-;  query_id: Output information on only a single stored query instead of
-;            all that are loaded.
-;
-; OUTPUT:
-;  This function returns an array of structures providing an overview of
-;  each stored result.  Output structures have the fields:
-;
-;    'id':       Long    ; A unique ID for this query result
-;    'datasets': Long    ; The number of datasets returned
-;    'server':   String  ; The network URL from which data were loaded
-;    'source':   String  ; The data source ID string on the server, if known
-;    'begin':    String  ; The min time value
-;    'end':      String  ; the max time value
-;    'res':      String  ; The resolution requested if any
-;    'extra':    String  ; Any extra arguments sent to the server
-;    'size':     Long64  ; The total number of values in the query result
-;
-; EXAMPLES:
-;  List summary information on all stored results
-;    das2c_queries()
-;
-;  List summary information on a single stored result
-;    das2c_queries(23);
-;
-; MODIFICATION HISTORY:
-;  Written by: Chris Piker, 2020-03-01
-;-
-*/
 
 /* Output structure definition */
 static IDL_STRUCT_TAG_DEF _das2c_result_tags[] = {
-	{"id",       0, (void*)IDL_TYP_LONG},
-	{"datasets", 0, (void*)IDL_TYP_LONG},
-	{"server",   0, (void*)IDL_TYP_STRING},
-	{"source",   0, (void*)IDL_TYP_STRING},
-	{"begin",    0, (void*)IDL_TYP_STRING},
-	{"end",      0, (void*)IDL_TYP_STRING},
-	{"res",      0, (void*)IDL_TYP_STRING},
-	{"extra",    0, (void*)IDL_TYP_STRING},
-	{"size",     0, (void*)IDL_TYP_LONG64},
+	{"ID",       0, (void*)IDL_TYP_LONG},
+	{"DATASETS", 0, (void*)IDL_TYP_LONG},
+	{"SERVER",   0, (void*)IDL_TYP_STRING},
+	{"SOURCE",   0, (void*)IDL_TYP_STRING},
+	{"BEGIN",    0, (void*)IDL_TYP_STRING},
+	{"END",      0, (void*)IDL_TYP_STRING},
+	{"RES",      0, (void*)IDL_TYP_STRING},
+	{"EXTRA",    0, (void*)IDL_TYP_STRING},
+	{"SIZE",     0, (void*)IDL_TYP_LONG64},
 	{0}
 };
 
@@ -121,6 +80,46 @@ static const DasIdlDbEnt* das2c_check_query_id(int iQueryId)
 #define D2C_QUERIES_MAXA 1
 #define D2C_QUERIES_FLAG 0
 
+/*
+;+
+; FUNCTION:
+;  das2c_queries
+;
+; PURPOSE:
+;  List stored das2 query results
+;
+; CALLING SEQUENCE:
+;  Result = das2c_queries(query_id)
+;
+; OPTIONAL INPUTS:
+;  query_id: Output information on only a single stored query instead of
+;            all that are loaded.
+;
+; OUTPUT:
+;  This function returns an array of structures providing an overview of
+;  each stored result.  Output structures have the fields:
+;
+;    'id':       Long    ; A unique ID for this query result
+;    'datasets': Long    ; The number of datasets returned
+;    'server':   String  ; The network URL from which data were loaded
+;    'source':   String  ; The data source ID string on the server, if known
+;    'begin':    String  ; The min time value
+;    'end':      String  ; the max time value
+;    'res':      String  ; The resolution requested if any
+;    'extra':    String  ; Any extra arguments sent to the server
+;    'size':     Long64  ; The total number of values in the query result
+;
+; EXAMPLES:
+;  List summary information on all stored results
+;    das2c_queries()
+;
+;  List summary information on a single stored result
+;    das2c_queries(23);
+;
+; MODIFICATION HISTORY:
+;  Written by: Chris Piker, 2020-03-01
+;-
+*/
 static IDL_VPTR das2c_api_queries(int argc, IDL_VPTR* argv)
 {
 	/* If no queries are stored, return the !NULL variable */
