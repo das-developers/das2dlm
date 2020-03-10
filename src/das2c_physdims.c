@@ -123,12 +123,12 @@ static int das2c_args_dim_id(
 	if(argc <= iArg)
 		das2c_IdlMsgExit(
 			"Physical dimension not specified, either a string or an integer "
-			"is required for argument number %d", iArg+1
+			"is required for argument number %d", iArg
 		);
 	
 	/* See if this is as string */
 	if(argv[iArg]->type == IDL_TYP_STRING){
-		sTmp = IDL_VarGetString(argv[2]);
+		sTmp = IDL_VarGetString(argv[iArg]);
 		if(*sTmp == '\0') das2c_IdlMsgExit("Dimension name is empty");
 		
 		strncpy(sName, sTmp, uLen-1);

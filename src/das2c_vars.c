@@ -58,7 +58,9 @@
 ;    'id':     Long     ; The ID number for this variable.  Usage of
 ;                       ; role names instead of numbers is recommended.
 ;	
-;    'name':   String   ; The role for this variable, for example 'max_error'
+;    'name':   String   ; The name of the physical dimension for this variable
+;
+;    'role':   String   ; The role for this variable, for example 'max_error'
 ;
 ;    'units':  String   ; The units for values from this variable.
 ;
@@ -92,8 +94,8 @@
 static IDL_STRUCT_TAG_DEF _das2c_var_tags[] = {
 	{"id",      NULL,     (void*)IDL_TYP_LONG},
 	{"name",    NULL,     (void*)IDL_TYP_STRING},
+	{"role",    NULL,     (void*)IDL_TYP_STRING},
 	{"units",   NULL,     (void*)IDL_TYP_STRING},
-	{"idxmap",  g_aShape, (void*)IDL_TYP_LONG64},
 	{"shape",   g_aShape, (void*)IDL_TYP_LONG64},
 	{"size",    NULL,     (void*)IDL_TYP_LONG64},
 	{0}
@@ -102,6 +104,7 @@ static IDL_STRUCT_TAG_DEF _das2c_var_tags[] = {
 typedef struct _das2c_var_sum{
 	IDL_LONG   id;
 	IDL_STRING name;
+	IDL_STRING role;
 	IDL_STRING units;
 	IDL_LONG64 shape[IDL_MAX_ARRAY_DIM];
 	IDL_LONG64 size;
@@ -134,12 +137,12 @@ static int das2c_args_var_id(
 	if(argc <= iArg)
 		das2c_IdlMsgExit(
 			"Variable role was not specified, either a string or an integer "
-			"is required for argument number %d", iArg+1
+			"is required for argument number %d", iArg
 		);
 	
 	/* See if this is as string */
 	if(argv[iArg]->type == IDL_TYP_STRING){
-		sTmp = IDL_VarGetString(argv[2]);
+		sTmp = IDL_VarGetString(argv[iArg]);
 		if(*sTmp == '\0') das2c_IdlMsgExit("Role string is empty");
 		
 		strncpy(sRole, sTmp, uLen-1);
@@ -169,7 +172,7 @@ static const DasVar* das2c_check_var_id(
 			pVar = pDim->aVars[*iVar];
 		else
 			das2c_IdlMsgExit(
-				"Query result %d, dataset %d, dimension %s, doesn't have a"
+				"Query result %d, dataset %d, dimension '%s', doesn't have a"
 				" variable with index number '%d'", 
 				pEnt->nQueryId, iDs, pDim->sId, *iVar
 			);
@@ -181,7 +184,7 @@ static const DasVar* das2c_check_var_id(
 		pVar = DasDim_getVar(pDim, sRole);
 		if(pVar == NULL)
 			das2c_IdlMsgExit(
-				"Query result %d, dataset %d, dimension %s, doesn't have a "
+				"Query result %d, dataset %d, dimension '%s', doesn't have a"
 				" variable for role '%s'", pEnt->nQueryId, iDs, pDim->sId,
 				sRole
 			);
@@ -249,7 +252,8 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 		if((pTheVar != NULL)&&(pVar != pTheVar)) continue;
 		
 		pData->id = u;
-		IDL_StrStore(&(pData->name), pDim->aRoles[u]);
+		IDL_StrStore(&(pData->name), pDim->sId);
+		IDL_StrStore(&(pData->role), pDim->aRoles[u]);
 		IDL_StrStore(&(pData->units), Units_toStr(pVar->units));
 		
 		nRank = DasVar_shape(pVar, shape);

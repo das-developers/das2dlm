@@ -174,7 +174,7 @@ static IDL_VPTR das2c_api_datasets(int argc, IDL_VPTR* argv)
 		
 		if((iDs > -1)&&(iDs != u)) continue;
 		
-		pDs = pEnt->lDs[iDs];
+		pDs = pEnt->lDs[u];
 		if(pDs == NULL) das2c_IdlMsgExit("Logic error, das2c_datasets.c");
 		
 		/* Write into IDL memory using parallel structure pointer */
