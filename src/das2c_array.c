@@ -41,10 +41,11 @@
 ;  das2c_array
 ;
 ; PURPOSE:
-;  Get arrays or slices of arrays from a variable
+;  Get low-level backing arrays.  
+;  See das2c_get for general data access
 ;
 ; CALLING SEQUENCE:
-;  Result = das2c_array(query_id, ds_index, pdim, var, slice)
+;  Result = das2c_array(query_id, ds_index, pdim, role)
 ;
 ; INPUTS:
 ;  query_id: The identification integer for the stored query result as
@@ -64,17 +65,10 @@
 ;            'mode', 'reference', 'offset', 'max_error', 'min_error',
 ;            'uncertainty',  'std_dev', 'point_spread', 'weight'
 ;
-; OPTIONAL INPUTS: 
-;  slice:    Gets a sub-set of the data values.  By default the output
-;            array will have the same rank and extents as the overall
-;            dataset.  Thus all data appears to be scatter data.
-;
 ; OUTPUT:
 ;            An array of values.  The IDL data type of the array depends
-;            on the input data.
-; TODO:
-;  Should this function return !NULL if a requested role doesn't exist in a
-;  physical dimension?
+;            on the input data.  If the specified variable is a virtual
+;            variable then this function return !NULL
 ;
 ; EXAMPLES:
 ;  List summary of all variable roles for the 'time' dimension in dataset 0 of

@@ -50,7 +50,6 @@ print, 'das2c_vars(nId, 0, ''time'', ''center'')'
 das2c_vars(nId, 0, 'time', 'center')
 das2c_vars(nId, 0, 'frequency', 'center')
 das2c_vars(nId, 0, 'electric', 'center')
-exit
 
 print, 'das2c_dsprops(nId, 0)'
 das2c_dsprops(nId, 0)
@@ -64,18 +63,27 @@ das2c_dimprops(nId, 0, 'frequency')
 print, 'das2c_dimprops(nId, 0, ''electric'')'
 das2c_dimprops(nId, 0, 'electric')
 
-; IDL indicies are backwards (column major) 
+; Get the unique set of time values
+vTime = das2c_vars(nId, 0, 'time','center')
 
-; Get all the time values for the 0th frequency
-das2c_array(nId, 0, 'time', 'center',  0, '*')
+vFreq = das2c_vars(nId, 0, 'frequency','center')
+
+exit
+
+das2c_data(nId, 0, 'time', 'center')
+das2c_array(nId, 0, 'time',     'center',  0, '*')
+
+; Get a ds sized array.
+das2c_array(nId, 0, 'frequency', 'center')
+
+; Get a partial array.
+das2c_array(nId, 0, 'electric', 'center', 
+
+das2c_array(nId, 0, 'electric', 'center', '*', 234)
 
 ; Get all the frequency values for the 0th time
 das2c_array(nId, 0, 'frequency', 'center', '*', 0)
 
+das2c_array(nId, 0, 'time', 'center', )
 
-; Get a time array with the exact same shape as the overall dataset
-; Since these data don't depend on the last index this is a waste of
-; space, Inspecting the 'shape' parameter of the variable and ignoring
-das2c_array(nId, 0, 'time', 'center')
 
-exit
