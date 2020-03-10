@@ -84,10 +84,6 @@ typedef struct _das2c_result_sum{
 	IDL_STRING extra;
 	IDL_LONG64 size;
 } das2c_ResultSummary;
-		
-#define D2C_QUERIES_MINA 0
-#define D2C_QUERIES_MAXA 1
-#define D2C_QUERIES_FLAG 0
 
 static IDL_StructDefPtr g_das2c_pResultDef;
 
@@ -120,6 +116,11 @@ static const DasIdlDbEnt* das2c_check_query_id(int iQueryId)
 
 /* ************************************************************************* */
 /* API Function, careful with changes! */
+
+#define D2C_QUERIES_MINA 0
+#define D2C_QUERIES_MAXA 1
+#define D2C_QUERIES_FLAG 0
+
 static IDL_VPTR das2c_api_queries(int argc, IDL_VPTR* argv)
 {
 	/* If no queries are stored, return the !NULL variable */

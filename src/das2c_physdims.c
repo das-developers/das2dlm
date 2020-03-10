@@ -72,6 +72,10 @@
 ;  List summary information on the dimension that happens to live at index 0.
 ;    das2c_physdims(27, 0, 0)
 ;
+; TODO:
+;  Should this function return !NULL if a requested physical dimension dosen't
+;  exist in the dataset?
+;
 ; MODIFICATION HISTORY:
 ;  Written by: Chris Piker, 2020-03-09
 ;-
@@ -95,17 +99,12 @@ typedef struct _das2c_pdim_sum{
 	IDL_LONG64 size;
 } das2c_PdimSummary;
 
-#define D2C_PHYSDIMS_MINA 2
-#define D2C_PHYSDIMS_MAXA 3
-#define D2C_PHYSDIMS_FLAG 0
-
 static IDL_StructDefPtr g_das2c_pPdimSumDef;
 
 static void DAS2C_PHYSDIM_def()
 {
 	g_das2c_pPdimSumDef = IDL_MakeStruct("DAS2C_PHYSDIM", _das2c_physdim_tags);
 }
-
 
 /* ************************************************************************* */
 /* Downstream helper for pulling out dimesions, these don't return on error  */
@@ -185,6 +184,11 @@ static const DasDim* das2c_check_dim_id(
 
 /* ************************************************************************* */
 /* API Function, careful with changes! */	
+
+#define D2C_PHYSDIMS_MINA 2
+#define D2C_PHYSDIMS_MAXA 3
+#define D2C_PHYSDIMS_FLAG 0
+
 static IDL_VPTR das2c_api_physdims(int argc, IDL_VPTR* argv)
 {
 	/* Get/check Query ID */

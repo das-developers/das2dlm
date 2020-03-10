@@ -27,7 +27,7 @@
 ;  List the variables present in a physical dimension, in a das2 dataset.
 ;
 ; CALLING SEQUENCE:
-;  Result = das2c_vars(query_id, ds_index, pdim_index, var)
+;  Result = das2c_vars(query_id, ds_index, pdim, var)
 ;
 ; INPUTS:
 ;  query_id: The identification integer for the stored query result as
@@ -35,7 +35,7 @@
 ;
 ;  ds_index: The dataset index, often 0.  See das2c_datasets() for details.
 ;
-;  pdim_index: Either the physical dimension index (long), or the dimension's
+;  pdim:     Either the physical dimension index (long), or the dimension's
 ;            name (string).  For more infor see das2c_physdims().
 ;
 ; OPTIONAL INPUTS:
@@ -71,6 +71,10 @@
 ;    'size':   Long64   ; If this variable is directly backed by an array this
 ;                       ; is the total number of values in that array.  This
 ;                       ; value is 0 for virtual variables.
+;
+; TODO:
+;  Should this function return !NULL if a requested role doesn't exist in a
+;  physical dimension?
 ;
 ; EXAMPLES:
 ;  List summary of all variable roles for the 'time' dimension in dataset 0 of
@@ -109,10 +113,6 @@ typedef struct _das2c_var_sum{
 	IDL_LONG64 shape[IDL_MAX_ARRAY_DIM];
 	IDL_LONG64 size;
 } das2c_VarSummary;
-
-#define D2C_VARS_MINA 3
-#define D2C_VARS_MAXA 4
-#define D2C_VARS_FLAG 0
 
 static IDL_StructDefPtr g_das2c_pVarSumDef;
 
@@ -200,6 +200,11 @@ static const DasVar* das2c_check_var_id(
 
 /* ************************************************************************* */
 /* API Function, careful with changes! */
+
+#define D2C_VARS_MINA 3
+#define D2C_VARS_MAXA 4
+#define D2C_VARS_FLAG 0
+
 static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 {
 	/* Get/check Query ID */

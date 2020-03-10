@@ -8,11 +8,11 @@ here's what's working.
   * The das2C error and log message system has been hooked into IDL via 
     callabacks.
 
-  * Data can be downloaded via the das2c_readhttp() function, but das2
-    datastructures are not converted to IDL structures yet.
+  * Data can be downloaded via the das2c_readhttp() function
 	
-  * Stored query results can be listed using the das2c_queries()
-    function.
+  * Stored query results can be inspected using the das2c_queries(),
+    das2c_datasets(), das2c_physdims(), das2c_vars(), das2c_dsprops(),
+	 das2c_dsinfo(), das2c_dimprops()
 
 ## Build
 
@@ -45,7 +45,7 @@ $ make -f makefiles/Debian.mak  # Or other suitable makefile in makefiles
 
 Output is in the `dlm` subdirectory.
 
-### Testing
+## Testing
 
 The files in the `dlm` subdirectory have to be added to your IDL DLM path.
 One way to do so follows.
@@ -54,6 +54,8 @@ cd dlm
 IDL_DLM_PATH="${PWD}:<IDL_DEFAULT>"
 export IDL_DLM_PATH
 ```
+
+### Get Data
 Now run IDL as follows:
 
 ```
@@ -102,6 +104,8 @@ different amplitude arrays.  A single datasets groups together the time,
 frequency, and amplitude arrays for a given band.  Thus Waves E-field data
 are transmitted as four diffent datasets.
 
+### Inspect Datasets
+
 Human readable information about a single dataset is provided by the 
 das2c_dsinfo() function, for example:
 
@@ -132,13 +136,18 @@ Dataset: 'electric_10' from group 'electric' | i:0..4483, j:0..152
       Property: String | scaleType | log
       Property: DatumRange | range | 5 to 6000000 Hz
       Property: Datum | tagWidth | 1.4 lo
+		
+		Variable: center | frequency[j] Hz | i:-, j:0..152
 ```
 The following call provides a summary of all the datasets in the query result.
 (output manually collapsed)
 ```idl
 IDL> das2c_datasets()
-{"id": 0, "name": "electric_10", "physdims": 3, "props": 1, "shape": (4483,152), "size": 686051 }
+{"id": 0, "name": "electric_10", "physdims": 3, "props": 1, "shape": [4483,152], "size": 686051 }
 ```
+
+### Inspecting Physical Dimensions (i.e. Variable Groups)
+
 The following call will provide a summary of all physical dimensions involved in the 0th
 dataset. (output manually collapsed)
 ```idl
@@ -149,5 +158,67 @@ IDL> das2c_physdims(query_id, 0)
   {"id": 2, "name": "electric", "vars": 1, "props": 4, "size": 681416 }
 ]
 ```
+Since "physical dimension" is a long term, we'll shorten it to *p-dim*.  Each 
+p-dim usually corresponds to a degree of freedom in the real world.  For example 
+location, time, wave-amplitude etc.  These may happen to correspond to an array
+dimension, but that is only a happenstance.  Array dimensions are merely book
+keeping, as all datasets can be flattened into a set of 1-D arrays with out affecting
+thier physical meaning.  To keep from confusing the two terms, we'll use the word
+*rank* to describe the number of independently varying index values used to correlate
+values in a dataset.
+
+### Listing Variables
+
+In each p-dim there are 1-N variables that supply data values.  Each variable 
+provides values for a particular purpose.  The most common purpose is to provide
+bin-center values.  The following code lists all the variables for a p-dim 'time'.
+```idl
+IDL> das2c_vars(query_id, 0, 'time')
+[
+  {"id": 0, "name": "time", "role": "center", "shape": [4483, -3], "size": 4483 },
+]
+```
+The value `-3` in the shape field indicates that the variable is degenerate in 
+the second index.  This is common for cubic datasets, but not all datasets are
+cubic.  For example sweep frequency receivers typically step in time as well as
+frequency.  Thus the time centers are an array as large as the amplitude dataset.
+
+### Geting Data Ararys
+
+TODO: Very next item
 
 
+### Getting Metadata
+
+Datasets contain metadata properties, such as titles and labels.  Metadata may be
+attached either for the dataset as a whole, such as the 'title' property above or
+to physical dimension variable groups.  The following two calls illustrate gathering
+all the metadata from the 0th dataset.
+```idl
+IDL> das2c_dsprops(query_id, 0)
+[
+   {"key":"title", "type":"String", "value":"Galileo PWS - LRS Electric"}
+]
+
+IDL> das2c_dimprops(query_id, 0, 'electric')
+[
+  {"key":"label", "type":"String, "value":"Spectral Density (V!a2!n m!a-2!n Hz!a-1!n)"},
+  {"key":"scaleType", "type":"String, "value":"log"},
+  {"key":"range", "type":"DatumRange", "value":"1.0e-17 to 1.0e-4 V**2 m**-2 Hz**-1"},
+  {"key":"fill", "type":"double", "value":"0.0"}
+]
+
+IDL> das2c_dimprops(query_id, 0, 'time')
+[
+	{"key":"tagWidth", "type":"Datum"; "value":"80 s"},
+	{"key":"cacheRange", "type":"DatumRange",
+	 "value":"2001-01-01T00:00:00.000 to 2001-01-02T00:00:00.000 UTC"
+	},
+]
+IDL> das2c_dimprops(query_id, 0, 'frequency')
+[
+	{"key":"label", "type":"String, "value":"Frequency (Hz)"},
+	{"key":"scaleType", "type":"String, "value":"log"},
+	{"key":"range", "type":"DatumRange", "value":"5 to 6000000 Hz"}
+]
+```

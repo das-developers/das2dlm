@@ -50,6 +50,9 @@
 ;-
 */
 
+/* ************************************************************************* */
+/* API Function, careful with changes! */
+
 #define D2C_DSINFO_MINA 2
 #define D2C_DSINFO_MAXA 2
 #define D2C_DSINFO_FLAG 0

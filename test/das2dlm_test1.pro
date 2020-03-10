@@ -33,5 +33,10 @@ das2c_physdims(nId, 0, 1)
 das2c_vars(nId, 0, 'time')
 das2c_vars(nId, 0, 'time', 'center')
 
+das2c_props(nId, 0)
+das2c_props(nId, 0, 'time')
+das2c_props(nId, 0, 'frequency')
+das2c_props(nId, 0, 'electric')
+
 
 exit

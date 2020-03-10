@@ -89,10 +89,6 @@ typedef struct _das2c_ds_sum{
 	IDL_LONG64 size;
 } das2c_DsSummary;
 
-#define D2C_DATASETS_MINA 1
-#define D2C_DATASETS_MAXA 2
-#define D2C_DATASETS_FLAG 0
-
 static IDL_StructDefPtr g_das2c_pDsSumDef;
 
 static void DAS2C_DATASET_def()
@@ -135,7 +131,12 @@ static const DasDs* das2c_check_ds_id(const DasIdlDbEnt* pEnt, int iDs)
 }
 
 /* ************************************************************************* */
-/* API Function, careful with changes! */	
+/* API Function, careful with changes! */
+
+#define D2C_DATASETS_MINA 1
+#define D2C_DATASETS_MAXA 2
+#define D2C_DATASETS_FLAG 0
+
 static IDL_VPTR das2c_api_datasets(int argc, IDL_VPTR* argv)
 {
 	

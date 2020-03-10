@@ -57,8 +57,8 @@ static IDL_MEMINT g_aShape[2];
 #include "das2c_dsinfo.c"
 #include "das2c_physdims.c"
 #include "das2c_vars.c"
-/*#include "das2c_props.c"
-#include "das2c_array.c"
+#include "das2c_props.c"
+/*#include "das2c_array.c"
 #include "das2c_free.c"*/
 #include "das2c_readhttp.c"
 
@@ -101,12 +101,12 @@ int IDL_Load(void){
 			D2C_VARS_MINA,     D2C_VARS_MAXA,     D2C_VARS_FLAG,     NULL
 		},
 		{ 
-			{(IDL_SYSRTN_GENERIC)das2c_api_props},    "DAS2C_DSPROPS",
-			D2C_PROPS_MINA,    D2C_DSPROPS_MAXA,  D2C_DSPROPS_FLAG,  NULL
+			{(IDL_SYSRTN_GENERIC)das2c_api_dsprops},  "DAS2C_DSPROPS",
+			D2C_DSPROPS_MINA,  D2C_DSPROPS_MAXA,  D2C_DSPROPS_FLAG,  NULL
 		},
 		{ 
-			{(IDL_SYSRTN_GENERIC)das2c_api_props},    "DAS2C_DIMPROPS",
-			D2C_PROPS_MINA,    D2C_DIMPROPS_MAXA, D2C_DIMPROPS_FLAG, NULL
+			{(IDL_SYSRTN_GENERIC)das2c_api_dimprops}, "DAS2C_DIMPROPS",
+			D2C_DIMPROPS_MINA, D2C_DIMPROPS_MAXA, D2C_DIMPROPS_FLAG, NULL
 		},
 		/*{
 			{(IDL_SYSRTN_GENERIC)das2c_api_array},    "DAS2C_ARRAY",
