@@ -31,8 +31,16 @@
 
 #define DLMERR 63
 
+/* Check to see that das array max indecies are at least as big as
+   the max IDL index, if not code in das2c_vars, das2c_array and 
+	das2c_datasets will need to change */
+
+#if IDL_MAX_ARRAY_DIM > DASIDX_MAX
+#error das2C has changed, DLM code need to be updated
+#endif
+
 /* Set the version number advertised in user agent strings by default */
-#define DAS2DLM_S_VER "0.1"
+#define DAS2DLM_S_VER "0.2"
 
 /* ************************************************************************* */
 /* Include C files directly since the module is composed almost entirely of  */
@@ -42,11 +50,11 @@
 #include "das2c_db.c"
 
 /* used in structure definitions for index_map and relate shape items */
-static IDL_MEMINT g_aShape8[2];
+static IDL_MEMINT g_aShape[2];
 
 #include "das2c_queries.c"   /* exported functions */
-#include "das2c_dsinfo.c"
 #include "das2c_datasets.c" 
+#include "das2c_dsinfo.c"
 #include "das2c_physdims.c"
 #include "das2c_vars.c"
 /*#include "das2c_props.c"
@@ -59,10 +67,10 @@ static IDL_MEMINT g_aShape8[2];
    These tables contain information on the functions and procedures that
    make up the das2c DLM. The information contained in these tables
    must be identical to that contained in das2c.dlm. */
-int IDL_Load(void){
+int IDL_Load(void){	
 
 	/* Define the shape8 struct def array */
-	g_aShape8[0] = 1;  g_aShape8[1] = 8;
+	g_aShape[0] = 1;  g_aShape[1] = IDL_MAX_ARRAY_DIM;
 
 	/* Define our structures */
 	DAS2C_QUERY_def();
@@ -71,20 +79,43 @@ int IDL_Load(void){
 	DAS2C_VAR_def();
 		
  	static IDL_SYSFUN_DEF2 function_addr[] = {
-		
-		/* the "database" functions, since manipulating IDL_TYP_PTR and
-		   IDL_TYP_OBJREF are illegal (grrr....) */
-		{ {(IDL_SYSRTN_GENERIC)das2c_queries},  "DAS2C_QUERIES",  D2C_QUERIES_MINA,  D2C_QUERIES_MAXA,  D2C_QUERIES_FLAG,  NULL},
-		{ {(IDL_SYSRTN_GENERIC)das2c_dsinfo},   "DAS2C_DSINFO",   D2C_DSINFO_MINA,   D2C_DSINFO_MAXA,   D2C_DSINFO_FLAG,   NULL},
-		{ {(IDL_SYSRTN_GENERIC)das2c_datasets}, "DAS2C_DATASETS", D2C_DATASETS_MINA, D2C_DATASETS_MAXA, D2C_DATASETS_FLAG, NULL},
-		{ {(IDL_SYSRTN_GENERIC)das2c_physdims}, "DAS2C_PHYSDIMS", D2C_PHYSDIMS_MINA, D2C_PHYSDIMS_MAXA, D2C_PHYSDIMS_FLAG, NULL},
-		{ {(IDL_SYSRTN_GENERIC)das2c_vars},     "DAS2C_VARS",     D2C_VARS_MINA,     D2C_VARS_MAXA,     D2C_VARS_FLAG,     NULL},
-/*		{ {(IDL_SYSRTN_GENERIC)das2c_props},    "DAS2C_PROPS",    D2C_PROPS_MINA,    D2C_PROPS_MAXA,    D2C_PROPS_FLAG,    NULL},
-		{ {(IDL_SYSRTN_GENERIC)das2c_array},    "DAS2C_ARRAY",    D2C_ARRAY_MINA,    D2C_ARRAY_MAXA,    D2C_ARRAY_FLAG,    NULL},
-		{ {(IDL_SYSRTN_GENERIC)das2c_free},     "DAS2C_FREE",     D2C_FREE_MINA,     D2C_FREE_MAXA,     D2C_FREE_FLAG,     NULL},
-*/				
+		{ 
+			{(IDL_SYSRTN_GENERIC)das2c_api_queries},  "DAS2C_QUERIES",
+			D2C_QUERIES_MINA,  D2C_QUERIES_MAXA,  D2C_QUERIES_FLAG,  NULL
+		},		
+		{ 
+			{(IDL_SYSRTN_GENERIC)das2c_api_datasets}, "DAS2C_DATASETS",
+			D2C_DATASETS_MINA, D2C_DATASETS_MAXA, D2C_DATASETS_FLAG, NULL
+		},
+		{ 
+			{(IDL_SYSRTN_GENERIC)das2c_api_dsinfo},   "DAS2C_DSINFO",
+		   D2C_DSINFO_MINA,   D2C_DSINFO_MAXA,   D2C_DSINFO_FLAG,   NULL
+		},		
+		{ 
+			{(IDL_SYSRTN_GENERIC)das2c_api_physdims}, "DAS2C_PHYSDIMS",
+			D2C_PHYSDIMS_MINA, D2C_PHYSDIMS_MAXA, D2C_PHYSDIMS_FLAG, NULL
+		},
+		{ 
+			{(IDL_SYSRTN_GENERIC)das2c_api_vars},     "DAS2C_VARS",
+			D2C_VARS_MINA,     D2C_VARS_MAXA,     D2C_VARS_FLAG,     NULL
+		},
+		/*{ 
+			{(IDL_SYSRTN_GENERIC)das2c_api_props},    "DAS2C_PROPS",
+			D2C_PROPS_MINA,    D2C_PROPS_MAXA,    D2C_PROPS_FLAG,    NULL
+		},
+		{
+			{(IDL_SYSRTN_GENERIC)das2c_api_array},    "DAS2C_ARRAY",
+			D2C_ARRAY_MINA,    D2C_ARRAY_MAXA,    D2C_ARRAY_FLAG,    NULL
+		},
+		{
+			{(IDL_SYSRTN_GENERIC)das2c_api_free},     "DAS2C_FREE",
+			D2C_FREE_MINA,     D2C_FREE_MAXA,     D2C_FREE_FLAG,     NULL
+		},*/
 		/* The "get data" functions, only one for now */
-		{ {(IDL_SYSRTN_GENERIC)das2c_readhttp}, "DAS2C_READHTTP", D2C_READHTTP_MINA, D2C_READHTTP_MAXA, D2C_READHTTP_FLAG, NULL}
+		{
+			{(IDL_SYSRTN_GENERIC)das2c_api_readhttp}, "DAS2C_READHTTP",
+			D2C_READHTTP_MINA, D2C_READHTTP_MAXA, D2C_READHTTP_FLAG, NULL
+		}
 		
 		/* The ancillary functions, none so far */
 	};
@@ -97,7 +128,7 @@ int IDL_Load(void){
 
  	/* Create a message block to hold our messages. Save its handle where the
 	   other routines can access it. */
-	msg_block = IDL_MessageDefineBlock("das2c",IDL_CARRAY_ELTS(msg_arr), msg_arr);
+	msg_block = IDL_MessageDefineBlock("das2c", IDL_CARRAY_ELTS(msg_arr), msg_arr);
 	if(msg_block == NULL) return IDL_FALSE;
 
 	/* Initialize das2, send das2 longs to the IDL message system */
@@ -110,8 +141,8 @@ int IDL_Load(void){
 	/* Override printing errors to stderr, save them instead */
 	das_save_error(DASIDL_ERR_MSG_SZ);
 	
- 	/* Register our routine. The routines must be specified exactly the same as in 
-	   testmodule.dlm. */
+ 	/* Register our routine. The routines must be specified exactly the same as 
+	   in das2c.dlm, not sure how to sycronize this automatically */
 	return IDL_SysRtnAdd(function_addr, TRUE, IDL_CARRAY_ELTS(function_addr));
 		
 	

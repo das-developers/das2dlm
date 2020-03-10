@@ -95,8 +95,32 @@ static void DAS2C_QUERY_def()
 {
 	g_das2c_pResultDef = IDL_MakeStruct("DAS2C_QUERY", _das2c_result_tags);
 }
-		
-static IDL_VPTR das2c_queries(int argc, IDL_VPTR* argv)
+
+/* ************************************************************************* */
+/* Downstream helpers for manditory query_id arg processing */
+static int das2c_args_query_id(int argc, IDL_VPTR* argv, int iArg)
+{
+	int iQueryId;
+	IDL_VPTR pTmpVar = NULL;		
+	
+	if(argc <= iArg) das2c_IdlMsgExit("Query ID not provided");
+	pTmpVar = IDL_BasicTypeConversion(1, argv + iArg, IDL_TYP_LONG);
+	iQueryId = pTmpVar->value.l;
+	IDL_DELTMP(pTmpVar);
+	
+	return iQueryId;
+}
+
+static const DasIdlDbEnt* das2c_check_query_id(int iQueryId)
+{
+	const DasIdlDbEnt* pEnt = das2c_db_getent(iQueryId);
+	if(pEnt == NULL) das2c_IdlMsgExit("No query result has ID %d", iQueryId);
+	return pEnt;
+}
+
+/* ************************************************************************* */
+/* API Function, careful with changes! */
+static IDL_VPTR das2c_api_queries(int argc, IDL_VPTR* argv)
 {
 	/* If no queries are stored, return the !NULL variable */
 	if(g_nDbStored == 0) return IDL_GettmpNULL();

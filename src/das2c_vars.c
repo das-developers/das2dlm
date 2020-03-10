@@ -61,10 +61,6 @@
 ;    'name':   String   ; The role for this variable, for example 'max_error'
 ;
 ;    'units':  String   ; The units for values from this variable.
-;	
-;    'idxmap': 8 Long   ; How to map indices for this variables array into the
-;                       ; overall datest index space.  A -1 means array values
-;                       ; are degenerate in a given dataset index.
 ;
 ;    'shape':  8 Long64 ; The extent of this variable in the dataset indices.
 ;                       ; Values less than 0 mean the variable is degenerate
@@ -94,12 +90,12 @@
 		
 /* Output structure definition */
 static IDL_STRUCT_TAG_DEF _das2c_var_tags[] = {
-	{"id",      NULL,      (void*)IDL_TYP_LONG},
-	{"name",    NULL,      (void*)IDL_TYP_STRING},
-	{"units",   NULL,      (void*)IDL_TYP_STRING},
-	{"idxmap",  g_aShape8, (void*)IDL_TYP_LONG64},
-	{"shape",   g_aShape8, (void*)IDL_TYP_LONG64},
-	{"size",    NULL,      (void*)IDL_TYP_LONG64},
+	{"id",      NULL,     (void*)IDL_TYP_LONG},
+	{"name",    NULL,     (void*)IDL_TYP_STRING},
+	{"units",   NULL,     (void*)IDL_TYP_STRING},
+	{"idxmap",  g_aShape, (void*)IDL_TYP_LONG64},
+	{"shape",   g_aShape, (void*)IDL_TYP_LONG64},
+	{"size",    NULL,     (void*)IDL_TYP_LONG64},
 	{0}
 };
 
@@ -107,13 +103,12 @@ typedef struct _das2c_var_sum{
 	IDL_LONG   id;
 	IDL_STRING name;
 	IDL_STRING units;
-	IDL_LONG64 idxmap[8];
-	IDL_LONG64 shape[8];
+	IDL_LONG64 shape[IDL_MAX_ARRAY_DIM];
 	IDL_LONG64 size;
 } das2c_VarSummary;
 
-#define D2C_VARS_MINA 1
-#define D2C_VARS_MAXA 2
+#define D2C_VARS_MINA 3
+#define D2C_VARS_MAXA 4
 #define D2C_VARS_FLAG 0
 
 static IDL_StructDefPtr g_das2c_pVarSumDef;
@@ -123,9 +118,154 @@ static void DAS2C_VAR_def()
 	g_das2c_pVarSumDef = IDL_MakeStruct("DAS2C_VAR", _das2c_var_tags);
 }
 
-static IDL_VPTR das2c_vars(int argc, IDL_VPTR* argv)
-{
-	return NULL;
+/* ************************************************************************* */
+/* Downstream arg helpers */
+
+/* returns either a var id, or -1 and a var role string */
+static int das2c_args_var_id(
+	int argc, IDL_VPTR* argv, int iArg, char* sRole, size_t uLen
+){
+	int iVar= -1;
+	const char* sTmp = NULL;
+	memset(sRole, 0, uLen);
+	
+	if(uLen < 2) das2c_IdlMsgExit("uLen too short");
+	
+	if(argc <= iArg)
+		das2c_IdlMsgExit(
+			"Variable role was not specified, either a string or an integer "
+			"is required for argument number %d", iArg+1
+		);
+	
+	/* See if this is as string */
+	if(argv[iArg]->type == IDL_TYP_STRING){
+		sTmp = IDL_VarGetString(argv[2]);
+		if(*sTmp == '\0') das2c_IdlMsgExit("Role string is empty");
+		
+		strncpy(sRole, sTmp, uLen-1);
+		return iVar;
+	}
+	
+	IDL_VPTR pTmpVar = IDL_BasicTypeConversion(1, argv + iArg, IDL_TYP_LONG);
+	
+	iVar = pTmpVar->value.l;
+	IDL_DELTMP(pTmpVar);
+	if(iVar < 0) das2c_IdlMsgExit("Invalid variable index %d", iVar);
+		
+	return iVar;
 }
 
+/* if var role or id is valid, set the missing item and return the var ptr */
+static const DasVar* das2c_check_var_id(
+	const DasIdlDbEnt* pEnt, int iDs, const DasDim* pDim,
+	int* iVar, char* sRole, size_t uLen  /* one of these is valid */
+){
+	int i = 0;
+	const DasVar* pVar = NULL;
+	
+	if((sRole == NULL)||(sRole[0] == '\0')){
+		/* Lookup by index and save the name */
+		if((*iVar > 0)&&(*iVar < pDim->uVars))
+			pVar = pDim->aVars[*iVar];
+		else
+			das2c_IdlMsgExit(
+				"Query result %d, dataset %d, dimension %s, doesn't have a"
+				" variable with index number '%d'", 
+				pEnt->nQueryId, iDs, pDim->sId, *iVar
+			);
+		
+		strncpy(sRole, pDim->aRoles[*iVar], uLen);
+	}
+	else{
+		/* Lookup by name and save the index */
+		pVar = DasDim_getVar(pDim, sRole);
+		if(pVar == NULL)
+			das2c_IdlMsgExit(
+				"Query result %d, dataset %d, dimension %s, doesn't have a "
+				" variable for role '%s'", pEnt->nQueryId, iDs, pDim->sId,
+				sRole
+			);
+		
+		for(i = 0; i < pDim->uVars; ++i){
+			if(pDim->aVars[i] == pVar) *iVar = i;
+		}
+		if(*iVar == -1) das2c_IdlMsgExit("Logic error das2c_check_var_id");
+	}
+	
+	return pVar;
+}
 
+/* ************************************************************************* */
+/* API Function, careful with changes! */
+static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
+{
+	/* Get/check Query ID */
+	int iQueryId = das2c_args_query_id(argc, argv, 0);
+	const DasIdlDbEnt* pEnt = das2c_check_query_id(iQueryId);
+	
+	/* Get/check dataset ID */
+	int iDs = das2c_args_ds_id(argc, argv, 1);
+	
+	/* Get/check physical dimension ID/Name */
+	char sDim[128] = {'\0'};
+	int iDim = das2c_args_dim_id(argc, argv, 2, sDim, 127);
+	const DasDim* pDim = das2c_check_dim_id(pEnt, iDs, &iDim, sDim, 127);
+	
+	const DasVar* pTheVar = NULL;
+	char sRole[64] = {'\0'};
+	int iVar = -1;
+	
+	if(argc > 3){
+		iVar = das2c_args_var_id(argc, argv, 3, sRole, 63);
+		pTheVar = das2c_check_var_id(pEnt, iDs, pDim, &iVar, sRole, 63);
+	}
+		
+	/* See if they want just one var or many */
+	IDL_MEMINT dims = 1;
+	if(pTheVar == NULL) dims = pDim->uVars;
+	
+	IDL_VPTR pRet;  /* the to-be-returned structure */
+	
+	/* Returns pRet->value.s.arr.data */
+	das2c_VarSummary* pData = (das2c_VarSummary*) IDL_MakeTempStruct(
+		g_das2c_pVarSumDef, /* The opaque structure definition */
+		1,                   /* Number of dimesions */
+		&dims,               /* Size of each dimension, (only one dimension) */
+		&pRet,               /* The actual structure variable */
+		TRUE                 /* Zero out the array */
+	);
+	
+	const DasVar* pVar = NULL;
+	const DasAry* pAry = NULL;
+	size_t u = 0, r = 0;
+	int nRank = -1;
+	ptrdiff_t shape[DASIDX_MAX] = DASIDX_INIT_UNUSED;
+	
+	for(u = 0; u < pDim->uVars; ++u){
+		pVar = pDim->aVars[u];
+		if(pVar == NULL) das2c_IdlMsgExit("Logic error, das2c_vars");
+		
+		/* If we have a single role to report and this ain't it, continue */
+		if((pTheVar != NULL)&&(pVar != pTheVar)) continue;
+		
+		pData->id = u;
+		IDL_StrStore(&(pData->name), pDim->aRoles[u]);
+		IDL_StrStore(&(pData->units), Units_toStr(pVar->units));
+		
+		nRank = DasVar_shape(pVar, shape);
+		for(r = 0; r < IDL_MAX_ARRAY_DIM; ++r){ 
+			if(r < nRank) pData->shape[r] = shape[r];
+			else pData->shape[r] = DASIDX_UNUSED;
+		}
+		
+		/* Add real value size for non-virtual variables */
+		pData->size = 0;
+		if( (pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)
+			pData->size += DasAry_size(pAry);
+				
+		if(pTheVar != NULL) break;
+		++pData;
+	}
+	
+	return pRet;
+}

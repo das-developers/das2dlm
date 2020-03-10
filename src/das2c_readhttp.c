@@ -77,7 +77,9 @@
 #define D2C_READHTTP_MAXA  2
 #define D2C_READHTTP_FLAG  0
 
-static IDL_VPTR das2c_readhttp(int argc, IDL_VPTR* argv)
+/* ************************************************************************* */
+/* API Function, careful with changes! */
+static IDL_VPTR das2c_api_readhttp(int argc, IDL_VPTR* argv)
 {
 	if(argc < 1)
 		IDL_Message(

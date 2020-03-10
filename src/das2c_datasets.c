@@ -75,7 +75,7 @@ static IDL_STRUCT_TAG_DEF _das2c_dataset_tags[] = {
 	{"name",     NULL,      (void*)IDL_TYP_STRING},
 	{"physdims", NULL,      (void*)IDL_TYP_LONG},
 	{"props",    NULL,      (void*)IDL_TYP_LONG},
-	{"shape",    g_aShape8, (void*)IDL_TYP_LONG64},
+	{"shape",    g_aShape,  (void*)IDL_TYP_LONG64},
 	{"size",     NULL,      (void*)IDL_TYP_LONG64},
 	{0}
 };
@@ -85,7 +85,7 @@ typedef struct _das2c_ds_sum{
 	IDL_STRING name;
 	IDL_LONG   physdims;
 	IDL_LONG   props;
-	IDL_LONG64 shape[8];
+	IDL_LONG64 shape[IDL_MAX_ARRAY_DIM];
 	IDL_LONG64 size;
 } das2c_DsSummary;
 
@@ -99,45 +99,58 @@ static void DAS2C_DATASET_def()
 {
 	g_das2c_pDsSumDef = IDL_MakeStruct("DAS2C_DATASET", _das2c_dataset_tags);
 }
-		
-static IDL_VPTR das2c_datasets(int argc, IDL_VPTR* argv)
-{
-	/* Check args exist */
-	if(argc < 1) das2c_IdlMsgExit("Query ID not provided");	
-	
-	int iQueryId;
-	
-	IDL_VPTR pTmpVar = NULL;
-	pTmpVar = IDL_BasicTypeConversion(1, argv, IDL_TYP_LONG);
-	iQueryId = pTmpVar->value.l;
+
+/* ************************************************************************* */
+/* Downstream helpers for pulling out datasets, these don't return on error  */
+
+static int das2c_args_ds_id(int argc, IDL_VPTR* argv, int iArg){
+	int iDs = -1;
+	if(argc <= iArg) das2c_IdlMsgExit("Dataset index not provided");
+	IDL_VPTR pTmpVar = IDL_BasicTypeConversion(1, argv+iArg, IDL_TYP_LONG);
+	iDs = pTmpVar->value.l;
 	IDL_DELTMP(pTmpVar);
-	
-	int iDs = -1;  /* Dataset index, -1 = All datasets */
-	
-	if(argc > 1){
-		pTmpVar = IDL_BasicTypeConversion(1, argv + 1, IDL_TYP_LONG);
-		iDs = pTmpVar->value.l;
-		IDL_DELTMP(pTmpVar);
-		if(iDs < 0) das2c_IdlMsgExit("Invalid dataset index %d", iDs);
-	}
-	
-	/* Check args valid */
-	const DasIdlDbEnt* pEnt = das2c_db_getent(iQueryId);
-	if(pEnt == NULL)
-		das2c_IdlMsgExit("No query result has ID %d", iQueryId);
+	if(iDs < 0) das2c_IdlMsgExit("Invalid dataset index %d", iDs);
+	return iDs;
+}
+
+/* Returns dataset pointer if index is valid */
+static const DasDs* das2c_check_ds_id(const DasIdlDbEnt* pEnt, int iDs)
+{
+	if(pEnt == NULL) das2c_IdlMsgExit("Logic error, das2c_datasets.c");
 	
 	if(iDs >= pEnt->uDs){
 		if(pEnt->uDs == 0)
 			das2c_IdlMsgExit(
-				"Query result %d doesn't contain any datasets", iQueryId
+				"Query result %d doesn't contain any datasets", pEnt->nQueryId
 			);
 		else
 			das2c_IdlMsgExit(
 				"Query result %d dataset indices are 0 to %zu", 
-				iQueryId, pEnt->uDs - 1
+				pEnt->nQueryId, pEnt->uDs - 1
 			);
 	}
+	const DasDs* pDs = pEnt->lDs[iDs];
+	if(pDs == NULL) das2c_IdlMsgExit("Logic error, das2c_datasets.c");
+	return pDs;
+}
+
+/* ************************************************************************* */
+/* API Function, careful with changes! */	
+static IDL_VPTR das2c_api_datasets(int argc, IDL_VPTR* argv)
+{
 	
+	/* Get/check Query ID */
+	int iQueryId = das2c_args_query_id(argc, argv, 0);
+	const DasIdlDbEnt* pEnt = das2c_check_query_id(iQueryId);
+	
+	/* Handle optional dataset ID */
+	int iDs = -1;  /* Dataset index, -1 = All datasets */
+		
+	if(argc > 1){
+		iDs = das2c_args_ds_id(argc, argv, 1);
+		das2c_check_ds_id(pEnt, iDs);
+	}
+		
 	IDL_MEMINT dims = pEnt->uDs;
 	if(iDs == -1) dims = 1;
 	
@@ -155,8 +168,8 @@ static IDL_VPTR das2c_datasets(int argc, IDL_VPTR* argv)
 	DasDs* pDs = NULL;
 	size_t uAry = 0;
 	DasAry* pAry = NULL;
-	ptrdiff_t shape[16] = {0};
-	int r = 0;  
+	ptrdiff_t shape[DASIDX_MAX] = DASIDX_INIT_UNUSED;
+	int nRank, r = 0;  
 	for(size_t u = 0; u < pEnt->uDs; ++u){
 		
 		if((iDs > -1)&&(iDs != u)) continue;
@@ -173,8 +186,11 @@ static IDL_VPTR das2c_datasets(int argc, IDL_VPTR* argv)
 			IDL_StrStore(&(pData->name), DasDs_id(pDs));
 		
 		/* Need to flag ragged datesets somehow */
-		int nRank = DasDs_shape(pDs, shape);
-		for(r = 0; r < nRank; ++r) pData->shape[r] = shape[r];
+		nRank = DasDs_shape(pDs, shape);
+		for(r = 0; r < IDL_MAX_ARRAY_DIM; ++r){ 
+			if(r < nRank) pData->shape[r] = shape[r];
+			else pData->shape[r] = DASIDX_UNUSED;
+		}
 		
 		pData->size = 0;
 		for(uAry = 0; uAry < pDs->uArrays; ++uAry){

@@ -16,7 +16,7 @@ I_DAS2=$(HOME)/git/das2C
 # We have to make a "fat shared object" so that the IDL DLM will be self 
 # contained.  This means that almost everything has to be staticlly linked.
 
-SYSLIB_DIR=/usr/lib
+SYSLIB_DIR=/usr/lib64
 
 # yum install fftw-devel fftw-static 
 L_FFTW3=$(SYSLIB_DIR)/libfftw3.a

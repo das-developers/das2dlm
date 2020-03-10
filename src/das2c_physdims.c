@@ -106,74 +106,104 @@ static void DAS2C_PHYSDIM_def()
 	g_das2c_pPdimSumDef = IDL_MakeStruct("DAS2C_PHYSDIM", _das2c_physdim_tags);
 }
 
-static IDL_VPTR das2c_physdims(int argc, IDL_VPTR* argv)
-{
-	/* Check args exist */
-	if(argc < 1) das2c_IdlMsgExit("Query ID not provided");	
+
+/* ************************************************************************* */
+/* Downstream helper for pulling out dimesions, these don't return on error  */
+
+/* returns either a dim id, or -1 and a dim string */
+static int das2c_args_dim_id(
+	int argc, IDL_VPTR* argv, int iArg, char* sName, size_t uLen
+){
+	int iDim = -1;
+	const char* sTmp = NULL;
+	memset(sName, 0, uLen);
 	
-	/* Get check Query ID */
-	int iQueryId;
-	IDL_VPTR pTmpVar = NULL;
-	pTmpVar = IDL_BasicTypeConversion(1, argv, IDL_TYP_LONG);
-	iQueryId = pTmpVar->value.l;
+	if(uLen < 2) das2c_IdlMsgExit("uLen too short");
+	
+	if(argc <= iArg)
+		das2c_IdlMsgExit(
+			"Physical dimension not specified, either a string or an integer "
+			"is required for argument number %d", iArg+1
+		);
+	
+	/* See if this is as string */
+	if(argv[iArg]->type == IDL_TYP_STRING){
+		sTmp = IDL_VarGetString(argv[2]);
+		if(*sTmp == '\0') das2c_IdlMsgExit("Dimension name is empty");
+		
+		strncpy(sName, sTmp, uLen-1);
+		return iDim;
+	}
+	
+	IDL_VPTR pTmpVar = IDL_BasicTypeConversion(1, argv + iArg, IDL_TYP_LONG);
+	
+	iDim = pTmpVar->value.l;
 	IDL_DELTMP(pTmpVar);
+	if(iDim < 0) das2c_IdlMsgExit("Invalid physical dimension index %d", iDim);
+		
+	return iDim;
+}
+
+/* if dim id or name is valid, set the missing item and return the dim ptr */
+static const DasDim* das2c_check_dim_id(
+	const DasIdlDbEnt* pEnt, int iDs, int* iDim, char* sDim, size_t uLen
+){
+	int i = 0;
+	const DasDs* pDs = das2c_check_ds_id(pEnt, iDs);
+	const DasDim* pDim = NULL;
 	
-	const DasIdlDbEnt* pEnt = das2c_db_getent(iQueryId);
-	if(pEnt == NULL)
-		das2c_IdlMsgExit("No query result has ID %d", iQueryId);
-	
-	/* Get/check dataset ID */
-	int iDs;
-	if(argc < 2) das2c_IdlMsgExit("Dataset index not provided");
-	pTmpVar = IDL_BasicTypeConversion(1, argv+1, IDL_TYP_LONG);
-	iDs = pTmpVar->value.l;
-	IDL_DELTMP(pTmpVar);
-	if(iDs < 0) das2c_IdlMsgExit("Invalid dataset index %d", iDs);
-	
-	if(iDs >= pEnt->uDs){
-		if(pEnt->uDs == 0)
-			das2c_IdlMsgExit(
-				"Query result %d doesn't contain any datasets", iQueryId
-			);
+	if((sDim == NULL)||(sDim[0] == '\0')){
+		/* Lookup by index and save the name */
+		if((*iDim > 0)&&(*iDim < pDs->uDims))
+			pDim = pDs->lDims[*iDim];
 		else
 			das2c_IdlMsgExit(
-				"Query result %d dataset indices are 0 to %zu", 
-				iQueryId, pEnt->uDs - 1
+				"Query result %d, dataset %d doesn't have a physical dimension"
+				" with index number '%d'", pEnt->nQueryId, iDs, *iDim
 			);
+		
+		strncpy(sDim, pDim->sId, uLen);
 	}
-	const DasDs* pDs = pEnt->lDs[iDs];
-	if(pDs == NULL) das2c_IdlMsgExit("Logic error, das2c_datasets.c");
+	else{
+		/* Lookup by name and save the index */
+		pDim = DasDs_getDimById(pDs, sDim);
+		if(pDim == NULL)
+			das2c_IdlMsgExit(
+				"Query result %d, dataset %d doesn't have a physical dimension"
+				" named '%s'", pEnt->nQueryId, iDs, sDim
+			);
+		
+		for(i = 0; i < pDs->uDims; ++i){
+			if(pDs->lDims[i] == pDim) *iDim = i;
+		}
+		if(*iDim == -1) das2c_IdlMsgExit("Logic error das2c_check_dim_id");
+	}
 	
+	return pDim;
+}
+
+
+/* ************************************************************************* */
+/* API Function, careful with changes! */	
+static IDL_VPTR das2c_api_physdims(int argc, IDL_VPTR* argv)
+{
+	/* Get/check Query ID */
+	int iQueryId = das2c_args_query_id(argc, argv, 0);
+	const DasIdlDbEnt* pEnt = das2c_check_query_id(iQueryId);
+	
+	/* Get/check dataset ID */
+	int iDs = das2c_args_ds_id(argc, argv, 1);
+	const DasDs* pDs = das2c_check_ds_id(pEnt, iDs);
 	
 	/* Get the dimension in question, or assume they want to know about
 	 * all of them. */
 	const DasDim* pTheDim = NULL;
-	int iTmp = -1;
-	const char* sDim = NULL;
+	int iDim = -1;
+	char sDim[128] = {'\0'};
 	
 	if(argc > 2){
-		/* See if this is as string */
-		if(argv[2]->type == IDL_TYP_STRING){
-			sDim = IDL_VarGetString(argv[2]);
-			
-			if(*sDim == '\0') das2c_IdlMsgExit("Dimension name is empty");
-			
-			pTheDim = DasDs_getDimById(pDs, sDim);
-						
-			das2c_IdlMsgExit(
-				"Query result %d, dataset %d doesn't have a physical dimension"
-				" namesd '%s'", iQueryId, iDs, sDim
-			);	
-		}
-		else{
-			pTmpVar = IDL_BasicTypeConversion(1, argv + 2, IDL_TYP_LONG);
-			iTmp = pTmpVar->value.l;
-			IDL_DELTMP(pTmpVar);
-			if((iTmp < 0)||(iTmp > pDs->uDims)) 
-				das2c_IdlMsgExit("Invalid physical dimension index %d", iTmp);
-			
-			pTheDim = pDs->lDims[iTmp];
-		}
+		iDim = das2c_args_dim_id(argc, argv, 2, sDim, 127);
+		pTheDim = das2c_check_dim_id(pEnt, iDs, &iDim, sDim, 127);
 	}
 	
 	IDL_MEMINT dims = 1;
@@ -197,7 +227,7 @@ static IDL_VPTR das2c_physdims(int argc, IDL_VPTR* argv)
 	
 	for(size_t u = 0; u < pDs->uDims; ++u){
 		pIterDim = pDs->lDims[u];
-		if(pIterDim == NULL) das2c_IdlMsgExit("Logic error, das2c_physdims.c");
+		if(pIterDim == NULL) das2c_IdlMsgExit("Logic error, das2c_physdims");
 		
 		/* If we have a constant dim to report on and this ain't it, skip */
 		if((pTheDim != NULL)&&(pIterDim != pTheDim)) continue;
