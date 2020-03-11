@@ -156,11 +156,11 @@ IDL> das2c_datasets(query)
  }
 ```
 The SHAPE field bears explaination.  This is the overall extent of the dataset
-in index space.  Due to a limitation in the IDL DLM interface, and since I want
-to be able to make arrays of dataset information all SHAPE fields must be the 
-same size.  Since IDL arrays may accessed by up to 8 indexes (i.e have up to 8
-array dimensions), the SHAPE value always has 8 elements, however only the last
-RANK elements are valid.  A bit of IDL code will cut out the unneeded elements:
+in index space.  Due to a limitation in the IDL DLM interface for structure
+arrays, all SHAPE fields must be the same size.  Since IDL arrays may accessed
+by up to 8 indexes (i.e have up to 8 array dimensions), the SHAPE value always
+has 8 elements, however only the last RANK elements are valid.  A bit of IDL
+code will cut out the unneeded elements:
 ```idl
 IDL> ds.shape[ 8 - ds.rank : -1 ]
 ```
@@ -258,6 +258,10 @@ Fields for indexes larger than the RANK of the dataset are ignored.  Currently
 only positive and negative intergers and the string `'*'` are undersood by the
 `das2c_data` function.  So for example `-1` could have been used for the I value
 to indicate that the highest valid first index, whatever that happened to be.
+
+Usage of the IDL [CREATE_STRUCT](https://www.harrisgeospatial.com/docs/create_struct.html)
+command can be used to interate over SHAPE fields and generate efficient slice
+structures.
 
 ### Getting Metadata
 
