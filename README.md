@@ -1,11 +1,27 @@
-# das2dlm
-IDL binary extension das2 client (in development)
+# das2dlm (in development)
+Das2dlm is an IDL (Interactive Data Language) DLM (Downloadable Module) that
+provides system routines bindings for the [das2C](https://github.com/das-developers/das2C)
+library.
 
 ## What works and what doesn't
-This project is far from ready for prime time.  It's early days yet.
-here's what's working.
 
-  * Nothing.  This branch is in the middle of an API refactor.
+Reading local files and command pipes is not yet implemented.  Only queries
+to non password protected HTTP servers providing a GET API are currently
+supported.
+
+This DLM is not that concerned with any particular server's query API.  It
+issues an HTTP request to a URL that you format.  For details of the das2
+server HTTP GET query interface see the
+[das2.2.2 Interface Control Document](https://das2.org/Das2.2.2-ICD_2017-05-09.pdf).
+If some of the HTTP GET paramaters are recognised they will be saved in 
+named fields in DAS2C_QUERY structures, but otherwise the code is GET API
+independent.
+
+On the otherhand, this DLM very much cares about the format of the data
+stream output by the server.  The supported stream formats are limited to
+those that are parseable by the [das2C](https://github.com/das-developers/das2C)
+library.  At the time of writing that is only das2.2.2 (or lower) streams,
+though plans are in the works for supporting das2.3 and HAPI 2.0 streams.
   
 ## Build and Config
 
@@ -55,8 +71,9 @@ export IDL_DLM_PATH
 
 ## Usage
 
-Reading local files and command pipes is not yet implemented, only queries
-to open HTTP das2 servers is currently supported.
+The following will download data from a Galileo mission das2 data source
+at the University of Iowa, save the results, and output a DAS2C_QUERY
+structure that can be used to access the data values.
 
 ```idl
 IDL> s = 'http://planet.physics.uiowa.edu/das/das2Server?server=dataset' + $
