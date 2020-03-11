@@ -234,7 +234,7 @@ IDL> ary = das2c_data(v_freq)
 ```
 
 The code above is not memory or time efficient.  Since the SHAPE field for the
-frequency centers has a degenerate flag in the first index.  We can spare 
+frequency centers has a degenerate flag in the first index, we can spare 
 ourselves alot of unnecessary memory usage if we just get a slice of frequencies
 for any valid first index.  The code below illustrates a slice operation:
 
