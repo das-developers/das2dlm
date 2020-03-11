@@ -310,3 +310,22 @@ IDL> das2c_props(pd_freq)
 ]
 ```
 
+### Cleaning Up
+
+To delete a das2c object and free it's memory use the `das2c_free` function as illustated below:
+```idl
+IDL> das2c_free(query)
+```
+The das2c_free function can be called on any of the following structure types:
+  * DAS2C_QUERY
+  * DAS2C_DSET
+  * DAS2C_PDIM
+  * DAS2C_VAR_*  (all versions)
+
+Calling `das2c_free` on a higher level object deletes all the child objects.  Note that any
+internal data arrays that have been wrapped by 
+[IDL_ImportArray](https://www.harrisgeospatial.com/docs/CreateArrayFromExistingData.html)
+and passed out to your application code without a memory copy will not be deleted until
+IDL is done with them.
+
+
