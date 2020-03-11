@@ -273,8 +273,8 @@ all valid indices".  The fields in a slice structure are:
 
 Fields for indexes larger than the RANK of the dataset are ignored.  Currently
 only positive and negative intergers and the string `'*'` are undersood by the
-`das2c_data` function.  So for example `-1` could have been used for the I value
-to indicate that the highest valid first index, whatever that happened to be.
+`das2c_data` function.  So for example `-1` could have been used for field I
+to indicate the highest valid first index value, whatever that happened to be.
 
 Given this interface, the following two lines of code are equivalent:
 ```idl
@@ -283,7 +283,7 @@ IDL> ary = das2c_data(v_freq, {I:'*', J:'*'})
 ```
 The IDL [CREATE_STRUCT](https://www.harrisgeospatial.com/docs/create_struct.html)
 function can be used to generate slice structures while interating over SHAPE arrays,
-since CREATE_STRUCT can all fields to an existing structure.
+since CREATE_STRUCT can add fields to an existing structure.
 
 ### Getting Metadata
 
