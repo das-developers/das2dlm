@@ -5,15 +5,8 @@ IDL binary extension das2 client (in development)
 This project is far from ready for prime time.  It's early days yet.
 here's what's working.
 
-  * The das2C error and log message system has been hooked into IDL via 
-    callabacks.
-
-  * Data can be downloaded via the das2c_readhttp() function
-	
-  * Stored query results can be inspected using the das2c_queries(),
-    das2c_datasets(), das2c_physdims(), das2c_vars(), das2c_dsprops(),
-	 das2c_dsinfo(), das2c_dimprops()
-
+  * Nothing.  This branch is in the middle of an API refactor.
+  
 ## Build and Config
 
 Building has been tested on CentOS 7 and KDE Neon.  Building on other systems
@@ -209,13 +202,13 @@ IDL> pd_freq = das2c_pdims(ds, 'frequency')
 IDL> das2c_vars(pd_freq)
 { 
    "QUERY": 1,
-	"DSET":  0,
-	"PDIM":  "frequency",
-	"VAR":   "center", 
-	"UNITS": "Hz"
-	"SHAPE": [-3, 152],
-	"TYPE":  "FLOAT",
-	"N_VALS": 152 
+   "DSET":  0,
+   "PDIM":  "frequency",
+   "VAR":   "center", 
+   "UNITS": "Hz"
+   "SHAPE": [-3, 152],
+   "TYPE":  "FLOAT",
+   "N_VALS": 152 
 },
 ```
 
@@ -242,7 +235,7 @@ IDL> ary = das2c_data(v_freq)
 
 The code above is not memory or time efficient.  Since the SHAPE field for the
 frequency centers has a degenerate flag in the first index.  We can spare 
-ourselfs alot of unnecessary memory usage if we just get a slice of frequencies
+ourselves alot of unnecessary memory usage if we just get a slice of frequencies
 for any valid first index.  The code below illustrates a slice operation:
 
 ```idl
@@ -262,10 +255,9 @@ all valid indices".  The fields in a slice structure are:
   * P - The eigth index
 
 Fields for indexes larger than the RANK of the dataset are ignored.  Currently
-only positive and negative intergers and the string '*' are undersood by the
+only positive and negative intergers and the string `'*'` are undersood by the
 `das2c_data` function.  So for example `-1` could have been used for the I value
-to indicate that the highest valid first index should be used, whatever that
-happens to be.
+to indicate that the highest valid first index, whatever that happened to be.
 
 ### Getting Metadata
 
@@ -309,3 +301,4 @@ IDL> das2c_props(pd_freq)
    {"KEY":"range",     "PTYPE":"DatumRange", "VALUE":"5 to 6000000 Hz"}
 ]
 ```
+
