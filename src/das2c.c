@@ -70,13 +70,13 @@ static IDL_MEMINT g_aShape7[2];
 static IDL_MEMINT g_aShape8[2];
 
 #include "das2c_queries.c"   /* exported functions */
-#include "das2c_datasets.c" 
+/*#include "das2c_datasets.c" 
 #include "das2c_dsinfo.c"
-#include "das2c_physdims.c"
+#include "das2c_pdims.c"
 #include "das2c_vars.c"
 #include "das2c_props.c"
-#include "das2c_array.c"
-/*#include "das2c_free.c"*/
+#include "das2c_data.c"
+#include "das2c_free.c" */
 #include "das2c_readhttp.c"
 
 /* ************************************************************************* */
@@ -108,11 +108,11 @@ int IDL_Load(void){
 			{(IDL_SYSRTN_GENERIC)das2c_api_queries},  "DAS2C_QUERIES",
 			D2C_QUERIES_MINA,  D2C_QUERIES_MAXA,  D2C_QUERIES_FLAG,  NULL
 		},		
-		{ 
+/*		{ 
 			{(IDL_SYSRTN_GENERIC)das2c_api_datasets}, "DAS2C_DATASETS",
 			D2C_DATASETS_MINA, D2C_DATASETS_MAXA, D2C_DATASETS_FLAG, NULL
 		},
-		{ 
+*/		{ 
 			{(IDL_SYSRTN_GENERIC)das2c_api_physdims}, "DAS2C_PDIMS",
 			D2C_PHYSDIMS_MINA, D2C_PDIMS_MAXA, D2C_PDIMS_FLAG, NULL
 		},

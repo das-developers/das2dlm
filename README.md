@@ -281,9 +281,11 @@ Given this interface, the following two lines of code are equivalent:
 IDL> ary = das2c_data(v_freq)
 IDL> ary = das2c_data(v_freq, {I:'*', J:'*'})
 ```
-The IDL [CREATE_STRUCT](https://www.harrisgeospatial.com/docs/create_struct.html)
-function can be used to generate slice structures while interating over SHAPE arrays,
-since CREATE_STRUCT can add fields to an existing structure.
+
+**Hint** Building slice structures in a loop can be accomplished using the IDL
+[CREATE_STRUCT](https://www.harrisgeospatial.com/docs/create_struct.html)
+function.  As you iterate over each element in SHAPE, use CREATE_STRUCT to add
+fields to a slice struture.
 
 ### Getting Metadata
 

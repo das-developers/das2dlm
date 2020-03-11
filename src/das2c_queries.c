@@ -18,8 +18,11 @@
  * version 2.1 along with libdas2; if not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Output structure definition */
-static IDL_STRUCT_TAG_DEF _das2c_result_tags[] = {
+/* ************************************************************************* */
+/* DAS2C_QUERY structure */
+
+/* IDL defininiton of DAS2C_QUERY */
+static IDL_STRUCT_TAG_DEF das2c_aQueryTags[] = {
 	{"QUERY",    0, (void*)IDL_TYP_LONG},
 
 	{"SERVER",   0, (void*)IDL_TYP_STRING},
@@ -34,27 +37,86 @@ static IDL_STRUCT_TAG_DEF _das2c_result_tags[] = {
 	{0}
 };
 
+/* Global struct definition pointer */
+static IDL_StructDefPtr das2c_pQueryDef;
+
+static void DAS2C_QUERY_def()
+{
+	das2c_pQueryDef = IDL_MakeStruct("DAS2C_QUERY", das2c_aQueryTags);
+}
+
+/* C structure to use in casts for manipulating IDL struct memory */
 typedef struct _das2c_result_sum{
 	IDL_LONG   query;
+	
 	IDL_STRING server;
 	IDL_STRING source;
 	IDL_STRING begin;
 	IDL_STRING end;
 	IDL_STRING res;
 	IDL_STRING extra;
+
 	IDL_LONG   n_dsets;
 	IDL_LONG64 n_vals;
-} das2c_ResultSummary;
+} das2c_QueryData;
 
-static IDL_StructDefPtr g_das2c_pResultDef;
 
-static void DAS2C_QUERY_def()
+/* Formating a query struct using an entry object pointer */
+static void das2c_ent2query(das2c_QueryData* pDest, const das2c_QueryDbEnt* pSrc)
 {
-	g_das2c_pResultDef = IDL_MakeStruct("DAS2C_QUERY", _das2c_result_tags);
+	pDest->query = pSrc->nQueryId;
+	pDest->n_dsets = (IDL_LONG) pSrc->uDs;
+			
+	/* TODO: Add path component */
+	if(pSrc->sHost) IDL_StrStore(&(pDest->server), pSrc->sHost);
+			
+	/* Loop over the params, pulling out ones of interest */
+	for(v = 0; v < pSrc->uParam; ++v){
+				
+		/* WARNING: Knowledge of das2 server interface used here
+		   may need updates for das2.3 compatability */
+		if(strcmp(pSrc->psKey[v], "dataset") == 0){
+			if(pSrc->psVal[v] != NULL) 
+				IDL_StrStore(&(pDest->source), pSrc->psVal[v]);
+		}
+		if(strcmp(pSrc->psKey[v], "start_time") == 0){
+			if(pSrc->psVal[v] != NULL) 
+				IDL_StrStore(&(pDest->begin), pSrc->psVal[v]);
+		}
+		if(strcmp(pSrc->psKey[v], "end_time") == 0){
+			if(pSrc->psVal[v] != NULL) 
+				IDL_StrStore(&(pDest->end), pSrc->psVal[v]);
+		}
+		if(strcmp(pSrc->psKey[v], "resolution") == 0){
+			if(pSrc->psVal[v] != NULL) 
+				IDL_StrStore(&(pDest->res), pSrc->psVal[v]);
+		}
+		if(strcmp(pSrc->psKey[v], "interval") == 0){
+			if(pSrc->psVal[v] != NULL) 
+				IDL_StrStore(&(pDest->res), pSrc->psVal[v]);
+		}
+		if(strcmp(pSrc->psKey[v], "params") == 0){
+			if(pSrc->psVal[v] != NULL) 
+				IDL_StrStore(&(pDest->extra), pSrc->psVal[v]);
+		}
+	}
+			
+	/* Now compute the total number of values in all arrays in
+	   in all datasets */
+	pDest->n_vals = 0;
+	for(d = 0; d < pSrc->uDs; ++d){
+		pDs = pSrc->lDs[d];
+		for(a = 0; a < pDs->uArrays; ++a){
+			pAry = pDs->lArrays[a];
+			pDest->n_vals += DasAry_size(pAry);
+		}
+	}	
 }
 
+
 /* ************************************************************************* */
-/* Downstream helpers for manditory query_id arg processing */
+/* Downstream helpers for query arg processing */
+
 static int das2c_args_query_id(int argc, IDL_VPTR* argv, int iArg)
 {
 	int iQueryId;
@@ -160,17 +222,12 @@ static IDL_VPTR das2c_api_queries(int argc, IDL_VPTR* argv)
 	if(nFound == 0) return IDL_GettmpNULL();
 		
 	IDL_MEMINT dims = nFound;
-	
 	IDL_VPTR pRet;
 	
-	/* Returns pRet->value.s.arr.data, if _das2c_queries_ret_s and
-	 * _das2c_queries_tags are correct */
-	das2c_ResultSummary* pData = (das2c_ResultSummary*) IDL_MakeTempStruct(
-		g_das2c_pResultDef,   /* The opaque structure definition */
-		1,      /* Number of dimesions */
-		&dims,  /* Size of each dimension, (only one dimension) */
-		&pRet,  /* The actual structure variable */
-		TRUE    /* Zero out the array */
+	/* Returns pRet->value.s.arr.data */
+	das2c_tQueryData* pData = (das2c_tQueryData*) IDL_MakeTempStruct(
+		das2c_pQueryDef, 1, /* ary dims */ &dims,  /* Sz of each dim */
+		&pRet,  /* Actual idl varabile */  TRUE    /* Zero out the array */
 	);
 	
 	/* Now fill in the values.  Pray that some other thread hasn't
@@ -185,59 +242,12 @@ static IDL_VPTR das2c_api_queries(int argc, IDL_VPTR* argv)
 	size_t a = 0;
 	for(u = 0; u < g_nLastQueryId && nFound < g_nDbStored; ++u){		
 		if(g_pDasIdlDb[u] == NULL) continue;
-		pEnt = g_pDasIdlDb[u];
-		
-		if((iQueryId == 0)||(pEnt->nQueryId == iQueryId)){
-			pData->query = pEnt->nQueryId;
-			
-			
-			pData->n_dsets = (IDL_LONG) pEnt->uDs;
-			
-			/* TODO: Add path component */
-			if(pEnt->sHost) IDL_StrStore(&(pData->server), pEnt->sHost);
-			
-			/* Loop over the params, pulling out ones of interest */
-			for(v = 0; v < pEnt->uParam; ++v){
+	
 				
-				/* WARNING: Knowledge of das2 server interface used here
-				            may need updates for das2.3 compatability */
-				if(strcmp(pEnt->psKey[v], "dataset") == 0){
-					if(pEnt->psVal[v] != NULL) 
-						IDL_StrStore(&(pData->source), pEnt->psVal[v]);
-				}
-				if(strcmp(pEnt->psKey[v], "start_time") == 0){
-					if(pEnt->psVal[v] != NULL) 
-						IDL_StrStore(&(pData->begin), pEnt->psVal[v]);
-				}
-				if(strcmp(pEnt->psKey[v], "end_time") == 0){
-					if(pEnt->psVal[v] != NULL) 
-						IDL_StrStore(&(pData->end), pEnt->psVal[v]);
-				}
-				if(strcmp(pEnt->psKey[v], "resolution") == 0){
-					if(pEnt->psVal[v] != NULL) 
-						IDL_StrStore(&(pData->res), pEnt->psVal[v]);
-				}
-				if(strcmp(pEnt->psKey[v], "interval") == 0){
-					if(pEnt->psVal[v] != NULL) 
-						IDL_StrStore(&(pData->res), pEnt->psVal[v]);
-				}
-				if(strcmp(pEnt->psKey[v], "params") == 0){
-					if(pEnt->psVal[v] != NULL) 
-						IDL_StrStore(&(pData->extra), pEnt->psVal[v]);
-				}
-			}
-			
-			/* Now compute the total number of values in all arrays in
-			   in all datasets */
-			pData->n_vals = 0;
-			for(d = 0; d < pEnt->uDs; ++d){
-				pDs = pEnt->lDs[d];
-				for(a = 0; a < pDs->uArrays; ++a){
-					pAry = pDs->lArrays[a];
-					pData->n_vals += DasAry_size(pAry);
-				}
-			}
-			
+		if((iQueryId == 0)||(pEnt->nQueryId == iQueryId)){
+			pEnt = g_pDasIdlDb[u];
+			das2c_ent2query(das2c_QueryData* pData, pEnt)		
+					
 			++pData;
 			++nFound;
 			if(iQueryId != 0) break;
