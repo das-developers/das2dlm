@@ -21,13 +21,13 @@
 /*
 ;+
 ; FUNCTION:
-;  das2c_physdims
+;  das2c_pdims
 ;
 ; PURPOSE:
 ;  List the physical dimensions represented in a das2 dataset.
 ;
 ; CALLING SEQUENCE:
-;  Result = das2c_physdims(query_id, ds_index, pdim)
+;  Result = das2c_pdims(query_id, ds_index, pdim)
 ;
 ; INPUTS:
 ;  query_id: The identification integer for the stored query result as
@@ -50,9 +50,14 @@
 ;  This function returns an array of structures providing an overview of
 ;  each stored result.  Output structures have the fields:
 ;
-;    'id':       Long    ; The ID number of this dataset, starts from 0
+;    'query':    Long    ; The query ID of this dataset, starts from 1
 ;
-;    'name':     String  ; The name of this physical dimension, ex: 'time'
+;    'dset':     Long    ; The ID number of this dataset, starts from 0
+;
+;    'pdim':     String  ; The name of this physical dimension, ex: 'time'
+;
+;    'use':      String  ; The intendend usage of values from this pdim,
+;                        ; will be one of two strings, 'COORD' or 'DATA'
 ;
 ;    'vars':     Long    ; The number of variables carring data values for this
 ;                        ; physical dimension.
@@ -64,13 +69,13 @@
 ; EXAMPLES:
 ;  List summary information on all physical dimensions for dataset 0 in
 ;  query result 27
-;    das2c_physdims(27, 0)
+;    das2c_pdims(27, 0)
 ;
 ;  List summary information on the time dimension in the same dataset.
-;    das2c_physdims(27, 0, 'time')
+;    das2c_pdims(27, 0, 'time')
 ;
 ;  List summary information on the dimension that happens to live at index 0.
-;    das2c_physdims(27, 0, 0)
+;    das2c_pdims(27, 0, 0)
 ;
 ; TODO:
 ;  Should this function return !NULL if a requested physical dimension dosen't
@@ -82,28 +87,34 @@
 */
 
 /* Output structure definition */
-static IDL_STRUCT_TAG_DEF _das2c_physdim_tags[] = {
-	{"ID",       0, (void*)IDL_TYP_LONG},
-	{"NAME",     0, (void*)IDL_TYP_STRING},
-	{"VARS",     0, (void*)IDL_TYP_LONG},
-	{"PROPS",    0, (void*)IDL_TYP_LONG},
-	{"SIZE",     0, (void*)IDL_TYP_LONG64},
+static IDL_STRUCT_TAG_DEF _das2c_pdim_tags[] = {
+	{"QUERY",    0, (void*)IDL_TYP_LONG},
+	{"DSET",     0, (void*)IDL_TYP_LONG},
+	{"PDIM",     0, (void*)IDL_TYP_STRING},
+
+	{"USE",      0, (void*)IDL_TYP_STRING},
+
+	{"N_VARS",   0, (void*)IDL_TYP_LONG},
+	{"N_PROPS",  0, (void*)IDL_TYP_LONG},
+	{"N_VALS",   0, (void*)IDL_TYP_LONG64},
 	{0}
 };	
 
 typedef struct _das2c_pdim_sum{
-	IDL_LONG   id;
-	IDL_STRING name;
-	IDL_LONG   vars;
-	IDL_LONG   props;
-	IDL_LONG64 size;
+	IDL_LONG   query;
+	IDL_LONG   dset;	
+	IDL_STRING pdim;
+	IDL_STRING use;
+	IDL_LONG   n_vars;
+	IDL_LONG   n_props;
+	IDL_LONG64 n_vals;
 } das2c_PdimSummary;
 
 static IDL_StructDefPtr g_das2c_pPdimSumDef;
 
-static void DAS2C_PHYSDIM_def()
+static void DAS2C_PDIM_def()
 {
-	g_das2c_pPdimSumDef = IDL_MakeStruct("DAS2C_PHYSDIM", _das2c_physdim_tags);
+	g_das2c_pPdimSumDef = IDL_MakeStruct("DAS2C_PDIM", _das2c_pdim_tags);
 }
 
 /* ************************************************************************* */
@@ -185,11 +196,11 @@ static const DasDim* das2c_check_dim_id(
 /* ************************************************************************* */
 /* API Function, careful with changes! */	
 
-#define D2C_PHYSDIMS_MINA 2
-#define D2C_PHYSDIMS_MAXA 3
-#define D2C_PHYSDIMS_FLAG 0
+#define D2C_PSDIMS_MINA 2
+#define D2C_PSDIMS_MAXA 3
+#define D2C_PSDIMS_FLAG 0
 
-static IDL_VPTR das2c_api_physdims(int argc, IDL_VPTR* argv)
+static IDL_VPTR das2c_api_pdims(int argc, IDL_VPTR* argv)
 {
 	/* Get/check Query ID */
 	int iQueryId = das2c_args_query_id(argc, argv, 0);
@@ -231,7 +242,7 @@ static IDL_VPTR das2c_api_physdims(int argc, IDL_VPTR* argv)
 	
 	for(size_t u = 0; u < pDs->uDims; ++u){
 		pIterDim = pDs->lDims[u];
-		if(pIterDim == NULL) das2c_IdlMsgExit("Logic error, das2c_physdims");
+		if(pIterDim == NULL) das2c_IdlMsgExit("Logic error, das2c_pdims");
 		
 		/* If we have a constant dim to report on and this ain't it, skip */
 		if((pTheDim != NULL)&&(pIterDim != pTheDim)) continue;

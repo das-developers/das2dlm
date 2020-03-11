@@ -23,149 +23,184 @@
 	can't access LIST() or MAP() so have to repeate var definitions for every
 	dataset size.  */
 static IDL_STRUCT_TAG_DEF _das2c_var_tags_1[] = {
-	{"ID",      NULL,     (void*)IDL_TYP_LONG},
-	{"NAME",    NULL,     (void*)IDL_TYP_STRING},
-	{"ROLE",    NULL,     (void*)IDL_TYP_STRING},
-	{"UNITS",   NULL,     (void*)IDL_TYP_STRING},
+   {"QUERY",   NULL,      (void*)IDL_TYP_LONG},    /* ID items */
+	{"DSET",    NULL,      (void*)IDL_TYP_LONG},
+	{"PDIM",    NULL,      (void*)IDL_TYP_STRING},
+	{"VAR",     NULL,      (void*)IDL_TYP_STRING},
+
+	{"UNITS",   NULL,      (void*)IDL_TYP_STRING},  /* info */
 	{"SHAPE",   g_aShape1, (void*)IDL_TYP_LONG64},
-	{"SIZE",    NULL,     (void*)IDL_TYP_LONG64},
+	{"TYPE",    NULL,      (void*)IDL_TYP_STRING},
+
+	{"N_VALS",  NULL,      (void*)IDL_TYP_LONG64},  /* contents */
 	{0}
 };
 static IDL_STRUCT_TAG_DEF _das2c_var_tags_2[] = {
-	{"ID",      NULL,     (void*)IDL_TYP_LONG},
-	{"NAME",    NULL,     (void*)IDL_TYP_STRING},
-	{"ROLE",    NULL,     (void*)IDL_TYP_STRING},
-	{"UNITS",   NULL,     (void*)IDL_TYP_STRING},
+   {"QUERY",   NULL,      (void*)IDL_TYP_LONG},
+	{"DSET",    NULL,      (void*)IDL_TYP_LONG},
+	{"PDIM",    NULL,      (void*)IDL_TYP_STRING},
+	{"VAR",     NULL,      (void*)IDL_TYP_STRING},
+	{"UNITS",   NULL,      (void*)IDL_TYP_STRING},
 	{"SHAPE",   g_aShape2, (void*)IDL_TYP_LONG64},
-	{"SIZE",    NULL,     (void*)IDL_TYP_LONG64},
+	{"TYPE",    NULL,      (void*)IDL_TYP_STRING},
+	{"N_VALS",  NULL,      (void*)IDL_TYP_LONG64},
 	{0}
 };
 static IDL_STRUCT_TAG_DEF _das2c_var_tags_3[] = {
-	{"ID",      NULL,     (void*)IDL_TYP_LONG},
-	{"NAME",    NULL,     (void*)IDL_TYP_STRING},
-	{"ROLE",    NULL,     (void*)IDL_TYP_STRING},
-	{"UNITS",   NULL,     (void*)IDL_TYP_STRING},
+   {"QUERY",   NULL,      (void*)IDL_TYP_LONG},
+	{"DSET",    NULL,      (void*)IDL_TYP_LONG},
+	{"PDIM",    NULL,      (void*)IDL_TYP_STRING},
+	{"VAR",     NULL,      (void*)IDL_TYP_STRING},
+	{"UNITS",   NULL,      (void*)IDL_TYP_STRING},
 	{"SHAPE",   g_aShape3, (void*)IDL_TYP_LONG64},
-	{"SIZE",    NULL,     (void*)IDL_TYP_LONG64},
+	{"TYPE",    NULL,      (void*)IDL_TYP_STRING},
+	{"N_VALS",  NULL,      (void*)IDL_TYP_LONG64},
 	{0}
 };
 static IDL_STRUCT_TAG_DEF _das2c_var_tags_4[] = {
-	{"ID",      NULL,     (void*)IDL_TYP_LONG},
-	{"NAME",    NULL,     (void*)IDL_TYP_STRING},
-	{"ROLE",    NULL,     (void*)IDL_TYP_STRING},
-	{"UNITS",   NULL,     (void*)IDL_TYP_STRING},
+   {"QUERY",   NULL,      (void*)IDL_TYP_LONG},
+	{"DSET",    NULL,      (void*)IDL_TYP_LONG},
+	{"PDIM",    NULL,      (void*)IDL_TYP_STRING},
+	{"VAR",     NULL,      (void*)IDL_TYP_STRING},
+	{"UNITS",   NULL,      (void*)IDL_TYP_STRING},
 	{"SHAPE",   g_aShape4, (void*)IDL_TYP_LONG64},
-	{"SIZE",    NULL,     (void*)IDL_TYP_LONG64},
+	{"TYPE",    NULL,      (void*)IDL_TYP_STRING},
+	{"N_VALS",  NULL,      (void*)IDL_TYP_LONG64},
 	{0}
 };
 static IDL_STRUCT_TAG_DEF _das2c_var_tags_5[] = {
-	{"ID",      NULL,     (void*)IDL_TYP_LONG},
-	{"NAME",    NULL,     (void*)IDL_TYP_STRING},
-	{"ROLE",    NULL,     (void*)IDL_TYP_STRING},
-	{"UNITS",   NULL,     (void*)IDL_TYP_STRING},
+   {"QUERY",   NULL,      (void*)IDL_TYP_LONG},
+	{"DSET",    NULL,      (void*)IDL_TYP_LONG},
+	{"PDIM",    NULL,      (void*)IDL_TYP_STRING},
+	{"VAR",     NULL,      (void*)IDL_TYP_STRING},
+	{"UNITS",   NULL,      (void*)IDL_TYP_STRING},
 	{"SHAPE",   g_aShape5, (void*)IDL_TYP_LONG64},
-	{"SIZE",    NULL,     (void*)IDL_TYP_LONG64},
+	{"TYPE",    NULL,      (void*)IDL_TYP_STRING},
+	{"N_VALS",  NULL,      (void*)IDL_TYP_LONG64},
 	{0}
 };
 static IDL_STRUCT_TAG_DEF _das2c_var_tags_6[] = {
-	{"ID",      NULL,     (void*)IDL_TYP_LONG},
-	{"NAME",    NULL,     (void*)IDL_TYP_STRING},
-	{"ROLE",    NULL,     (void*)IDL_TYP_STRING},
-	{"UNITS",   NULL,     (void*)IDL_TYP_STRING},
+   {"QUERY",   NULL,      (void*)IDL_TYP_LONG},
+	{"DSET",    NULL,      (void*)IDL_TYP_LONG},
+	{"PDIM",    NULL,      (void*)IDL_TYP_STRING},
+	{"VAR",     NULL,      (void*)IDL_TYP_STRING},
+	{"UNITS",   NULL,      (void*)IDL_TYP_STRING},
 	{"SHAPE",   g_aShape6, (void*)IDL_TYP_LONG64},
-	{"SIZE",    NULL,     (void*)IDL_TYP_LONG64},
+	{"TYPE",    NULL,      (void*)IDL_TYP_STRING},
+	{"N_VALS",  NULL,      (void*)IDL_TYP_LONG64},
 	{0}
 };
 static IDL_STRUCT_TAG_DEF _das2c_var_tags_7[] = {
-	{"ID",      NULL,     (void*)IDL_TYP_LONG},
-	{"NAME",    NULL,     (void*)IDL_TYP_STRING},
-	{"ROLE",    NULL,     (void*)IDL_TYP_STRING},
-	{"UNITS",   NULL,     (void*)IDL_TYP_STRING},
+   {"QUERY",   NULL,      (void*)IDL_TYP_LONG},
+	{"DSET",    NULL,      (void*)IDL_TYP_LONG},
+	{"PDIM",    NULL,      (void*)IDL_TYP_STRING},
+	{"VAR",     NULL,      (void*)IDL_TYP_STRING},
+	{"UNITS",   NULL,      (void*)IDL_TYP_STRING},
 	{"SHAPE",   g_aShape7, (void*)IDL_TYP_LONG64},
-	{"SIZE",    NULL,     (void*)IDL_TYP_LONG64},
+	{"TYPE",    NULL,      (void*)IDL_TYP_STRING},
+	{"N_VALS",  NULL,      (void*)IDL_TYP_LONG64},
 	{0}
 };
 static IDL_STRUCT_TAG_DEF _das2c_var_tags_8[] = {
-	{"ID",      NULL,     (void*)IDL_TYP_LONG},
-	{"NAME",    NULL,     (void*)IDL_TYP_STRING},
-	{"ROLE",    NULL,     (void*)IDL_TYP_STRING},
-	{"UNITS",   NULL,     (void*)IDL_TYP_STRING},
+   {"QUERY",   NULL,      (void*)IDL_TYP_LONG},
+	{"DSET",    NULL,      (void*)IDL_TYP_LONG},
+	{"PDIM",    NULL,      (void*)IDL_TYP_STRING},
+	{"VAR",     NULL,      (void*)IDL_TYP_STRING},
+	{"UNITS",   NULL,      (void*)IDL_TYP_STRING},
 	{"SHAPE",   g_aShape8, (void*)IDL_TYP_LONG64},
-	{"SIZE",    NULL,     (void*)IDL_TYP_LONG64},
+	{"TYPE",    NULL,      (void*)IDL_TYP_STRING},
+	{"N_VALS",  NULL,      (void*)IDL_TYP_LONG64},
 	{0}
 };
 
 typedef struct _das2c_var_sum_1{
-	IDL_LONG   id;
-	IDL_STRING name;
-	IDL_STRING role;
+	IDL_LONG   query;
+	IDL_LONG   dset;
+	IDL_STRING pdim;
+	IDL_STRING var;
 	IDL_STRING units;
 	IDL_LONG64 shape[1];
-	IDL_LONG64 size;
+	IDL_STRING type;
+	IDL_LONG64 n_vals;
 } das2c_VarSummary_1;
 
 typedef struct _das2c_var_sum_2{
-	IDL_LONG   id;
-	IDL_STRING name;
-	IDL_STRING role;
+	IDL_LONG   query;
+	IDL_LONG   dset;
+	IDL_STRING pdim;
+	IDL_STRING var;
 	IDL_STRING units;
 	IDL_LONG64 shape[2];
-	IDL_LONG64 size;
+	IDL_STRING type;
+	IDL_LONG64 n_vals;
 } das2c_VarSummary_2;
 
 typedef struct _das2c_var_sum_3{
-	IDL_LONG   id;
-	IDL_STRING name;
-	IDL_STRING role;
+	IDL_LONG   query;
+	IDL_LONG   dset;
+	IDL_STRING pdim;
+	IDL_STRING var;
 	IDL_STRING units;
 	IDL_LONG64 shape[3];
-	IDL_LONG64 size;
+	IDL_STRING type;
+	IDL_LONG64 n_vals;
 } das2c_VarSummary_3;
 
 typedef struct _das2c_var_sum_4{
-	IDL_LONG   id;
-	IDL_STRING name;
-	IDL_STRING role;
+	IDL_LONG   query;
+	IDL_LONG   dset;
+	IDL_STRING pdim;
+	IDL_STRING var;
 	IDL_STRING units;
 	IDL_LONG64 shape[4];
-	IDL_LONG64 size;
+	IDL_STRING type;
+	IDL_LONG64 n_vals;
 } das2c_VarSummary_4;
 
 typedef struct _das2c_var_sum_5{
-	IDL_LONG   id;
-	IDL_STRING name;
-	IDL_STRING role;
+	IDL_LONG   query;
+	IDL_LONG   dset;
+	IDL_STRING pdim;
+	IDL_STRING var;
 	IDL_STRING units;
 	IDL_LONG64 shape[5];
-	IDL_LONG64 size;
+	IDL_STRING type;
+	IDL_LONG64 n_vals;
 } das2c_VarSummary_5;
 
 typedef struct _das2c_var_sum_6{
-	IDL_LONG   id;
-	IDL_STRING name;
-	IDL_STRING role;
+	IDL_LONG   query;
+	IDL_LONG   dset;
+	IDL_STRING pdim;
+	IDL_STRING var;
 	IDL_STRING units;
 	IDL_LONG64 shape[6];
-	IDL_LONG64 size;
+	IDL_STRING type;
+	IDL_LONG64 n_vals;
 } das2c_VarSummary_6;
 
 typedef struct _das2c_var_sum_7{
-	IDL_LONG   id;
-	IDL_STRING name;
-	IDL_STRING role;
+	IDL_LONG   query;
+	IDL_LONG   dset;
+	IDL_STRING pdim;
+	IDL_STRING var;
 	IDL_STRING units;
 	IDL_LONG64 shape[7];
-	IDL_LONG64 size;
+	IDL_STRING type;
+	IDL_LONG64 n_vals;
 } das2c_VarSummary_7;
 
 typedef struct _das2c_var_sum_8{
-	IDL_LONG   id;
-	IDL_STRING name;
-	IDL_STRING role;
+	IDL_LONG   query;
+	IDL_LONG   dset;
+	IDL_STRING pdim;
+	IDL_STRING var;
 	IDL_STRING units;
 	IDL_LONG64 shape[8];
-	IDL_LONG64 size;
+	IDL_STRING type;
+	IDL_LONG64 n_vals;
 } das2c_VarSummary_8;
+
 
 static IDL_StructDefPtr g_das2c_pVarSumDef_1;
 static IDL_StructDefPtr g_das2c_pVarSumDef_2;

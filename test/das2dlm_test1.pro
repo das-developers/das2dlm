@@ -1,89 +1,34 @@
 sUrl = 'http://planet.physics.uiowa.edu/das/das2Server?server=dataset' + $
 '&dataset=Galileo/PWS/Survey_Electric&start_time=2001-001&end_time=2001-002'
 
+; good tests, not testing failure modes
+query = das2c_readhttp(sUrl)
+ds = das2c_datasets(query, 0)
+das2c_info(ds)
 
-; Bad call, test error handling
-;das2c_readhttp("ardvark:/ /d oggy\t. cat ?\n\n\n = == ")
+pd_time = das2c_pdims(ds, 'time')
+pd_freq = das2c_pdims(ds, 'frequecy')
+pd_amp  = das2c_pdims(ds, 'electric')
 
-; now a good call
-print, 'nId = das2c_readhttp(sUrl)'
-nId = das2c_readhttp(sUrl)
+v_time  = das2c_vars(pd_time, 'center')
+v_freq  = das2c_vars(pd_freq, 'center')
+v_amp   = das2c_vars(pd_amp,  'center')
 
-;das2c_queries(17)           ; Bad calls, test error handling
-;das2c_queries("doggy");
-
-print, 'das2c_queries()'    ; Good call, test both versions'
-das2c_queries()         
-
-print, 'das2c_queries(nId) '
-das2c_queries(nId) 
-
-;das2c_dsinfo()              ; Bad calls, test error handling
-;das2c_dsinfo(nId)  
-;das2c_dsinfo(13, 12) 
-
-print, 'das2c_dsinfo(nId, 0)' ; Good call
-das2c_dsinfo(nId, 0)      
-
-;das2c_datasets()            ; Bad calls, test error handling
-;das2c_datasets('kitty', 78)
-;das2c_datasets(0, 'wattie')
-
-print, 'das2c_datasets(nId)'  ; Good calls, test both versions
-das2c_datasets(nId)
+aTimes  = das2c_data(v_time, {i:0,   j:'*'} )
+aFreqs  = das2c_data(v_freq, {i:'*', j:0  } )
+aAmp    = das2c_data(v_amp)
 
 
-print, 'das2c_datasets(nId, 0)'
-t = das2c_datasets(nId, 0)
-t.shape[8-t.rank:-1]          ; Trim shape
-
-print, 'das2c_physdims(nId, 0)'  ; Good calls, test both versions
-das2c_physdims(nId, 0)      
-
-print, 'das2c_physdims(nId, 0, ''electric'')'
-das2c_physdims(nId, 0, 'electric')
-
-print, 'das2c_vars(nId, 0, ''time'')'
-das2c_vars(nId, 0, 'time')
-
-print, 'das2c_vars(nId, 0, ''time'', ''center'')'
-das2c_vars(nId, 0, 'time', 'center')
-das2c_vars(nId, 0, 'frequency', 'center')
-das2c_vars(nId, 0, 'electric', 'center')
-
-print, 'das2c_dsprops(nId, 0)'
-das2c_dsprops(nId, 0)
-
-print, 'das2c_dimprops(nId, 0, ''time'')'
-das2c_dimprops(nId, 0, 'time')
-
-print, 'das2c_dimprops(nId, 0, ''frequency'')'
-das2c_dimprops(nId, 0, 'frequency')
-
-print, 'das2c_dimprops(nId, 0, ''electric'')'
-das2c_dimprops(nId, 0, 'electric')
-
-; Get the unique set of time values
-vTime = das2c_vars(nId, 0, 'time','center')
-
-vFreq = das2c_vars(nId, 0, 'frequency','center')
+s_title  = das2c_props(ds, 'title')
+s_x_lbl  = das2c_props(pd_time, 'label')
+s_y_lbl  = das2c_props(pd_freq, 'label')
+s_z_lbl  = das2c_props(pd_amp,  'label')
 
 exit
 
-das2c_data(nId, 0, 'time', 'center')
-das2c_array(nId, 0, 'time',     'center',  0, '*')
+; Next interation, for waveforms
+v_start  = das2c_vars(pd_time, 'reference')
+v_offest = das2c_vars(pd_time, 'offset')
+v_time   = das2c_mk_var(pd_time, 'reference', '+', 'offset')
 
-; Get a ds sized array.
-das2c_array(nId, 0, 'frequency', 'center')
-
-; Get a partial array.
-das2c_array(nId, 0, 'electric', 'center', 
-
-das2c_array(nId, 0, 'electric', 'center', '*', 234)
-
-; Get all the frequency values for the 0th time
-das2c_array(nId, 0, 'frequency', 'center', '*', 0)
-
-das2c_array(nId, 0, 'time', 'center', )
-
-
+aTimes   = das2c_data(v_time)

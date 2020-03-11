@@ -98,8 +98,8 @@ int IDL_Load(void){
 
 	/* Define our structures */
 	DAS2C_QUERY_def();
-	DAS2C_DATASET_def();
-	DAS2C_PHYSDIM_def();
+	DAS2C_DSET_def();
+	DAS2C_PDIM_def();
 	DAS2C_VAR_def();
 	DAS2C_PROP_def();
 		
@@ -113,28 +113,24 @@ int IDL_Load(void){
 			D2C_DATASETS_MINA, D2C_DATASETS_MAXA, D2C_DATASETS_FLAG, NULL
 		},
 		{ 
-			{(IDL_SYSRTN_GENERIC)das2c_api_dsinfo},   "DAS2C_DSINFO",
-		   D2C_DSINFO_MINA,   D2C_DSINFO_MAXA,   D2C_DSINFO_FLAG,   NULL
-		},		
-		{ 
-			{(IDL_SYSRTN_GENERIC)das2c_api_physdims}, "DAS2C_PHYSDIMS",
-			D2C_PHYSDIMS_MINA, D2C_PHYSDIMS_MAXA, D2C_PHYSDIMS_FLAG, NULL
+			{(IDL_SYSRTN_GENERIC)das2c_api_physdims}, "DAS2C_PDIMS",
+			D2C_PHYSDIMS_MINA, D2C_PDIMS_MAXA, D2C_PDIMS_FLAG, NULL
 		},
 		{ 
 			{(IDL_SYSRTN_GENERIC)das2c_api_vars},     "DAS2C_VARS",
 			D2C_VARS_MINA,     D2C_VARS_MAXA,     D2C_VARS_FLAG,     NULL
 		},
 		{ 
-			{(IDL_SYSRTN_GENERIC)das2c_api_dsprops},  "DAS2C_DSPROPS",
-			D2C_DSPROPS_MINA,  D2C_DSPROPS_MAXA,  D2C_DSPROPS_FLAG,  NULL
+			{(IDL_SYSRTN_GENERIC)das2c_api_dsprops},  "DAS2C_PROPS",
+			D2C_DSPROPS_MINA,  D2C_PROPS_MAXA,  D2C_PROPS_FLAG,  NULL
 		},
 		{ 
-			{(IDL_SYSRTN_GENERIC)das2c_api_dimprops}, "DAS2C_DIMPROPS",
-			D2C_DIMPROPS_MINA, D2C_DIMPROPS_MAXA, D2C_DIMPROPS_FLAG, NULL
-		},
+			{(IDL_SYSRTN_GENERIC)das2c_api_dsinfo},   "DAS2C_INFO",
+		   D2C_DSINFO_MINA,   D2C_INFO_MAXA,   D2C_INFO_FLAG,   NULL
+		},		
 		{
-			{(IDL_SYSRTN_GENERIC)das2c_api_array},    "DAS2C_ARRAY",
-			D2C_ARRAY_MINA,    D2C_ARRAY_MAXA,    D2C_ARRAY_FLAG,    NULL
+			{(IDL_SYSRTN_GENERIC)das2c_api_data},    "DAS2C_DATA",
+			D2C_DATA_MINA,     D2C_DATA_MAXA,    D2C_DATA_FLAG,    NULL
 		},
 /*		{
 			{(IDL_SYSRTN_GENERIC)das2c_api_free},     "DAS2C_FREE",

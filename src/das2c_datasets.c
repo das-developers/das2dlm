@@ -21,31 +21,35 @@
 		
 /* Output structure definitions.*/
 static IDL_STRUCT_TAG_DEF _das2c_dataset_tags[] = {
-	{"ID",       NULL,      (void*)IDL_TYP_LONG},
+   {"QUERY",    NULL,      (void*)IDL_TYP_LONG},
+	{"DSET",     NULL,      (void*)IDL_TYP_LONG},
+
 	{"NAME",     NULL,      (void*)IDL_TYP_STRING},
-	{"PHYSDIMS", NULL,      (void*)IDL_TYP_LONG},
-	{"PROPS",    NULL,      (void*)IDL_TYP_LONG},
 	{"RANK",     NULL,      (void*)IDL_TYP_LONG},
 	{"SHAPE",    g_aShape8, (void*)IDL_TYP_LONG64},
-	{"SIZE",     NULL,      (void*)IDL_TYP_LONG64},
+
+	{"N_PDIMS",  NULL,      (void*)IDL_TYP_LONG},
+	{"N_PROPS",  NULL,      (void*)IDL_TYP_LONG},
+	{"N_VALS",   NULL,      (void*)IDL_TYP_LONG64},
 	{0}
 };
 
 typedef struct _das2c_ds_sum{
-	IDL_LONG   id;
+	IDL_LONG   query;
+	IDL_LONG   dset;
 	IDL_STRING name;
-	IDL_LONG   physdims;
-	IDL_LONG   props;
 	IDL_LONG   rank;
 	IDL_LONG64 shape[8];
-	IDL_LONG64 size;
+	IDL_LONG   n_pdims;
+	IDL_LONG   n_props;
+	IDL_LONG64 n_vals;
 } das2c_DsSummary;
 
 static IDL_StructDefPtr g_das2c_pDsSumDef;
 
 static void DAS2C_DATASET_def()
 {
-	g_das2c_pDsSumDef = IDL_MakeStruct("DAS2C_DATASET", _das2c_dataset_tags);
+	g_das2c_pDsSumDef = IDL_MakeStruct("DAS2C_DSET", _das2c_dataset_tags);
 }
 
 /* ************************************************************************* */
@@ -78,27 +82,27 @@ static const DasDs* das2c_check_ds_id(const DasIdlDbEnt* pEnt, int iDs)
 			);
 	}
 	const DasDs* pDs = pEnt->lDs[iDs];
-	if(pDs == NULL) das2c_IdlMsgExit("Logic error, das2c_datasets.c");
+	if(pDs == NULL) das2c_IdlMsgExit("Logic error, das2c_dsets.c");
 	return pDs;
 }
 
 /* ************************************************************************* */
 /* API Function, careful with changes! */
 
-#define D2C_DATASETS_MINA 1
-#define D2C_DATASETS_MAXA 2
-#define D2C_DATASETS_FLAG 0
+#define D2C_DSETS_MINA 1
+#define D2C_DSETS_MAXA 2
+#define D2C_DSETS_FLAG 0
 
 /*
 ;+
 ; FUNCTION:
-;  das2c_datasets
+;  das2c_dsets
 ;
 ; PURPOSE:
 ;  List stored datasets in a das2 query result
 ;
 ; CALLING SEQUENCE:
-;  Result = das2c_datasets(query_id, ds_index)
+;  Result = das2c_dsets(query_id, ds_index)
 ;
 ; INPUTS:
 ;  query_id: The identification integer for the stored query result as
@@ -114,7 +118,10 @@ static const DasDs* das2c_check_ds_id(const DasIdlDbEnt* pEnt, int iDs)
 ;  This function returns an array of structures providing an overview of
 ;  each stored result.  Output structures have the fields:
 ;
-;    'id':       Long     ; The ID number of this dataset, starts from 0
+;    'query':    Long     ; The ID number of the query that producted this
+;                         ; dataest, starts from 1
+;
+;    'dset':     Long     ; The ID number of this dataset, starts from 0
 ;
 ;    'name':     String   ; The name of this dataset, dataset names are not
 ;                         ; usually unique.  This limits thier utility.
