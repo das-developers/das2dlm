@@ -259,9 +259,9 @@ only positive and negative intergers and the string `'*'` are undersood by the
 `das2c_data` function.  So for example `-1` could have been used for the I value
 to indicate that the highest valid first index, whatever that happened to be.
 
-Usage of the IDL [CREATE_STRUCT](https://www.harrisgeospatial.com/docs/create_struct.html)
-command can be used to interate over SHAPE fields and generate efficient slice
-structures.
+The IDL [CREATE_STRUCT](https://www.harrisgeospatial.com/docs/create_struct.html)
+function can be used to generate slice structures while interating over SHAPE arrays,
+since CREATE_STRUCT can all fields to an existing structure.
 
 ### Getting Metadata
 
