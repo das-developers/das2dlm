@@ -102,11 +102,11 @@ static const DasDs* das2c_check_ds_id(const DasIdlDbEnt* pEnt, int iDs)
 ;  List stored datasets in a das2 query result
 ;
 ; CALLING SEQUENCE:
-;  Result = das2c_dsets(query_id, ds_index)
+;  Result = das2c_dsets(query)
+;  Result = das2c_dsets(query, ds_index)
 ;
 ; INPUTS:
-;  query_id: The identification integer for the stored query result as
-;            returned by das2c_readhttp() or das2c_queries.
+;  query: A query structure as returned by das2c_readhttp() or das2c_queries()
 ;
 ; OPTIONAL INPUTS:
 ;  ds_index: The dataset index. Only required if information about a single
@@ -118,43 +118,46 @@ static const DasDs* das2c_check_ds_id(const DasIdlDbEnt* pEnt, int iDs)
 ;  This function returns an array of structures providing an overview of
 ;  each stored result.  Output structures have the fields:
 ;
-;    'query':    Long     ; The ID number of the query that producted this
-;                         ; dataest, starts from 1
+;    QUERY:    Long     ; The ID number of the query that producted this
+;                       ; dataest, starts from 1
 ;
-;    'dset':     Long     ; The ID number of this dataset, starts from 0
+;    DSET:     Long     ; The ID number of this dataset, starts from 0
 ;
-;    'name':     String   ; The name of this dataset, dataset names are not
-;                         ; usually unique.  This limits thier utility.
+;    NAME:     String   ; The name of this dataset, dataset names are not
+;                       ; usually unique.  This limits thier utility.
 ;
-;    'physdims': Long     ; The number of physical dimensions in the dataset
+;    RANK:     Long     ; The number of entries in 'shape' that matter.  
+;                       ; Since IDL uses a 'first index fastest' memory layout
+;                       ; only the last 'rank' values of 'shape' actually
+;                       ; matter.
 ;
-;    'props':    Long     ; The number of metadata properties in the dataset
+;    SHAPE:    8 Long64 ; The extents of this dataset in the full IDL index
+;                       ; space.  
+;                       ;
+;                       ; Ideally this array would be of length 'rank', 
+;                       ; however due to limitations on DLMs, this array is
+;                       ; always 8 elements long. An example of trimming
+;                       ; the shape array is provided in EXAMPLES below.
 ;
-;    'rank':     Long     ; The number of entries in 'shape' that matter.  
-;                         ; Since IDL uses a 'first index fastest' memory layout
-;                         ; only the last 'rank' values of 'shape' actually
-;                         ; matter.
+;    N_PDIMS:  Long     ; The number of physical dimensions in the dataset
 ;
-;    'shape':    8 Long64 ; The extents of this dataset in the full IDL index
-;                         ; space.  
-;                         ;
-;                         ; Ideally this array would be of length 'rank', 
-;                         ; however due to limitations on DLMs, this array is
-;                         ; always 8 elements long. An example of trimming
-;                         ; the shape array is provided in EXAMPLES below.
+;    N_PROPS:  Long     ; The number of metadata properties in the dataset
 ;
-;    'size':     Long64   ; The total number of values in the dataset may be
-;                         ; less that nth  
+;    N_VALS:   Long64   ; The total number of actual data values in the
+;                       ; dataset.  Due to virtual variables this may be less
+;                       ; sum of the shapes of all variables.
 ;
 ; EXAMPLES:
-;  List summary information on all datasets from a query with ID 27
-;    das2c_datasets(27)
+;  Get an array of dataset strutures for datasets in a HTTP GET query.
+;    query = das2c_readhttp(url_string)
+;    ds_arr = das2c_datasets(query)
 ;
-;  List summary information on the first dataset from query ID 27
-;    das2c_queries(27, 0);
+;  Get the first dataset struture for query ID 27.
+;    query = das2c_queries(27)
+;    ds = das2c_datasets(query, 0);
 ;
 ;  Trim the shape array down to the actual rank of the dataset.
-;    ds = das2c_queries(27, 0);
+;    ds = das2c_datesets(query, 0);
 ;    shape = ds.shape[8 - ds.rank : -1 ]
 ;
 ; MODIFICATION HISTORY:
@@ -163,7 +166,6 @@ static const DasDs* das2c_check_ds_id(const DasIdlDbEnt* pEnt, int iDs)
 */
 static IDL_VPTR das2c_api_datasets(int argc, IDL_VPTR* argv)
 {
-	
 	/* Get/check Query ID */
 	int iQueryId = das2c_args_query_id(argc, argv, 0);
 	const DasIdlDbEnt* pEnt = das2c_check_query_id(iQueryId);

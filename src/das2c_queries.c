@@ -177,6 +177,7 @@ static const QueryDbEnt* das2c_query_arg_to_ent(int argc, IDL_VPTR* argv, int iA
 ;  List stored das2 query results
 ;
 ; CALLING SEQUENCE:
+;  Result = das2c_queries()
 ;  Result = das2c_queries(query_id)
 ;
 ; OPTIONAL INPUTS:
@@ -187,25 +188,35 @@ static const QueryDbEnt* das2c_query_arg_to_ent(int argc, IDL_VPTR* argv, int iA
 ;  This function returns an array of structures providing an overview of
 ;  each stored result.  Output structures have the fields:
 ;
-;    'query':    Long    ; A unique ID for this query result
-;    'n_dsets':  Long    ; The number of datasets returned
-;    'n_vals':   Long64  ; The total number of values in the query result		
-;    'server':   String  ; The network URL from which data were loaded
-;    'source':   String  ; The data source ID string on the server, if known
-;    'begin':    String  ; The min time value
-;    'end':      String  ; the max time value
-;    'res':      String  ; The resolution requested if any
-;    'extra':    String  ; Any extra arguments sent to the server
+;    QUERY:    Long     ; The ID number of the query that producted this
+;                       ; dataest, starts from 1
+;
+;    N_DSETS:  Long     ; The number of datasets returned by the query
+;
+;    N_VALS:   Long64   ; The total number of actual data values in the
+;                       ; dataset.  Due to virtual variables this may be less
+;                       ; sum of the shapes of all variables.
+;
+; ADDITIONAL OUTPUT:
+;  If the query was to a das2 server the following structure memebers 
+;  will also be present:
+;
+;    SERVER:   String   ; The network URL from which data were loaded
+;    SOURCE:   String   ; The data source ID string on the server, if known
+;    BEGIN:    String   ; The min time value
+;    END:      String   ; the max time value
+;    RES:      String   ; The resolution requested if any
+;    EXTRA:    String   ; Any extra arguments sent to the server
 ;
 ; EXAMPLES:
 ;  List summary information on all stored results
 ;    das2c_queries()
 ;
-;  List summary information on a single stored result
+;  List summary information given a single stored result ID.
 ;    das2c_queries(23);
 ;
 ; MODIFICATION HISTORY:
-;  Written by: Chris Piker, 2020-03-01
+;  Written by: Chris Piker, 2020-03-11
 ;-
 */
 static IDL_VPTR das2c_api_queries(int argc, IDL_VPTR* argv)
