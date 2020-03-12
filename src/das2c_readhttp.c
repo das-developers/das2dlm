@@ -149,24 +149,22 @@ static IDL_VPTR das2c_api_readhttp(int argc, IDL_VPTR* argv)
 	DasDsBldr_release(pBldr); /* Detach datasets from builder */
 	del_DasIO(pIn);           /* No longer need the IO object */
 	
-	DasIdlDbEnt* pEnt = das2c_db_addHttpEnt(&res, lDs, uDs);
+	const QueryDbEnt* pEnt = das2c_db_addHttpEnt(&res, lDs, uDs);
 	DasHttpResp_clear(&res);
 	
 	/* addHttpEnt cleans up any memory on an error */
 	
 	if(pEnt == NULL)
-		return IDL_Gettmpnull();
+		return IDL_GettmpNULL();
 	
 	IDL_VPTR pRet;
 	IDL_MEMINT dims = 1;
-	das2c_tQueryData* pData = (das2c_tQueryData*) IDL_MakeTempStruct(
-		das2c_pQueryDef, 1, /* ary dims */ &dims,  /* Sz of each dim */
+	DAS2C_QUERY_data* pData = (DAS2C_QUERY_data*) IDL_MakeTempStruct(
+		DAS2C_QUERY_pdef, 1, /* ary dims */ &dims,  /* Sz of each dim */
 		&pRet,  /* Actual idl varabile */  TRUE    /* Zero out the array */
 	);
 	
-	if(!das2c_ent2query(pData, pEnt))
-		das2c_IdlMsgExit("HTTP GET URL string not provided");
-	
+	das2c_ent2query(pData, pEnt); /* only 1 value in the output struct array */
 	
 	return pRet;
 }

@@ -1,8 +1,11 @@
 sUrl = 'http://planet.physics.uiowa.edu/das/das2Server?server=dataset' + $
 '&dataset=Galileo/PWS/Survey_Electric&start_time=2001-001&end_time=2001-002'
 
-; good tests, not testing failure modes
+; good tests, not testing failure modes at this time
 query = das2c_readhttp(sUrl)
+print, query
+exit
+
 ds = das2c_datasets(query, 0)
 das2c_info(ds)
 

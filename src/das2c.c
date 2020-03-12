@@ -97,11 +97,11 @@ int IDL_Load(void){
 	g_aShape8[0] = 1;  g_aShape8[1] = 8;
 
 	/* Define our structures */
-	DAS2C_QUERY_def();
-	DAS2C_DSET_def();
-	DAS2C_PDIM_def();
-	DAS2C_VAR_def();
-	DAS2C_PROP_def();
+	define_DAS2C_QUERY();
+	/*define_DAS2C_DSET();
+	define_DAS2C_PDIM();
+	define_DAS2C_VAR();
+	define_DAS2C_PROP(); */
 		
  	static IDL_SYSFUN_DEF2 function_addr[] = {
 		{ 
@@ -112,7 +112,7 @@ int IDL_Load(void){
 			{(IDL_SYSRTN_GENERIC)das2c_api_datasets}, "DAS2C_DATASETS",
 			D2C_DATASETS_MINA, D2C_DATASETS_MAXA, D2C_DATASETS_FLAG, NULL
 		},
-*/		{ 
+		{ 
 			{(IDL_SYSRTN_GENERIC)das2c_api_physdims}, "DAS2C_PDIMS",
 			D2C_PHYSDIMS_MINA, D2C_PDIMS_MAXA, D2C_PDIMS_FLAG, NULL
 		},
@@ -132,11 +132,11 @@ int IDL_Load(void){
 			{(IDL_SYSRTN_GENERIC)das2c_api_data},    "DAS2C_DATA",
 			D2C_DATA_MINA,     D2C_DATA_MAXA,    D2C_DATA_FLAG,    NULL
 		},
-/*		{
+		{
 			{(IDL_SYSRTN_GENERIC)das2c_api_free},     "DAS2C_FREE",
 			D2C_FREE_MINA,     D2C_FREE_MAXA,     D2C_FREE_FLAG,     NULL
-		},*/
-		/* The "get data" functions, only one for now */
+		},
+*/		/* The "get data" functions, only one for now */
 		{
 			{(IDL_SYSRTN_GENERIC)das2c_api_readhttp}, "DAS2C_READHTTP",
 			D2C_READHTTP_MINA, D2C_READHTTP_MAXA, D2C_READHTTP_FLAG, NULL
