@@ -1,5 +1,5 @@
 # das2dlm (in development)
-Das2dlm is an IDL (Interactive Data Language) DLM (Downloadable Module) that
+Das2dlm is an IDL (Interactive Data Language) DLM (Dynamically Loadable Module) that
 provides system routines bindings for the [das2C](https://github.com/das-developers/das2C)
 library.
 
