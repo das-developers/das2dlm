@@ -349,8 +349,7 @@ bool das2c_db_getPath(const QueryDbEnt* pEnt, char* sBuf, size_t uSz)
 	
 	if(pEnt->sPath != NULL){
 		uLen = strlen(pEnt->sPath);
-		if((uWrote + uLen + 1) < uSz){
-			sBuf[uWrote] = '/'; ++uWrote;
+		if((uWrote + uLen) < uSz){
 			strncpy(sBuf + uWrote, pEnt->sPath, uLen);
 			/* uWrote += uLen; */
 		}
