@@ -70,7 +70,7 @@ static IDL_MEMINT g_aShape7[2];
 static IDL_MEMINT g_aShape8[2];
 
 #include "das2c_queries.c"   /* exported functions */
-/*#include "das2c_datasets.c" 
+/*#include "das2c_datasets.c"  
 #include "das2c_dsinfo.c"
 #include "das2c_pdims.c"
 #include "das2c_vars.c"
@@ -98,7 +98,7 @@ int IDL_Load(void){
 
 	/* Define our structures */
 	define_DAS2C_QUERY();
-	/*define_DAS2C_DSET();
+/*	define_DAS2C_DSET();
 	define_DAS2C_PDIM();
 	define_DAS2C_VAR();
 	define_DAS2C_PROP(); */

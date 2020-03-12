@@ -105,8 +105,8 @@ static IDL_VPTR das2c_api_readhttp(int argc, IDL_VPTR* argv)
 			sError, 1023, "%d, Could not get body for URL, reason: %s", 
 			res.nCode, res.sError
 		);
-		IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, sError);
 		DasHttpResp_clear(&res);
+		IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, sError);
 	}
 	
 	char sUrl[512] = {'\0'};
@@ -164,7 +164,8 @@ static IDL_VPTR das2c_api_readhttp(int argc, IDL_VPTR* argv)
 		&pRet,  /* Actual idl varabile */  TRUE    /* Zero out the array */
 	);
 	
-	das2c_ent2query(pData, pEnt); /* only 1 value in the output struct array */
-	
+	if(! das2c_ent2query(pData, pEnt)) /* only 1 value in the output struct array */
+		das2c_IdlMsgExit("Logic error in das2c_ent2query()");
+			
 	return pRet;
 }

@@ -30,6 +30,7 @@
 */
 
 #define D2C_ENT_HTTP_QUERY 0xA
+#define D2C_ENT_HTTPS_QUERY 0xB
 
 /* ************************************************************************* */
 /* DB entry "class" */
@@ -42,7 +43,7 @@ typedef struct query_db_ent{
 	/* Query info */
 	time_t  nTime;  /* The time at which the query was performed, seconds since
 	                 * 1970 (unix epoch) */
-	int     nType;  /* The query type, only HTTP (nType=0xA) allowed right now */
+	int     nType;  /* The query type, only HTTP & HTTPS allowed right now */
 	char*   sHost;  /* The host that was queried */
 	char*   sPort;  /* The port that was queried */	
 	char*   sPath;  /* The path that was queried */
@@ -225,7 +226,8 @@ static QueryDbEnt* das2c_db_addHttpEnt(
 	pEnt->lDs = lDs;
 	pEnt->uDs = uDs;
 	pEnt->nTime = time(NULL);
-	pEnt->nType = D2C_ENT_HTTP_QUERY;
+	if(strcmp(pRes->url.sScheme, "https") == 0) pEnt->nType = D2C_ENT_HTTPS_QUERY;
+	else pEnt->nType = D2C_ENT_HTTP_QUERY;
 	pEnt->sHost = das_strdup(pRes->url.sHost);
 	pEnt->sPort = das_strdup(pRes->url.sPort);
 	pEnt->sPath = das_strdup(pRes->url.sPath);
@@ -302,5 +304,60 @@ static QueryDbEnt* das2c_db_addHttpEnt(
 	
 	return pEnt;	
 }
+
+/* ************************************************************************* */
+
+bool das2c_db_getPath(const QueryDbEnt* pEnt, char* sBuf, size_t uSz)
+{
+	size_t uLen = 0;
+	size_t uWrote = 0;
+	bool bAddPort = false;
+	
+	memset(sBuf, 0, uSz);
+	
+	switch(pEnt->nType){
+	case D2C_ENT_HTTP_QUERY:  strncpy(sBuf, "http://", 7);   uWrote = 7; break;
+	case D2C_ENT_HTTPS_QUERY:  strncpy(sBuf, "https://", 8); uWrote = 8; break;
+	default:
+		daslog_error_v("Unknown query type 0x%X", pEnt->nType);
+		return false;
+	}
+
+	uLen = strlen(pEnt->sHost);
+	if(pEnt->sHost && ((uWrote + uLen) < uSz) ){
+		strncpy(sBuf + uWrote, pEnt->sHost, uLen);
+		uWrote += uLen;
+	}
+	
+	if(pEnt->sPort != NULL){
+		if(pEnt->nType == D2C_ENT_HTTP_QUERY){
+			bAddPort = (strcmp(pEnt->sPort, "80") != 0);
+		}
+		else{
+			if(pEnt->nType == D2C_ENT_HTTP_QUERY)
+				bAddPort = (strcmp(pEnt->sPort, "443") != 0);
+		}
+	}
+	if(bAddPort){
+		uLen = strlen(pEnt->sPort);
+		if((uWrote + uLen + 1) < uSz){
+			sBuf[uWrote] = ':'; ++uWrote;
+			strncpy(sBuf + uWrote, pEnt->sPort, uLen);
+			uWrote += uLen;
+		}
+	}
+	
+	if(pEnt->sPath != NULL){
+		uLen = strlen(pEnt->sPath);
+		if((uWrote + uLen + 1) < uSz){
+			sBuf[uWrote] = '/'; ++uWrote;
+			strncpy(sBuf + uWrote, pEnt->sPath, uLen);
+			/* uWrote += uLen; */
+		}
+	}
+	
+	return true;
+}
+
 
 

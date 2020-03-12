@@ -62,14 +62,15 @@ typedef struct _das2c_result_sum{
 
 
 /* Formating a query struct using an entry object pointer */
-static void das2c_ent2query(DAS2C_QUERY_data* pDest, const QueryDbEnt* pSrc)
+static bool das2c_ent2query(DAS2C_QUERY_data* pDest, const QueryDbEnt* pSrc)
 {		
 	pDest->query = pSrc->nQueryId;
 	pDest->n_dsets = (IDL_LONG) pSrc->uDs;
-			
-	/* TODO: Add path component */
-	if(pSrc->sHost) IDL_StrStore(&(pDest->server), pSrc->sHost);
-			
+
+	char sBuf[512] = {'\0'};
+	if(!das2c_db_getPath(pSrc, sBuf, 511)) return false;
+	IDL_StrStore(&(pDest->server), sBuf);
+	
 	/* Loop over the params, pulling out ones of interest */
 	size_t u = 0;
 	for(u = 0; u < pSrc->uParam; ++u){
@@ -116,6 +117,7 @@ static void das2c_ent2query(DAS2C_QUERY_data* pDest, const QueryDbEnt* pSrc)
 			pDest->n_vals += DasAry_size(pAry);
 		}
 	}	
+	return true;
 }
 
 /* Get a DB entry from a query struct arg */
