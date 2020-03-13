@@ -318,8 +318,8 @@ static const DasVar* das2c_check_var_id(
 /* ************************************************************************* */
 /* API Function, careful with changes! */
 
-#define D2C_VARS_MINA 3
-#define D2C_VARS_MAXA 4
+#define D2C_VARS_MINA 1
+#define D2C_VARS_MAXA 2
 #define D2C_VARS_FLAG 0
 
 /*
@@ -331,21 +331,15 @@ static const DasVar* das2c_check_var_id(
 ;  List the variables present in a physical dimension, in a das2 dataset.
 ;
 ; CALLING SEQUENCE:
-;  Result = das2c_vars(query_id, ds_index, pdim, var)
+;  Result = das2c_vars(pdim)
+;  Result = das2c_vars(pdim, var)
 ;
 ; INPUTS:
-;  query_id: The identification integer for the stored query result as
-;            returned by das2c_readhttp() or das2c_queries.
-;
-;  ds_index: The dataset index, often 0.  See das2c_datasets() for details.
-;
-;  pdim:     Either the physical dimension index (long), or the dimension's
-;            name (string).  For more infor see das2c_physdims().
+;  pdim: A DAS2C_PDIM structure as returned by das2c_pdims().
 ;
 ; OPTIONAL INPUTS:
-;  var:      Either the role name (string) or the var index (long).  This
-;            argument is only required if summary information on a single 
-;            variable is desired.
+;  var:      A variables role name (string). This argument is only needed
+;            if information on a single variable is desired.
 ;
 ;            Variable role names are standardized.  The most common one is
 ;            'center' which represents the central point of a measurement
@@ -356,55 +350,78 @@ static const DasVar* das2c_check_var_id(
 ;            'uncertainty',  'std_dev', 'point_spread', 'weight'
 ;
 ; OUTPUT:
-;  This function returns an array of structures providing an overview of
-;  each stored result.  Output structures have the fields:
+;  This function returns an array of structures providing an overview of each
+;  variable in this physical dimension.  Output structures have the following
+;  fields:
 ;
-;    'id':     Long     ; The ID number for this variable.  Usage of
-;                       ; role names instead of numbers is recommended.
-;	
-;    'name':   String   ; The name of the physical dimension for this variable
+;    QUERY (Long)       The query ID of this dataset, starts from 1
 ;
-;    'type':   String   ; The IDL datatype of the values in this variable.
+;    DSET  (Long)       The ID number of this dataset, starts from 0
 ;
-;    'role':   String   ; The role for this variable, for example 'max_error'
+;    PDIM  (String)     The name of this physical dimension, ex: 'time'
 ;
-;    'units':  String   ; The units for values from this variable.
+;    VAR   (String)     The role name for this variable.  These are standardize.
+;                       See the optional inputs section above for details.
 ;
-;    'shape':  N Long64 ; The extent of this variable in the dataset indices.
-;                       ; Certian flag values have special meanings:
-;                       ;
-;                       ;   -3 : The variable is degenerate in this index. I.e.
-;                       ;        any value used here will not affect the output.
-;                       ;
-;                       ;   -1 : This is a virtual variable that has no internal
-;                       ;        storage but rather generates a value based
-;                       ;        on the index provided.  See Das2 Virtual
-;                       ;        variables for more information.
+;    UNITS (String)     The units for values from this variable.  The default
+;                       units format follows the fortran convention of using
+;                       two astricks (**) to indicate exponentiation.
 ;
+;    SHAPE (Long64 Arr) This array is DAS2C_DSET.RANK elements long. It provides
+;                       information on the internal storage of the variable that
+;                       is of use when calling das2c_data().
+;                      
+;                       While all variables have the same shape in index space
+;                       as the overall dataset, they may be backed by arrays 
+;                       that are actually smaller than the overall dataset shape
+;                       would indicate.  Also, some variables may generate data 
+;                       from a sequence calculation and thus do not have a 
+;                       backing array at all.  Each element of SHAPE has one of
+;                       the following values:
+;                      
+;                         N:  An integer >= 0 means that this variable produces
+;                             potentially unique values in this index when 
+;                             calling das2c_data().  This integer will be the
+;                             same as the corresponding value from 
+;                             DAS2C_DSET.SHAPE.
 ;
-;    'size':   Long64   ; If this variable is directly backed by an array this
-;                       ; is the total number of values in that array.  This
-;                       ; value is 0 for virtual variables.
+;                         -3: The variable is degenerate in this index, so
+;                             any integer used for this index will not affect
+;                             the output of a das2c_data() call.  This is 
+;                             common for variables in coordinate dimensions.
+;                             (see DAS2C_PDIM.USE)
+;                       
+;                         -1: The variable has no internal storage at all 
+;                             corresponding to this index.  It is a sequence.
+;                             The output from a das2c_data() call is calculated
+;                             based on the index values supplied, or indicated,
+;                             by the caller.
 ;
-; TODO:
-;  Should this function return !NULL if a requested role doesn't exist in a
-;  physical dimension?
+;    'TYPE':   String   The IDL datatype of the output of das2c_data() calls
+;                       for this variable.
+;
+;    'N_VALS': Long64   If this variable is directly backed by an array this
+;                       is the total number of real storage locations in that
+;                       array.
+;
+; If a variable is requested for a role that doesn't exist in the given physical
+; dimension, !NULL is returned.
 ;
 ; EXAMPLES:
 ;  List summary of all variable roles for the 'time' dimension in dataset 0 of
 ;  query result 27
-;    das2c_vars(27, 0, 'time')
+;    query = das2c_query(27)
+;    ds = das2c_datasets(0)
+;    pd_time = das2c_pdims(ds, 'time')
 ;
-;  List summary information of the 'center' variable for 'time' in dataset 0 for
-;  query result 27
-;    das2c_vars(27, 0, 'time', 'center')
+;    das2c_vars(pd_time)
 ;
-;  List summary information for the first variable in the first physical
-;  physical dimension of the first datasets, what ever it happens to be.
-;    das2c_vars(27, 0, 0, 0)
+;  List summary information of the 'center' variable for the 'time' dimension
+;  above:
+;    das2c_vars(pd_time, 'center')
 ;
 ; MODIFICATION HISTORY:
-;  Written by: Chris Piker, 2020-03-10
+;  Written by: Chris Piker, 2020-03-13
 ;-
 */
 static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)

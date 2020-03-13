@@ -48,21 +48,22 @@
 ;  each physical dimension represented in the dataset. Output structures
 ;  have the following fields:
 ;
-;    'QUERY':    Long    ; The query ID of this dataset, starts from 1
+;    QUERY   (Long)    The query ID of this dataset, starts from 1
 ;
-;    'DSET':     Long    ; The ID number of this dataset, starts from 0
+;    DSET    (Long)    The ID number of this dataset, starts from 0
 ;
-;    'PDIM':     String  ; The name of this physical dimension, ex: 'time'
+;    PDIM    (String)  The name of this physical dimension, ex: 'time'
 ;
-;    'USE':      String  ; The intendend usage of values from this pdim,
-;                        ; will be one of two strings, 'COORD' or 'DATA'
+;    USE     (String)  The intendend usage of values from this pdim,
+;                      will be one of two strings, 'COORD' or 'DATA'
 ;
-;    'N_VARS':   Long    ; The number of variables carring data values for this
-;                        ; physical dimension.
-;    'N_PROPS':  Long    ; The number of metadata properties for this dimension
+;    N_VARS  (Long)    The number of variables carring data values for this
+;                      physical dimension.
 ;
-;    'N_VALS':   Long64  ; The total number of values in the variables for 
-;                        ; this dimension
+;    N_PROPS (Long)    The number of metadata properties for this dimension
+;
+;    N_VALS  (Long64)  The total number of stored values in the variables
+;                      for this dimension.
 ;
 ;   If a particular dimension is requested by name and it doesn't exist in
 ;   the given dataset, !NULL is returned.
@@ -78,7 +79,7 @@
 ;    das2c_pdims(ds, 'time')
 ;
 ; MODIFICATION HISTORY:
-;  Written by: Chris Piker, 2020-03-09
+;  Written by: Chris Piker, 2020-03-12
 ;-
 */
 
@@ -194,7 +195,7 @@ static const DasDim* das2c_check_dim_id(
 static const DasDim* das2c_arg_to_dim(
 	int argc, IDL_VPTR* argv, int iArg, int* piQuery, int* piDs
 ){
-	
+	return NULL;	
 	
 }
 
