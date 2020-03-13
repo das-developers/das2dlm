@@ -20,7 +20,7 @@
  
 		
 /* Output structure definitions.*/
-static IDL_STRUCT_TAG_DEF _das2c_dataset_tags[] = {
+static IDL_STRUCT_TAG_DEF DAS2C_DSET_tags[] = {
    {"QUERY",    NULL,      (void*)IDL_TYP_LONG},
 	{"DSET",     NULL,      (void*)IDL_TYP_LONG},
 
@@ -34,26 +34,25 @@ static IDL_STRUCT_TAG_DEF _das2c_dataset_tags[] = {
 	{0}
 };
 
-typedef struct _das2c_ds_sum{
+typedef struct das2c_dset_data_s{
 	IDL_LONG   query;
 	IDL_LONG   dset;
+	
 	IDL_STRING name;
 	IDL_LONG   rank;
 	IDL_LONG64 shape[8];
+	
 	IDL_LONG   n_pdims;
 	IDL_LONG   n_props;
 	IDL_LONG64 n_vals;
-} das2c_DsSummary;
+} DAS2C_DSET_data;
 
-static IDL_StructDefPtr g_das2c_pDsSumDef;
+static IDL_StructDefPtr DAS2C_DSET_pdef;
 
-static void DAS2C_DATASET_def()
+static void define_DAS2C_DSET()
 {
-	g_das2c_pDsSumDef = IDL_MakeStruct("DAS2C_DSET", _das2c_dataset_tags);
+	DAS2C_DSET_pdef = IDL_MakeStruct("DAS2C_DSET", DAS2C_DSET_tags);
 }
-
-/* ************************************************************************* */
-/* Downstream helpers for pulling out datasets, these don't return on error  */
 
 static int das2c_args_ds_id(int argc, IDL_VPTR* argv, int iArg){
 	int iDs = -1;
@@ -66,7 +65,7 @@ static int das2c_args_ds_id(int argc, IDL_VPTR* argv, int iArg){
 }
 
 /* Returns dataset pointer if index is valid */
-static const DasDs* das2c_check_ds_id(const DasIdlDbEnt* pEnt, int iDs)
+static const DasDs* das2c_check_ds_id(const QueryDbEnt* pEnt, int iDs)
 {
 	if(pEnt == NULL) das2c_IdlMsgExit("Logic error, das2c_datasets.c");
 	
@@ -86,12 +85,98 @@ static const DasDs* das2c_check_ds_id(const DasIdlDbEnt* pEnt, int iDs)
 	return pDs;
 }
 
+/* Put a Das2Ds into a DAS2C_DSET structure */
+static void das2c_ds_to_dset(
+	int nQueryId, int iDs, DAS2C_DSET_data* pDest, const DasDs* pSrc
+){
+	size_t uDim = 0, uAry = 0;
+	const DasAry* pAry = NULL;
+	ptrdiff_t shape[DASIDX_MAX] = DASIDX_INIT_UNUSED;
+	int nRank, r = 0;  
+	
+	/* Write into IDL memory using parallel structure pointer */
+	pDest->query    = nQueryId;
+	pDest->dset     = iDs;
+	
+	if(DasDs_id(pSrc) != NULL) 
+		IDL_StrStore(&(pDest->name), DasDs_id(pSrc));
+		
+	/* Need to flag ragged datesets somehow */
+	nRank = DasDs_shape(pSrc, shape);	
+	pDest->rank    = nRank;
+		
+	for(r = 0; r < IDL_MAX_ARRAY_DIM; ++r){ 
+		if(r < nRank) pDest->shape[(IDL_MAX_ARRAY_DIM - 1) - r] = shape[r];
+		else pDest->shape[(IDL_MAX_ARRAY_DIM - 1) - r] = D2C_OVER_RANK_FLAG;
+	}
+
+	pDest->n_pdims  = DasDs_numDims(pSrc, DASDIM_COORD) + 
+	                  DasDs_numDims(pSrc, DASDIM_DATA);
+	
+	pDest->n_props = DasDesc_length((DasDesc*)pSrc);   /* Global props */
+	for(uDim = 0; uDim < pSrc->uDims; ++uDim)          /* dim props */
+		pDest->n_props += DasDesc_length( (DasDesc*)(pSrc->lDims[uDim]) );
+			
+	pDest->n_vals = 0;
+	for(uAry = 0; uAry < pSrc->uArrays; ++uAry){
+		pAry = pSrc->lArrays[uAry];
+		pDest->n_vals += DasAry_size(pAry);
+	}
+}
+
+/* Get a DB entry from a query struct arg */
+static const DasDs* das2c_arg_to_ds(
+	int argc, IDL_VPTR* argv, int iArg, int* piQuery, int* piDset
+){	
+	const QueryDbEnt* pEnt = das2c_arg_to_ent(argc, argv, iArg);
+	if(piQuery != NULL) *piQuery = pEnt->nQueryId;
+	
+	/* See if this is a query struct */
+	IDL_VPTR pVar = argv[iArg];
+	
+	if(pVar->type != IDL_TYP_STRUCT)
+		das2c_IdlMsgExit("Argument %d is not a structure", iArg);	
+	
+	/* Get the DSET ID.  Use duck-typing here.  If there is a
+	   field named "DSET" and it can be converted to a LONG
+		then good enough.  Consider it a DAS2C_DSET structure */
+	
+	IDL_VPTR pFakeVar = NULL;
+	IDL_MEMINT nOffset = IDL_StructTagInfoByName(
+		pVar->value.s.sdef, "DSET", IDL_MSG_LONGJMP, &pFakeVar
+	);
+	
+	/* Get pointer to query field in first element of the structure array */
+	/* Skipping the (i * elt_len) clause since i = 0 for first row */
+	UCHAR* pData = pVar->value.s.arr->data + nOffset;
+	
+	/* Get the query ID value, accept a few different types */
+	int32_t iDs = -1;  /* -1 is always a bad dataset ID */
+	switch(pFakeVar->type){
+	case IDL_TYP_INT:  iDs = *((IDL_INT*)pData);  break;
+	case IDL_TYP_UINT: iDs = *((IDL_UINT*)pData); break;
+	case IDL_TYP_LONG: iDs = *((IDL_LONG*)pData); break;
+	/* other types have range larger than uint32_t */
+	default:
+		das2c_IdlMsgExit(" 'DSET' value should be an INT, UINT or LONG");
+		break;
+	}
+
+	if((iDs < 0)||(iDs > pEnt->uDs)||(pEnt->lDs[iDs]==NULL))
+		das2c_IdlMsgExit(
+			"No dataset at index %d for query result %d", iDs, pEnt->nQueryId
+		);
+	
+	if(piDset != NULL) *piDset = iDs;
+	return pEnt->lDs[iDs];
+}
+
 /* ************************************************************************* */
 /* API Function, careful with changes! */
 
-#define D2C_DSETS_MINA 1
-#define D2C_DSETS_MAXA 2
-#define D2C_DSETS_FLAG 0
+#define D2C_DATASETS_MINA 1
+#define D2C_DATASETS_MAXA 2
+#define D2C_DATASETS_FLAG 0
 
 /*
 ;+
@@ -166,13 +251,11 @@ static const DasDs* das2c_check_ds_id(const DasIdlDbEnt* pEnt, int iDs)
 */
 static IDL_VPTR das2c_api_datasets(int argc, IDL_VPTR* argv)
 {
-	/* Get/check Query ID */
-	int iQueryId = das2c_args_query_id(argc, argv, 0);
-	const DasIdlDbEnt* pEnt = das2c_check_query_id(iQueryId);
+	/* Get DB entry */
+	const QueryDbEnt* pEnt = das2c_arg_to_ent(argc, argv, 0);
 	
-	/* Handle optional dataset ID */
-	int iDs = -1;  /* Dataset index, -1 = All datasets */
-		
+	int iDs = -1; /* Flag for all dims */
+	
 	if(argc > 1){
 		iDs = das2c_args_ds_id(argc, argv, 1);
 		das2c_check_ds_id(pEnt, iDs);
@@ -181,22 +264,18 @@ static IDL_VPTR das2c_api_datasets(int argc, IDL_VPTR* argv)
 	IDL_MEMINT dims = pEnt->uDs;
 	if(iDs == -1) dims = 1;
 	
-	IDL_VPTR pRet;  /* the to-be-returned structure */
+	IDL_VPTR pRet;
 	
 	/* Returns pRet->value.s.arr.data */
-	das2c_DsSummary* pData = (das2c_DsSummary*) IDL_MakeTempStruct(
-		g_das2c_pDsSumDef,   /* The opaque structure definition */
-		1,                   /* Number of dimesions */
-		&dims,               /* Size of each dimension, (only one dimension) */
-		&pRet,               /* The actual structure variable */
-		TRUE                 /* Zero out the array */
+	DAS2C_DSET_data* pData = (DAS2C_DSET_data*) IDL_MakeTempStruct(
+		DAS2C_DSET_pdef, /* The opaque structure definition */
+		1,               /* Number of dimesions */
+		&dims,           /* Size of each dimension, (only one dimension) */
+		&pRet,           /* The actual structure variable */
+		TRUE             /* Zero out the array */
 	);
 
 	DasDs* pDs = NULL;
-	size_t uAry = 0;
-	DasAry* pAry = NULL;
-	ptrdiff_t shape[DASIDX_MAX] = DASIDX_INIT_UNUSED;
-	int nRank, r = 0;  
 	for(size_t u = 0; u < pEnt->uDs; ++u){
 		
 		if((iDs > -1)&&(iDs != u)) continue;
@@ -204,29 +283,7 @@ static IDL_VPTR das2c_api_datasets(int argc, IDL_VPTR* argv)
 		pDs = pEnt->lDs[u];
 		if(pDs == NULL) das2c_IdlMsgExit("Logic error, das2c_datasets.c");
 		
-		/* Write into IDL memory using parallel structure pointer */
-		pData->id       = u;
-		pData->physdims = DasDs_numDims(pDs, DASDIM_COORD) + 
-				            DasDs_numDims(pDs, DASDIM_DATA);
-		pData->props    = DasDesc_length((DasDesc*)pDs);
-		if(DasDs_id(pDs) != NULL) 
-			IDL_StrStore(&(pData->name), DasDs_id(pDs));
-		
-		/* Need to flag ragged datesets somehow */
-		nRank = DasDs_shape(pDs, shape);
-		
-		pData->rank    = nRank;
-		
-		for(r = 0; r < IDL_MAX_ARRAY_DIM; ++r){ 
-			if(r < nRank) pData->shape[(IDL_MAX_ARRAY_DIM - 1) - r] = shape[r];
-			else pData->shape[(IDL_MAX_ARRAY_DIM - 1) - r] = D2C_OVER_RANK_FLAG;
-		}
-		
-		pData->size = 0;
-		for(uAry = 0; uAry < pDs->uArrays; ++uAry){
-			pAry = pDs->lArrays[uAry];
-			pData->size += DasAry_size(pAry);
-		}
+		das2c_ds_to_dset(pEnt->nQueryId, u, pData, pDs);
 		
 		++pData;
 	}

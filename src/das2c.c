@@ -70,10 +70,10 @@ static IDL_MEMINT g_aShape7[2];
 static IDL_MEMINT g_aShape8[2];
 
 #include "das2c_queries.c"   /* exported functions */
-/*#include "das2c_datasets.c"  
+#include "das2c_datasets.c"  
 #include "das2c_dsinfo.c"
 #include "das2c_pdims.c"
-#include "das2c_vars.c"
+/*#include "das2c_vars.c"
 #include "das2c_props.c"
 #include "das2c_data.c"
 #include "das2c_free.c" */
@@ -98,25 +98,29 @@ int IDL_Load(void){
 
 	/* Define our structures */
 	define_DAS2C_QUERY();
-/*	define_DAS2C_DSET();
+	define_DAS2C_DSET();
 	define_DAS2C_PDIM();
-	define_DAS2C_VAR();
+/*	define_DAS2C_VAR();
 	define_DAS2C_PROP(); */
 		
  	static IDL_SYSFUN_DEF2 function_addr[] = {
 		{ 
-			{(IDL_SYSRTN_GENERIC)das2c_api_queries},  "DAS2C_QUERIES",
-			D2C_QUERIES_MINA,  D2C_QUERIES_MAXA,  D2C_QUERIES_FLAG,  NULL
+			{(IDL_SYSRTN_GENERIC)das2c_api_queries}, "DAS2C_QUERIES",
+			D2C_QUERIES_MINA, D2C_QUERIES_MAXA, D2C_QUERIES_FLAG, NULL
 		},		
-/*		{ 
+		{ 
 			{(IDL_SYSRTN_GENERIC)das2c_api_datasets}, "DAS2C_DATASETS",
 			D2C_DATASETS_MINA, D2C_DATASETS_MAXA, D2C_DATASETS_FLAG, NULL
 		},
 		{ 
-			{(IDL_SYSRTN_GENERIC)das2c_api_physdims}, "DAS2C_PDIMS",
-			D2C_PHYSDIMS_MINA, D2C_PDIMS_MAXA, D2C_PDIMS_FLAG, NULL
-		},
+			{(IDL_SYSRTN_GENERIC)das2c_api_dsinfo}, "DAS2C_DSINFO",
+		   D2C_DSINFO_MINA, D2C_DSINFO_MAXA, D2C_DSINFO_FLAG, NULL
+		},		
 		{ 
+			{(IDL_SYSRTN_GENERIC)das2c_api_pdims}, "DAS2C_PDIMS",
+			D2C_PDIMS_MINA, D2C_PDIMS_MAXA, D2C_PDIMS_FLAG, NULL
+		},
+/*		{ 
 			{(IDL_SYSRTN_GENERIC)das2c_api_vars},     "DAS2C_VARS",
 			D2C_VARS_MINA,     D2C_VARS_MAXA,     D2C_VARS_FLAG,     NULL
 		},
@@ -124,13 +128,9 @@ int IDL_Load(void){
 			{(IDL_SYSRTN_GENERIC)das2c_api_dsprops},  "DAS2C_PROPS",
 			D2C_DSPROPS_MINA,  D2C_PROPS_MAXA,  D2C_PROPS_FLAG,  NULL
 		},
-		{ 
-			{(IDL_SYSRTN_GENERIC)das2c_api_dsinfo},   "DAS2C_INFO",
-		   D2C_DSINFO_MINA,   D2C_INFO_MAXA,   D2C_INFO_FLAG,   NULL
-		},		
 		{
 			{(IDL_SYSRTN_GENERIC)das2c_api_data},    "DAS2C_DATA",
-			D2C_DATA_MINA,     D2C_DATA_MAXA,    D2C_DATA_FLAG,    NULL
+			D2C_DATA_MINA,     D2C_DATA_MAXA,    D2C_DATA_FLAG,      NULL
 		},
 		{
 			{(IDL_SYSRTN_GENERIC)das2c_api_free},     "DAS2C_FREE",
@@ -165,6 +165,9 @@ int IDL_Load(void){
 	
 	/* Override printing errors to stderr, save them instead */
 	das_save_error(DASIDL_ERR_MSG_SZ);
+	
+	/* Switch info string print order to fast index first */
+	das_varindex_prndir(false);
 	
  	/* Register our routine. The routines must be specified exactly the same as 
 	   in das2c.dlm, not sure how to sycronize this automatically */

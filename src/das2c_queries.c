@@ -46,7 +46,7 @@ static void define_DAS2C_QUERY()
 }
 
 /* C structure to use in casts for manipulating IDL struct memory */
-typedef struct _das2c_result_sum{
+typedef struct das2c_query_data_s{
 	IDL_LONG   query;
 	
 	IDL_STRING server;
@@ -121,9 +121,9 @@ static bool das2c_ent2query(DAS2C_QUERY_data* pDest, const QueryDbEnt* pSrc)
 }
 
 /* Get a DB entry from a query struct arg */
-static const QueryDbEnt* das2c_query_arg_to_ent(int argc, IDL_VPTR* argv, int iArg)
+static const QueryDbEnt* das2c_arg_to_ent(int argc, IDL_VPTR* argv, int iArg)
 {	
-	if(argc <= iArg) das2c_IdlMsgExit("Query struture argument missing");
+	if(argc <= iArg) das2c_IdlMsgExit("Expecting a struture for argument %d", iArg+1);
 	
 	/* See if this is a query struct */
 	IDL_VPTR pVar = argv[iArg];
@@ -145,7 +145,7 @@ static const QueryDbEnt* das2c_query_arg_to_ent(int argc, IDL_VPTR* argv, int iA
 	UCHAR* pData = pVar->value.s.arr->data + nOffset;
 	
 	/* Get the query ID value, accept a few different types */
-	uint32_t iQueryId = 0;  /* 0 is always a bad query ID */
+	int32_t iQueryId = 0;  /* 0 is always a bad query ID */
 	switch(pFakeVar->type){
 	case IDL_TYP_INT:  iQueryId = *((IDL_INT*)pData);  break;
 	case IDL_TYP_UINT: iQueryId = *((IDL_UINT*)pData); break;

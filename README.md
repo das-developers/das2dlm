@@ -127,7 +127,7 @@ Ask the query for dataset 0 and print some a human readable description.
 
 ```idl
 IDL> ds = das2c_datasets(query, 0)
-IDL> print, das2c_info(ds)
+IDL> ds
 ```
 ```
 Dataset: 'electric_10' from group 'electric' | i:0..4483, j:0..152

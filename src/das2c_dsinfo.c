@@ -21,8 +21,8 @@
 /* ************************************************************************* */
 /* API Function, careful with changes! */
 
-#define D2C_DSINFO_MINA 2
-#define D2C_DSINFO_MAXA 2
+#define D2C_DSINFO_MINA 1
+#define D2C_DSINFO_MAXA 1
 #define D2C_DSINFO_FLAG 0
 
 /*
@@ -34,15 +34,10 @@
 ;  Output summary information string about a dataset
 ;
 ; CALLING SEQUENCE:
-;  Result = das2c_dsinfo(query_id, ds_index)
+;  Result = das2c_dsinfo(dset)
 ;
 ; INPUTS:
-;  query_id: The identification integer for the stored query result as
-;            returned by das2c_readhttp() or das2c_queries.
-;
-;  ds_index: Output information for this dataset number in the query.
-;            Most queries will output only a single dataset at index 0,
-;            Though common sources such as Juno Waves output more than 1.
+;  dset: A DAS2C_DSET structure, as returned by das2c_datasets().
 ;
 ; OUTPUT:
 ;  A multi-line human readable formatted string providing an overview of
@@ -58,18 +53,12 @@
 */
 static IDL_VPTR das2c_api_dsinfo(int argc, IDL_VPTR* argv)
 {
-	char sBuf[1024] = {'\0'};
-	int nBuf = 1024;
+	int iQuery = -1;
+	int iDs = -1;
+	const DasDs* pDs = das2c_arg_to_ds(argc, argv, 0, &iQuery, &iDs);
 	
-	/* Get/check Query ID */
-	int iQueryId = das2c_args_query_id(argc, argv, 0);
-	const DasIdlDbEnt* pEnt = das2c_check_query_id(iQueryId);
-	
-	/* Get/check dataset ID */
-	int iDs = das2c_args_ds_id(argc, argv, 1);
-	const DasDs* pDs = das2c_check_ds_id(pEnt, iDs);
-		
-	DasDs_toStr(pDs, sBuf, nBuf);
+	char sBuf[8192] = {'\0'};
+	DasDs_toStr(pDs, sBuf, 8191);
 	
 	return (IDL_StrToSTRING(sBuf));
 }
