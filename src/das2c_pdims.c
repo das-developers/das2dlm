@@ -117,9 +117,6 @@ static void define_DAS2C_PDIM()
 	DAS2C_PDIM_pdef = IDL_MakeStruct("DAS2C_PDIM", DAS2C_PDIM_tags);
 }
 
-/* ************************************************************************* */
-/* Downstream helper for pulling out dimesions, these don't return on error  */
-
 /* returns either a dim id, or -1 and a dim string */
 static int das2c_args_dim_id(
 	int argc, IDL_VPTR* argv, int iArg, char* sName, size_t uLen
@@ -154,49 +151,50 @@ static int das2c_args_dim_id(
 	return iDim;
 }
 
-/* if dim id or name is valid, set the missing item and return the dim ptr */
-static const DasDim* das2c_check_dim_id(
-	const QueryDbEnt* pEnt, int iDs, int* iDim, char* sDim, size_t uLen
-){
-	int i = 0;
-	const DasDs* pDs = das2c_check_ds_id(pEnt, iDs);
-	const DasDim* pDim = NULL;
-	
-	if((sDim == NULL)||(sDim[0] == '\0')){
-		/* Lookup by index and save the name */
-		if((*iDim > 0)&&(*iDim < pDs->uDims))
-			pDim = pDs->lDims[*iDim];
-		else
-			das2c_IdlMsgExit(
-				"Query result %d, dataset %d doesn't have a physical dimension"
-				" with index number '%d'", pEnt->nQueryId, iDs, *iDim
-			);
-		
-		strncpy(sDim, pDim->sId, uLen);
-	}
-	else{
-		/* Lookup by name and save the index */
-		pDim = DasDs_getDimById(pDs, sDim);
-		if(pDim == NULL)
-			das2c_IdlMsgExit(
-				"Query result %d, dataset %d doesn't have a physical dimension"
-				" named '%s'", pEnt->nQueryId, iDs, sDim
-			);
-		
-		for(i = 0; i < pDs->uDims; ++i){
-			if(pDs->lDims[i] == pDim) *iDim = i;
-		}
-		if(*iDim == -1) das2c_IdlMsgExit("Logic error das2c_check_dim_id");
-	}
-	
-	return pDim;
-}
 
 static const DasDim* das2c_arg_to_dim(
 	int argc, IDL_VPTR* argv, int iArg, int* piQuery, int* piDs
 ){
-	return NULL;	
+	int iQuery = -1;
+	int iDs = -1;
+	const DasDs* pDs = das2c_arg_to_ds(argc, argv, iArg, &iQuery, &iDs);
+	if(pDs == NULL) return NULL;
 	
+	/* Get the PDIM string field */
+	IDL_VPTR pVar = argv[iArg];
+	
+	if(pVar->type != IDL_TYP_STRUCT)
+		das2c_IdlMsgExit("Argument %d is not a structure", iArg+1);
+	
+	/* Ducktyping: Any field names 'PDIM' that has type string will do */
+	IDL_VPTR pFakeVar = NULL;
+	IDL_MEMINT nOffset = IDL_StructTagInfoByName(
+		pVar->value.s.sdef, "PDIM", IDL_MSG_LONGJMP, &pFakeVar
+	);
+	
+	if(pFakeVar->type != IDL_TYP_STRING)
+		das2c_IdlMsgExit("Field PDIM in argument %d is not a string", iArg+1);
+	
+	UCHAR* pData = pVar->value.s.arr->data + nOffset;
+	
+	/* IDL docs are not clear on whos own's the memory after this call
+	   https://www.harrisgeospatial.com/docs/StringProcessing.html 
+	   Assume they do for now and use valgrind to see for sure later */
+	const char* sDim = IDL_STRING_STR( (IDL_STRING*)pData);
+	if((sDim == NULL)||(sDim[0] == '\0'))
+		das2c_IdlMsgExit("Field PDIM is empty in the structure at argument %d", iArg+1);
+	
+	const DasDim* pDim = DasDs_getDimById(pDs, sDim);
+	if(pDim == NULL)
+		das2c_IdlMsgExit(
+			"Mismatch PDIM '%s' is not present in query %d, dataset %d",
+			sDim, iQuery, iDs
+		);
+	
+	if(piQuery != NULL) *piQuery = iQuery;
+	if(piDs    != NULL) *piDs    = iDs;
+	
+	return pDim;
 }
 
 

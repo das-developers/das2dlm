@@ -135,7 +135,7 @@ static const DasDs* das2c_arg_to_ds(
 	IDL_VPTR pVar = argv[iArg];
 	
 	if(pVar->type != IDL_TYP_STRUCT)
-		das2c_IdlMsgExit("Argument %d is not a structure", iArg);	
+		das2c_IdlMsgExit("Argument %d is not a structure", iArg+1);	
 	
 	/* Get the DSET ID.  Use duck-typing here.  If there is a
 	   field named "DSET" and it can be converted to a LONG
