@@ -191,6 +191,13 @@ static const DasDim* das2c_check_dim_id(
 	return pDim;
 }
 
+static const DasDim* das2c_arg_to_dim(
+	int argc, IDL_VPTR* argv, int iArg, int* piQuery, int* piDs
+){
+	
+	
+}
+
 
 /* ************************************************************************* */
 /* API Function, careful with changes! */	
