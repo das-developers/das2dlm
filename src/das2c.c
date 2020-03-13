@@ -101,7 +101,7 @@ int IDL_Load(void){
 	define_DAS2C_DSET();
 	define_DAS2C_PDIM();
 	define_DAS2C_VAR();
-/*	define_DAS2C_PROP(); */
+	define_DAS2C_PROP();
 		
  	static IDL_SYSFUN_DEF2 function_addr[] = {
 		{ 
@@ -124,11 +124,11 @@ int IDL_Load(void){
 			{(IDL_SYSRTN_GENERIC)das2c_api_vars},     "DAS2C_VARS",
 			D2C_VARS_MINA,     D2C_VARS_MAXA,     D2C_VARS_FLAG,     NULL
 		},
-/*		{ 
+		{ 
 			{(IDL_SYSRTN_GENERIC)das2c_api_dsprops},  "DAS2C_PROPS",
 			D2C_DSPROPS_MINA,  D2C_PROPS_MAXA,  D2C_PROPS_FLAG,  NULL
 		},
-		{
+/*		{
 			{(IDL_SYSRTN_GENERIC)das2c_api_data},    "DAS2C_DATA",
 			D2C_DATA_MINA,     D2C_DATA_MAXA,    D2C_DATA_FLAG,      NULL
 		},

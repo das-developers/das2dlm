@@ -19,10 +19,10 @@
  */
 				
 /* Output structure definition */
-static IDL_STRUCT_TAG_DEF _das2c_prop_tags[] = {
-	{"key",     NULL,     (void*)IDL_TYP_STRING},
-	{"type",    NULL,     (void*)IDL_TYP_STRING},
-	{"value",   NULL,     (void*)IDL_TYP_STRING},
+static IDL_STRUCT_TAG_DEF DAS2C_PROP_tags[] = {
+	{"KEY",     NULL,     (void*)IDL_TYP_STRING},
+	{"TYPE",    NULL,     (void*)IDL_TYP_STRING},
+	{"VALUE",   NULL,     (void*)IDL_TYP_STRING},
 	{0}
 };
 
@@ -32,11 +32,11 @@ typedef struct _das2c_prop{
 	IDL_STRING value;
 } das2c_Prop;
 
-static IDL_StructDefPtr g_das2c_pPropDef;
+static IDL_StructDefPtr DAS2C_PROP_pdef;
 
-static void DAS2C_PROP_def()
+static void define_DAS2C_PROP()
 {
-	g_das2c_pPropDef = IDL_MakeStruct("DAS2C_PROP", _das2c_prop_tags);
+	DAS2C_PROP_pdef = IDL_MakeStruct("DAS2C_PROP", DAS2C_PROP_tags);
 }
 
 /* ************************************************************************* */
@@ -116,60 +116,95 @@ IDL_VPTR das2c_props_from_desc(const DasDesc* pDesc, const char* sKey)
 /* ************************************************************************* */
 /* API Functions, careful with changes! */
 
-#define D2C_DSPROPS_MINA 2
-#define D2C_DSPROPS_MAXA 3
-#define D2C_DSPROPS_FLAG 0
+#define D2C_PROPS_MINA 1
+#define D2C_PROPS_MAXA 2
+#define D2C_PROPS_FLAG 0
 
 /*
 ;+
 ; FUNCTION:
-;  das2c_dsprops
+;  das2c_props
 ;
 ; PURPOSE:
 ;  Get dataset metadata properties
 ;
 ; CALLING SEQUENCE:
-;  Result = das2c_dsprops(query_id, ds_index, prop_key)
+;  Result = das2c_props(struct)
+;  Result = das2c_props(struct, key)
 ;
 ; INPUTS:
-;  query_id: The identification integer for the stored query result as
-;            returned by das2c_readhttp() or das2c_queries.
-;
-;  ds_index: The dataset index, often 0.  See das2c_datasets() for details.
+;  struct: Either a DAS2C_DSET or DAS2C_PDIM structure.
 ;
 ; OPTIONAL INPUTS:
-;  prop_key: The name of a specific property
+;  key: The name of a specific property
 ;
 ; OUTPUT:
 ;  This function returns an array of structures providing the property or
 ;  properties of the dataset.  Each structure has the following fields
 ;
-;    'key':    String   ; The name of the property
+;    KEY    String   ; The name of the property
 ;
-;    'type':   String   ; The intended final data type for the property
+;    TYPE   String   ; The intended final data type for the property
 ;
-;    'value':  String   ; A string version of the property value.
+;    VALUE  String   ; A string version of the property value.
 ;
 ;  If a prop key is given as an input but the dataset has no properties with
 ;  that name, !NULL is returned.  If the dataset has no properites at all,
 ;  then !NULL is retured when the the full property list is requested.
 ;
 ; EXAMPLES:
-;  Get all the properties for dataset 1 from query result 48
-;    das2c_dsprops(48, 1)
+;  Get all the properties for dataset 1 from query result 48:
+;    query = das2c_queries(48)
+;    ds = das2c_datasets(query, 1)
+;    das2c_dsprops(ds)
 ;
-;  Get the title property for dataset 0 from query result 27
-;    das2c_dsprops(27, 0, 'title')
+;  Get the label property for the time dimension from the dataset above:
+;    pd_time = das2c_pdims(ds, 'time')
+;    das2c_dsprops(pd_time, 'label')
 ;
 ; MODIFICATION HISTORY:
-;  Written by: Chris Piker, 2020-03-10
+;  Written by: Chris Piker, 2020-03-13
 ;-
 */
-static IDL_VPTR das2c_api_dsprops(int argc, IDL_VPTR* argv)
+static IDL_VPTR das2c_api_props(int argc, IDL_VPTR* argv)
 {
-	/* Get/check Query ID */
-	int iQueryId = das2c_args_query_id(argc, argv, 0);
-	const DasIdlDbEnt* pEnt = das2c_check_query_id(iQueryId);
+	
+	int iQuery = -1;
+	int iDs = -1;
+	const DasDs* pDs = das2c_arg_to_ds(argc, argv, 0, &iQuery, &iDs);
+	const DasDim* pDim = NULL;
+	const char* sDim = NULL;
+	UCHAR* pData = NULL;
+	
+	/* Look at the structure and see if it has a PDIM memeber */
+	IDL_VPTR pFakeVar = NULL;
+	IDL_MEMINT nOffset = IDL_StructTagInfoByName(
+		pVar->value.s.sdef, "PDIM", IDL_MSG_RET /* Just return if no prop */, &pFakeVar
+	);
+	if(pFakeVar != NULL){
+		/* Oh, they do have a 'PDIM' member */
+		if(pFakeVar->type != IDL_TYP_STRING)
+			das2c_IdlMsgExit("Field PDIM in argument1 is not a string");
+		
+		UCHAR* pData = pVar->value.s.arr->data + nOffset;
+	
+		/* IDL docs are not clear on whos own's the memory after this call
+		   https://www.harrisgeospatial.com/docs/StringProcessing.html 
+		   Assume they do for now and use valgrind to see for sure later */
+		sDim = IDL_STRING_STR( (IDL_STRING*)pData);
+		if((sDim == NULL)||(sDim[0] == '\0'))
+			das2c_IdlMsgExit("Field PDIM is empty in the structure at argument 1");
+		
+		pDim = DasDs_getDimById(pDs, sDim);
+		if(pDim == NULL)
+			das2c_IdlMsgExit(
+				"Mismatch PDIM '%s' is not present in query %d, dataset %d",
+				sDim, iQuery, iDs
+			);
+		
+		
+	}
+	
 	
 	/* Get/check dataset ID */
 	int iDs = das2c_args_ds_id(argc, argv, 1);
@@ -188,55 +223,6 @@ static IDL_VPTR das2c_api_dsprops(int argc, IDL_VPTR* argv)
 #define D2C_DIMPROPS_MAXA 4
 #define D2C_DIMPROPS_FLAG 0
 
-/*
-;+
-; FUNCTION:
-;  das2c_dimprops
-;
-; PURPOSE:
-;  Get metadata properties for a physical dimension variable group
-;
-; CALLING SEQUENCE:
-;  Result = das2c_dimprops(query_id, ds_index, pdim, prop_key)
-;
-; INPUTS:
-;  query_id: The identification integer for the stored query result as
-;            returned by das2c_readhttp() or das2c_queries.
-;
-;  ds_index: The dataset index, often 0.  See das2c_datasets() for details.
-;
-;  pdim:     Either the physical dimension index (long), or the dimension's
-;            name (string).  For more infor see das2c_physdims().
-;
-; OPTIONAL INPUTS:
-;  prop_key: The name of a specific property
-;
-; OUTPUT:
-;  This function returns an array of structures providing the property or
-;  properties of the dataset.  Each structure has the following fields
-;
-;    'key':    String   ; The name of the property
-;
-;    'type':   String   ; The intended final data type for the property
-;
-;    'value':  String   ; A string version of the property value.
-;
-;  If a prop key is given as an input but the physical dimension has no
-;  properties with that name, !NULL is returned.  If the phys. dim. has no
-;  properites at all, then !NULL is retured when the the full property
-;  list is requested.
-;
-; EXAMPLES:
-;  Get all the properties for dataset 1 from query result 48
-;    das2c_dsprops(48, 1)
-;
-;  Get the title property for dataset 0 from query result 27
-;    das2c_dsprops(27, 0, 'title')
-;
-; MODIFICATION HISTORY:
-;  Written by: Chris Piker, 2020-03-11
-;-
-*/
 static IDL_VPTR das2c_api_dimprops(int argc, IDL_VPTR* argv)
 {
 	/* Get/check Query ID */
