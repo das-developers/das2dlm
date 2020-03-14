@@ -72,7 +72,7 @@ IDL uses the environment variable `IDL_DLM_PATH` to find new system rountines
 that were not delivered with the IDL distribution.  You can add the `dlm` the
 directory to the path using the following commands.
 
-``sh
+```sh
 IDL_DLM_PATH="${PWD}/dlm:<IDL_DEFAULT>"
 export IDL_DLM_PATH
 ```
@@ -96,42 +96,39 @@ There are two ways to install the DLM.
 
  1. Copy the `das2c.dlm` and `das2c.linux.x86_64.so` files to the IDL system
     module directory.  This varies based on where IDL is installed and what
-	 version you are running.  An example directory is:
+    version you are running.  An example directory is:
 	 
-	   `/usr/local/harris/idl87/bin/bin.linux.x86_64`
+    `/usr/local/harris/idl87/bin/bin.linux.x86_64`
 		
-	 In this case the install proceedure would just be:
-	 
-	   `sudo cp dlm/das2c.dlm dlm/das2c.linux.x86_64.so /usr/local/harris/idl87/bin/bin.linux.x86_64`
+    In this case the install proceedure would just be:
+    
+    `sudo cp dlm/das2c.dlm dlm/das2c.linux.x86_64.so /usr/local/harris/idl87/bin/bin.linux.x86_64`
 	 
 
  2. Copy the whole das2dlm/dlm directory, not just the two files above,
     to some location on your computer and update your `IDL_DLM_PATH`
-	 environment variable to include the new directory.
+    environment variable to include the new directory.
 	 
-	 For example if you want to put the files in $HOME/idl/dlm, then issue the
-	 following.
-	 
-	 ```sh
-	 mkdir -p $HOME/idl
-	 cp -r das2c/dlm $HOME/idl
-	 ```
+    For example if you want to put the files in $HOME/idl/dlm, then issue the following.
+    ```sh
+    mkdir -p $HOME/idl
+    cp -r das2c/dlm $HOME/idl
+    ```
 
     Then add the following lines to your .bash_profile or .bashrc files:
-	 
-	 ```sh
-	 dlmpathmunge () {
-	   if ! echo $IDL_DLM_PATH | /bin/egrep -q "(^|:)$1($|:)" ; then
-		  if [ "$IDL_DLM_PATH" = "" ] ; then                        
-			  IDL_DLM_PATH="$1:<IDL_DEFAULT>"                        
-		  else                                                  
-			  IDL_DLM_PATH=$1:$IDL_DLM_PATH
-		  fi                                                    
-	   fi                                                       
+    ```sh
+    dlmpathmunge () {
+     if ! echo $IDL_DLM_PATH | /bin/egrep -q "(^|:)$1($|:)" ; then
+      if \[ "$IDL_DLM_PATH" = "" \] ; then                        
+       IDL_DLM_PATH="$1:<IDL_DEFAULT>"                        
+      else                                                  
+       IDL_DLM_PATH=$1:$IDL_DLM_PATH
+      fi                                                    
+     fi                                                       
     }
-
+   
     dlmpathmunge $HOME/idl/dlm
-	 ```
+    ```
 
 
 
