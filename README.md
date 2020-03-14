@@ -23,51 +23,16 @@ those that are parseable by the [das2C](https://github.com/das-developers/das2C)
 library.  At the time of writing that is only das2.2.2 (or lower) streams,
 though plans are in the works for supporting das2.3 and HAPI 2.0 streams.
   
-## Build and Config
+## Build/Install
 
-Building has been tested on CentOS 7 and KDE Neon.  Building on other systems
-should work fine but the makefile will need to be edited.  Build instructions 
-included here for CentOS 7 may be useful for those building on other versions
-of Linux.  Compiling the DLM on windows has not been attempted yet though das2C
-itself has been built and tested on Windows 7 and 10.
+Once the DLM has been build, you can place it somewhere on your `IDL_DLM_PATH`
+and it will work.  Currently you'll have to build the DLM from source code.
+Instructions for doing so can be found in:
 
-First download and build [das2C](https://github.com/das-developers/das2C) on
-your system.
+  * doc/build_linux.md
+  * doc/build_windows.md
 
-### Prerequisites
-
-The DLM uses static libs for portability when ever possible.  Install these
-packages first.  Instruction are also included in the makefile.
-```build
-sudo yum install fftw-devel fftw-static
-sudo yum install expat-devel expat-static
-sudo yum install openssl-devel openssl-static
-sudo yum install zlib-devel
-```
-
-### Build
-
-Open the file `makefile` and adjust `SYSLIB_DIR`, `L_DAS2` and `I_DAS2` as 
-indicated in the comments.  For Debian based systems, `SYSLIB_DIR` will be
-`/usr/lib` instead of `/usr/lib64`.  The values of the other two varibles 
-will depend on where your built/install das2C.
-
-Build the DLM by running the command:
-```bash
-$ make -f makefiles/Debian.mak  # Or other suitable makefile in makefiles
-```
-
-Output is in the `dlm` subdirectory.
-
-### IDL Environment Setup
-
-The files in the `dlm` subdirectory have to be added to your IDL DLM path.
-One way to do so follows.
-```bash
-cd dlm
-IDL_DLM_PATH="${PWD}:<IDL_DEFAULT>"
-export IDL_DLM_PATH
-```
+Follow one of the files above to create the DLM.
 
 ## Usage
 
