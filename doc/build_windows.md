@@ -1,3 +1,148 @@
-# Building das2dlm on Windows 10
+# Building das2dlm on Windows 10  (in progress)
 
-(Instructions in progress)
+Building das2dlm is some what tricky on Windows.  Using a prebuilt releases may
+save time if your focus is on writing IDL code that uses das2dlm instead of
+working on the module itself.  Using the pre-built DLM will be coverd in the
+main README.md file as soon as a release is ready.
+
+Windows development has been tested on Windows 10 using the command line
+Visual C++ tool set.
+
+# Install Visual Studio Tools
+
+First you need a compiler.  Since most system DLLs were compiled with Visual
+C++, this is the compiler we'll use:
+
+  Microsoft Visual C++ 14.2 standalone.
+  
+Go here:
+
+  (https://visualstudio.microsoft.com/downloads/)
+
+Open the "Tools for Visual Studio 2019" accordian and find:
+
+ "Build Tools for Visual Studio 2019"
+
+Click "Download" to get the installer.  It should be a small file named:
+
+  vs_BuildTools.exe
+  
+Run this file as Administrator.
+
+From the installer screen select "C++ build tools" then on the sidebar select
+at least the following opitons:
+
+  * MSVC v142 - VS 2019 C++ x64/x86 build tools
+  * Windows 10 SDK
+  * CMake tools
+
+select other options as you see fit.  The CMake tools are needed by vcpkg below.
+
+In the "Install locations" tab, feel free to enter a much shorter paths for the
+install loacation.  The author shortened:
+```
+  C:\Program Files(x86)\Microsoft Visual Studio\2019\BuildTools
+  C:\ProgramData\Microsoft\VisualStudio\Packages
+  C:\Program Files(x86)\Microsoft Visual Studio\Shared
+```
+to:
+```
+  C:\opt\vs\2019\buildtools
+  C:\opt\vs\packages
+  C:\opt\vs\shared
+```
+The rest of these notes will assume the locations above.  Substitute as needed
+for your system.
+
+After install you will need to reboot your computer.
+
+After rebooting, open a dos shell and run the Visual C environment config
+script:
+
+  "\opt\vs\2019\buildtools\VC\Auxiliary\Build\vcvars64.bat"
+  
+or equivalent.  You should get the output:
+```
+  **********************************************************************
+  ** Visual Studio 2019 Developer Command Prompt v16.4.4
+  ** Copyright (c) 2019 Microsoft Corporation
+  **********************************************************************
+  [vcvarsall.bat] Environment initialized for: 'x64'
+```
+Then try:
+```dos
+  cl.exe
+```
+If this works, then you now have a compiler on your path!
+
+# Install Dependencies
+
+As of 2018, Microsoft has relased a small dependency library handler tool called
+vcpkg (Visual C++ Package).  It downloads code, not binaries so that you can be
+sure that dependencies are build with the same version of the compiler as the
+final project.  Furthermore, all downloads, build products settings etc. are
+contained within the one top-level vcpgk git clone directory.  Multiple vcpkg
+clones can be placed on the same computer without interferring with each other.
+
+This is a welcome development.  
+
+To install vcpkg:
+
+$ git https://github.com/microsoft/vcpkg.git
+$ cd vcpkg
+$ .\bootstrap-vcpkg.bat -disableMetrics
+
+
+Then gather and build the dependencies:
+
+.\vcpkg install openssl fftw3 zlib expat pthreads --triplet x64-windows-static
+
+After this command is finished (will take a while), you should see the static
+library files and headers you need under the subdirectory subdirectory:
+
+  installed\x64-windows-static
+
+# Checkout and build
+
+You'll need to know the directory where you git cloned vcpkg.  Will this
+directory will be called VCPKG_ROOT, below.  Change all instances of VCPGK_ROOT
+as appropriate for your situation.
+
+This variable prevents putting binary files in a windows specific sub-folder.
+  
+  set N_ARCH=\
+
+These variables provide Windows.mak with library and header locations:
+
+  set LIBRARY_INC=%VCPGK_ROOT%\installed\x64-windows-static\include
+  set LIBRARY_LIB=%VCPGK_ROOT%\installed\x64-windows-static\lib
+
+This variable determines where the output will be installed:
+
+  set LIBRARY_PREFIX=C:\opt     # for example
+  
+  
+Then build, test and install the software...
+
+nmake.exe /nologo /f makefiles\Windows.mak build
+nmake.exe /nologo /f makefiles\Windows.mak run_test
+nmake.exe /nologo /f makefiles\Windows.mak install
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

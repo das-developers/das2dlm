@@ -1,9 +1,9 @@
 # Building das2dlm on Linux
 
 Building das2dlm is relativly easy on Linux, but a prebuild release may save
-you time if all you're looking to do is write IDL code that calls the new system
-routines supplied by this DLM (Down Load Module).  Using the pre-built DLM is
-coverd in the main README.md file.
+you time your focus is on writting IDL code uses das2dlm instead of working on
+the module itself.  Using the pre-built DLM will be coverd in the main
+README.md file as soon as a release is ready.
 
 Linux development has been tested on CentOS 7 and KDE Neon.  Building on other
 systems should work fine but the makefile will need to be edited.  Instruction
