@@ -76,8 +76,8 @@ directory to the path using the following commands.
 IDL_DLM_PATH="${PWD}/dlm:<IDL_DEFAULT>"
 export IDL_DLM_PATH
 ```
-The section `<IDL_DEFAULT>` is a bit odd, but that's the token IDL uses to find
-it's builting DLMs. 
+The section `<IDL_DEFAULT>` is not replacement text.  It is the a literal token that
+IDL uses to indicate the default module directory, so use it as is.
 
 The test script consists of commands as they would be entered at the IDL prompt.
 To run the script, redirect the contents of the script to standard input as 
