@@ -2,62 +2,82 @@
 MAKE=nmake /nologo
 CC=cl.exe /nologo
 
-# IDL Include Path ################################################################
-IDL_DIR="C:\Program Files\Exelis\IDL84\bin\bin.x86_64\external\include\"
+# Where to find stuff #########################################################
+#
+# Set default locations or use environment overrides.  To override any of 
+# the macros below use (for example):
+#
+#   set I_IDL="C:\Program Files\Exelis\IDL87\bin\bin.x86_64\external\include"
+#
 
-# Library locations ###########################################################
-# We have to make a "fat shared object" so that the IDL DLM will be self 
-# contained.  This means that almost everything has to be statically linked.
+# The directory containing idl_export.h
+!IFNDEF I_IDL
+I_IDL="C:\Program Files\Exelis\IDL84\bin\bin.x86_64\external\include"
+!ENDIF
 
-# Defaults assume you have das2C and compiled lib. 
-L_DAS2="e:\Codes\SPEDAS\das2\das2C\build\libdas2.3.lib"
+# Directory contaning das2 include directory.  (i.e. the one above the
+# actual header files)
+!IFNEDF I_DAS2
+I_DAS2="$(USERPROFILE)\git\das2C"
+!ENDIF
 
-ED=e:\Codes\SPEDAS\das2\vcpkg\installed\x64-windows-static\lib
-EX_LIBS=$(ED)\expat.lib $(ED)\fftw3.lib $(ED)\libssl.lib $(ED)\libcrypto.lib $(L_DAS2)
-EX_PTHREAD=$(ED)\pthreadVC3.lib
-# Advapi32.lib User32.lib Crypt32.lib ws2_32.lib
+# Directory contaning libdas2.3.lib
+!IFNDEF L_DAS2
+L_DAS2="$(USERPROFILE)\git\das2C\build"
+!ENDIF
 
-# Directory containing das2 with contains core.h
-I_DAS2="e:\Codes\SPEDAS\das2\das2C\"
+# Directory containing vcpkg static libraries
+!IFNDEF L_VCPKG
+L_VCPGK="$(USERPROFILE)\git\vcpkg\installed\x64-windows-static\lib
+!ENDIF
+
+# Directory containing vcpkg header files
+!IFNDEF I_VCPKG
+L_VCPGK="$(USERPROFILE)\git\vcpkg\installed\x64-windows-static\include
+!ENDIF
+
+# Derived defintions ##########################################################
+
+ALL_INC=/I $(I_DAS2) /I $(I_IDL) /I $(I_VCPKG)
+
+STATIC_LIBS=$(L_DAS2)\libdas2.3.lib $(L_VCPKG)\expat.lib $(L_VCPKG)\fftw3.lib \
+ $(L_VCPKG)\libssl.lib $(ED)\libcrypto.lib $(ED)\pthreadVC3.lib
+
+ALL_LIBS= $(EX_LIBS) Advapi32.lib User32.lib Crypt32.lib ws2_32.lib
+
 
 # Sources #####################################################################
 # Warning: keep das2c.c first in the list below!  Since we are usin a wierd
 #          #include scheme
+
+SRCS=src\das2c.c src\das2c_message.c src\das2c_db.c src\das2c_queries.c \
+ src\das2c_datasets.c src\das2c_dsinfo.c src\das2c_pdims.c src\das2c_vars.c \
+ src\das2c_data.c src\das2c_readhttp.c
+ 
 BD=build.windows64
-SD=src
 
-SOURCES=$(SD)\das2c.c $(SD)\das2c_message.c $(SD)\das2c_db.c \
-	$(SD)\das2c_queries.c $(SD)\das2c_dsinfo.c \
-	$(SD)\das2c_datasets.c $(SD)\das2c_physdims.c $(SD)\das2c_readhttp.c
+# next line is wierd, it's due to all the static functions in DLMs so we just
+# include all the .c files in one.
+OBJS=$(BD)\das2c.obj
 
-# Composite Defs ##############################################################
+CFLAGS=$(CFLAGS) $(ALL_INC)
 
-###CFLAGS=-g -std=c99 -Wall -fPIC -I$(IDL_DIR)/external/include -I$(I_DAS2)
-###STATIC_LIBS=$(L_DAS2) $(L_FFTW3) $(L_EXPAT) $(L_SSL) $(L_CRYPTO) $(L_Z)
-###LFLAGS=-Wall -fPIC -shared -Wl,-Bsymbolic $(STATIC_LIBS) $(DYN_LIBS)
-
-CFLAGS=/I $(IDL_DIR) /I $(I_DAS2) /I $(SD)
-
-DLMD=dlm
-P_SUFFIX=windows.x86_64.dll
+DLM_SUFFIX=.x86_64.dll
 
 # Explicit Rules #############################################################
 
-.PHONY: build
+build:$(BD) dlm\das2c.$(DLM_SUFFIX)
 
-build:CREATE_DIRS $(DLMD)/das2c.$(P_SUFFIX) $(DLMD)/das2c.dlm
-
-CREATE_DIRS:
+$(BD):
 	if not exist "$(BD)" mkdir "$(BD)"
-	if not exist "$(DLMD)" mkdir "$(DLMD)"
 	   
-$(BD)/das2c.obj:$(SOURCES)
+$(BD)/das2c.obj:$(SRCS)
 	$(CC) $(CFLAGS) /Fo:$@ /c $(SD)/das2c.c /link $(EX_PTHREAD)
 
-$(DLMD)/das2c.$(P_SUFFIX):$(BD)/das2c.obj
-	link /nologo /out:$@ $(BD)/das2c.obj $(EX_LIBS)
+dlm\das2c$(DLM_SUFFIX):$(BD)\das2c.obj
+	link /nologo /out:$@ $(BD)/das2c.obj $(ALL_LIBS)
 
 clean:
-	rm -r $(BD) 
-	rm $(DLMD)/das2c.$(P_SUFFIX)
+	if exist $(BD) rmdir /S /Q $(BD)
+	rm dlm/das2c.$(P_SUFFIX)
 

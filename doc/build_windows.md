@@ -31,12 +31,13 @@ or
   `"C:\Program Files(x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat"`
 
 if you using the default VC tools install location.  You should get the output:
-
+```
   **********************************************************************
   ** Visual Studio 2019 Developer Command Prompt v16.4.4
   ** Copyright (c) 2019 Microsoft Corporation
   **********************************************************************
   [vcvarsall.bat] Environment initialized for: 'x64'
+```
 
 Then issue
 ```batchfile
@@ -62,13 +63,22 @@ Open the file `Windows.mak` and check on the following variables:
 
   * `SYSLIB_DIR` should point to the directory containing `libssl.a`, etc.
   * `I_IDL` should point to the directory containing `idl_export.h`
-  * `L_DAS2` should point to the directory containing `libdas2.3.a`
+  * `L_DAS2` should be the full path to `libdas2.3.a`
   * `I_DAS2` should point to the directory containing the das2C include 
     directory, `das2`.
 
 The default paths for the variables above assume that you clone git projects
 under the path `%USERPROFIE%\git`. Undoubtable you'll have your own convention
 and will need to modify the make file variables above.
+
+If any of these are incorrect for your system then override them with 
+environment variables, for example:
+
+```batchfile
+set I_IDL="C:\Program Files\Exelis\IDL84\bin\bin.x86_64\external\include\"
+set L_DAS2="e:\Codes\SPEDAS\das2\das2C\build\libdas2.3.lib"
+set I_DAS2="e:\Codes\SPEDAS\das2\das2C"
+
 
 ## Build
 
@@ -80,6 +90,8 @@ Output is in the `dlm` subdirectory.  If the build runs successfully, you
 should see the output file `das2c.x86_64.dll`
 
 ## Testing
+
+TODO:
 
 
 
