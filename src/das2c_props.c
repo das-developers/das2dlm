@@ -26,11 +26,11 @@ static IDL_STRUCT_TAG_DEF DAS2C_PROP_tags[] = {
 	{0}
 };
 
-typedef struct _das2c_prop{
+typedef struct das2c_prop_data_s{
 	IDL_STRING key;
 	IDL_STRING type;
 	IDL_STRING value;
-} das2c_Prop;
+} DAS2C_PROP_data;
 
 static IDL_StructDefPtr DAS2C_PROP_pdef;
 
@@ -82,8 +82,8 @@ IDL_VPTR das2c_props_from_desc(const DasDesc* pDesc, const char* sKey)
 	}
 	
 	IDL_VPTR pRet;
-	das2c_Prop* pData = (das2c_Prop*) IDL_MakeTempStruct(
-		g_das2c_pPropDef,   /* The opaque structure definition */
+	DAS2C_PROP_data* pData = (DAS2C_PROP_data*) IDL_MakeTempStruct(
+		DAS2C_PROP_pdef,   /* The opaque structure definition */
 		1,                   /* Number of dimesions */
 		&dims,               /* Size of each dimension, (only one dimension) */
 		&pRet,               /* The actual structure variable */
@@ -176,17 +176,28 @@ static IDL_VPTR das2c_api_props(int argc, IDL_VPTR* argv)
 	const char* sDim = NULL;
 	UCHAR* pData = NULL;
 	
-	/* Look at the structure and see if it has a PDIM memeber */
+	const char* sKey = NULL;
+	/* See if they want a specific prop or not */
+	if(argc > 1){
+		sKey = das2c_args_prop_name(argc, argv, 1);
+	}
+	
+	/* Look at the structure and see if it has a PDIM memeber.  We know it
+	   has to be a structure because the das2c_arg_to_ds call worked */
 	IDL_VPTR pFakeVar = NULL;
 	IDL_MEMINT nOffset = IDL_StructTagInfoByName(
-		pVar->value.s.sdef, "PDIM", IDL_MSG_RET /* Just return if no prop */, &pFakeVar
+		argv[0]->value.s.sdef, 
+		"PDIM", 
+		IDL_MSG_SUPPRESS /* Just return if no prop */, 
+		&pFakeVar
 	);
+	
 	if(pFakeVar != NULL){
 		/* Oh, they do have a 'PDIM' member */
 		if(pFakeVar->type != IDL_TYP_STRING)
 			das2c_IdlMsgExit("Field PDIM in argument1 is not a string");
 		
-		UCHAR* pData = pVar->value.s.arr->data + nOffset;
+		pData = argv[0]->value.s.arr->data + nOffset;
 	
 		/* IDL docs are not clear on whos own's the memory after this call
 		   https://www.harrisgeospatial.com/docs/StringProcessing.html 
@@ -202,48 +213,9 @@ static IDL_VPTR das2c_api_props(int argc, IDL_VPTR* argv)
 				sDim, iQuery, iDs
 			);
 		
-		
+		return das2c_props_from_desc((DasDesc*)pDim, sKey);
 	}
-	
-	
-	/* Get/check dataset ID */
-	int iDs = das2c_args_ds_id(argc, argv, 1);
-	const DasDs* pDs = das2c_check_ds_id(pEnt, iDs);
-	const DasDesc* pDesc = (const DasDesc*) pDs;
-	const char* sKey = NULL;
-	if(argc > 2){
-		sKey = das2c_args_prop_name(argc, argv, 2);
-		if(!DasDesc_has(pDesc, sKey)) return IDL_GettmpNULL();
+	else{		
+		return das2c_props_from_desc((DasDesc*)pDs, sKey);
 	}
-	
-	return das2c_props_from_desc(pDesc, sKey);
-}
-
-#define D2C_DIMPROPS_MINA 3
-#define D2C_DIMPROPS_MAXA 4
-#define D2C_DIMPROPS_FLAG 0
-
-static IDL_VPTR das2c_api_dimprops(int argc, IDL_VPTR* argv)
-{
-	/* Get/check Query ID */
-	int iQueryId = das2c_args_query_id(argc, argv, 0);
-	const DasIdlDbEnt* pEnt = das2c_check_query_id(iQueryId);
-	
-	/* Get/check dataset ID */
-	int iDs = das2c_args_ds_id(argc, argv, 1);
-	das2c_check_ds_id(pEnt, iDs);
-	
-	/* Get/check dimension */
-	char sDim[128] = {'\0'};
-	int iDim = das2c_args_dim_id(argc, argv, 2, sDim, 127);
-	const DasDim* pDim = das2c_check_dim_id(pEnt, iDs, &iDim, sDim, 127);
-	
-	const DasDesc* pDesc = (const DasDesc*) pDim;
-	const char* sKey = NULL;
-	if(argc > 3){
-		sKey = das2c_args_prop_name(argc, argv, 3);
-		if(!DasDesc_has(pDesc, sKey)) return IDL_GettmpNULL();
-	}
-	
-	return das2c_props_from_desc(pDesc, sKey);
 }

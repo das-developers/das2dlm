@@ -123,7 +123,7 @@ static bool das2c_ent2query(DAS2C_QUERY_data* pDest, const QueryDbEnt* pSrc)
 /* Get a DB entry from a query struct arg */
 static const QueryDbEnt* das2c_arg_to_ent(int argc, IDL_VPTR* argv, int iArg)
 {	
-	if(argc <= iArg) das2c_IdlMsgExit("Expecting a struture for argument %d", iArg+1);
+	if(argc <= iArg) das2c_IdlMsgExit("Expecting a structure for argument %d", iArg+1);
 	
 	/* See if this is a query struct */
 	IDL_VPTR pVar = argv[iArg];

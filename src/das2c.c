@@ -74,9 +74,9 @@ static IDL_MEMINT g_aShape8[2];
 #include "das2c_dsinfo.c"
 #include "das2c_pdims.c"
 #include "das2c_vars.c"
-/*#include "das2c_props.c"
-#include "das2c_data.c"
-#include "das2c_free.c" */
+#include "das2c_props.c"
+/*#include "das2c_data.c" */
+#include "das2c_free.c"
 #include "das2c_readhttp.c"
 
 /* ************************************************************************* */
@@ -121,28 +121,26 @@ int IDL_Load(void){
 			D2C_PDIMS_MINA, D2C_PDIMS_MAXA, D2C_PDIMS_FLAG, NULL
 		},
 		{ 
-			{(IDL_SYSRTN_GENERIC)das2c_api_vars},     "DAS2C_VARS",
-			D2C_VARS_MINA,     D2C_VARS_MAXA,     D2C_VARS_FLAG,     NULL
+			{(IDL_SYSRTN_GENERIC)das2c_api_vars}, "DAS2C_VARS",
+			D2C_VARS_MINA, D2C_VARS_MAXA, D2C_VARS_FLAG, NULL
 		},
 		{ 
-			{(IDL_SYSRTN_GENERIC)das2c_api_dsprops},  "DAS2C_PROPS",
-			D2C_DSPROPS_MINA,  D2C_PROPS_MAXA,  D2C_PROPS_FLAG,  NULL
+			{(IDL_SYSRTN_GENERIC)das2c_api_props}, "DAS2C_PROPS",
+			D2C_PROPS_MINA, D2C_PROPS_MAXA, D2C_PROPS_FLAG, NULL
 		},
 /*		{
 			{(IDL_SYSRTN_GENERIC)das2c_api_data},    "DAS2C_DATA",
 			D2C_DATA_MINA,     D2C_DATA_MAXA,    D2C_DATA_FLAG,      NULL
 		},
-		{
+*/		{
 			{(IDL_SYSRTN_GENERIC)das2c_api_free},     "DAS2C_FREE",
 			D2C_FREE_MINA,     D2C_FREE_MAXA,     D2C_FREE_FLAG,     NULL
 		},
-*/		/* The "get data" functions, only one for now */
+		/* The "get data" functions, only one for now */
 		{
 			{(IDL_SYSRTN_GENERIC)das2c_api_readhttp}, "DAS2C_READHTTP",
 			D2C_READHTTP_MINA, D2C_READHTTP_MAXA, D2C_READHTTP_FLAG, NULL
 		}
-		
-		/* The ancillary functions, none so far */
 	};
 
 	/*

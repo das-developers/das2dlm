@@ -82,6 +82,7 @@ static bool das2c_db_init(size_t uLen){
 
 void das2c_free_ent(QueryDbEnt* pEnt)
 {
+	
    if(pEnt == NULL) return;
 
    if((pEnt->lDs != NULL)&&(pEnt->uDs > 0)){
@@ -101,8 +102,6 @@ void das2c_free_ent(QueryDbEnt* pEnt)
 	if(pEnt->sQuery != NULL) free(pEnt->sQuery);
 
    free(pEnt);
-
-   g_nDbStored -= 1;
 }
 
 /* ************************************************************************* */
@@ -166,18 +165,26 @@ static QueryDbEnt* das2c_db_newEnt()
 /* Return true if the entry existed, false otherwise */
 static bool das2c_db_free_ent(int nQueryId)
 {
-	if((g_pDasIdlDb == NULL)||(g_uDasIdlDbSz = 0)) return false;
+	if((g_pDasIdlDb == NULL)||(g_uDasIdlDbSz == 0)) return false;
 	
+	size_t u = 0;
+	int nFound = 0;
 	QueryDbEnt* pEnt = NULL;
-	for(size_t u = 0; u < g_uDasIdlDbSz; ++u){
+	
+	for(u = 0; u < g_nLastQueryId && nFound < g_nDbStored; ++u){
+		if(g_pDasIdlDb[u] == NULL) continue;
 		pEnt = g_pDasIdlDb[u];
+		
 		if(pEnt->nQueryId == nQueryId){
 			das2c_free_ent(pEnt);
 			g_pDasIdlDb[u] = NULL;
+			g_nDbStored -= 1;
+			break;
 		}
+		
 	}
 	
-	return false;
+	return true;
 }
 
 /* ************************************************************************* */
@@ -193,6 +200,7 @@ static const QueryDbEnt* das2c_db_getent(int nQueryId)
 		
 		if((nQueryId != 0) && (pEnt->nQueryId == nQueryId))
 			return pEnt;
+		++nFound;
 	}
 	
 	return NULL;
