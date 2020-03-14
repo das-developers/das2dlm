@@ -1,0 +1,4 @@
+LIBRARY        das2c
+DESCRIPTION    'IDL System Routine bindings for das2C'
+
+EXPORTS        IDL_Load   @1

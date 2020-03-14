@@ -17,23 +17,23 @@ I_IDL="C:\Program Files\Exelis\IDL84\bin\bin.x86_64\external\include"
 
 # Directory contaning das2 include directory.  (i.e. the one above the
 # actual header files)
-!IFNEDF I_DAS2
+!IFNDEF I_DAS2
 I_DAS2="$(USERPROFILE)\git\das2C"
 !ENDIF
 
 # Directory contaning libdas2.3.lib
 !IFNDEF L_DAS2
-L_DAS2="$(USERPROFILE)\git\das2C\build"
+L_DAS2="$(USERPROFILE)\git\das2C\build.windows"
 !ENDIF
 
 # Directory containing vcpkg static libraries
 !IFNDEF L_VCPKG
-L_VCPGK="$(USERPROFILE)\git\vcpkg\installed\x64-windows-static\lib
+L_VCPKG="$(USERPROFILE)\git\vcpkg\installed\x64-windows-static\lib"
 !ENDIF
 
 # Directory containing vcpkg header files
 !IFNDEF I_VCPKG
-L_VCPGK="$(USERPROFILE)\git\vcpkg\installed\x64-windows-static\include
+I_VCPKG="$(USERPROFILE)\git\vcpkg\installed\x64-windows-static\include"
 !ENDIF
 
 # Derived defintions ##########################################################
@@ -41,9 +41,10 @@ L_VCPGK="$(USERPROFILE)\git\vcpkg\installed\x64-windows-static\include
 ALL_INC=/I $(I_DAS2) /I $(I_IDL) /I $(I_VCPKG)
 
 STATIC_LIBS=$(L_DAS2)\libdas2.3.lib $(L_VCPKG)\expat.lib $(L_VCPKG)\fftw3.lib \
- $(L_VCPKG)\libssl.lib $(ED)\libcrypto.lib $(ED)\pthreadVC3.lib
+ $(L_VCPKG)\libssl.lib $(L_VCPKG)\libcrypto.lib $(L_VCPKG)\zlib.lib \
+ $(L_VCPKG)\pthreadVC3.lib
 
-ALL_LIBS= $(EX_LIBS) Advapi32.lib User32.lib Crypt32.lib ws2_32.lib
+ALL_LIBS= $(STATIC_LIBS) Advapi32.lib User32.lib Crypt32.lib ws2_32.lib
 
 
 # Sources #####################################################################
@@ -66,16 +67,16 @@ DLM_SUFFIX=.x86_64.dll
 
 # Explicit Rules #############################################################
 
-build:$(BD) dlm\das2c.$(DLM_SUFFIX)
+build:$(BD) dlm\das2c$(DLM_SUFFIX)
 
 $(BD):
 	if not exist "$(BD)" mkdir "$(BD)"
 	   
-$(BD)/das2c.obj:$(SRCS)
-	$(CC) $(CFLAGS) /Fo:$@ /c $(SD)/das2c.c /link $(EX_PTHREAD)
+$(BD)\das2c.obj:$(SRCS)
+	$(CC) $(CFLAGS) /Fo:$@ /c src\das2c.c
 
 dlm\das2c$(DLM_SUFFIX):$(BD)\das2c.obj
-	link /nologo /out:$@ $(BD)/das2c.obj $(ALL_LIBS)
+	link /nologo /ltcg /dll $(BD)/das2c.obj $(ALL_LIBS) /def:src\das2c.def /out:dlm\das2c$(DLM_SUFFIX)
 
 clean:
 	if exist $(BD) rmdir /S /Q $(BD)
