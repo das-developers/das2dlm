@@ -48,14 +48,14 @@ If this works, then you now have a compiler on your path!
 **NOTE**: You will need to intialize the VC environment whenever you open
 a new `cmd.exe` window when building or changing das2dlm.
 
-## Get idl_export.h
+## Get idl_export.h and idl.lib
 
-You will need the `idl_export.h` file from your IDL distribution.  This is the
-only file that is needed from the distribution.  There is no need to install
-the full IDL package to get this file.  Just copy it from an existing 
-installation that you own.  Unfortunatly the `idl_export.h` file cannot be
-redistribute with the das2dlm sources due to usage restrictions.  You'll have
-to get it on you're own.
+You will need the `idl_export.h` and `idl.lib` files from your IDL distribution.
+These are the only file that is needed from the distribution.  There is no need
+to install the full IDL package to get these files.  Just copy them from an
+existing installation that you are licensed to use.  Unfortunatly these files
+cannot be redistrubed by anyone but Harris Geospatial. You'll have to get them
+on you're own.
 
 ## Check Makefile
 
