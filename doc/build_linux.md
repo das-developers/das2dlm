@@ -17,6 +17,9 @@ The big one.  First download and build
 involved but much of the system setup for building das2C applies to building
 das2dlm.
 
+You will need to know the location of the libdas2.3.a and the header files
+from the das2C project in the "Check Makefile" section below.
+
 ## Add system packages
 
 The DLM uses static libs for portability when ever possible.  Install these
@@ -50,7 +53,8 @@ Open the file `RedHat.mak` or `Debian.mak` depending on if your Linux system
 is RedHat derived, or Debian derived, and check on the following variables:
 
   * `SYSLIB_DIR` should point to the directory containing `libssl.a`, etc.
-  * `L_DAS2` should point to the directory containing `libdas2.3.`
+  * `I_IDL` should point to the directory containing `idl_export.h`
+  * `L_DAS2` should point to the directory containing `libdas2.3.a`
   * `I_DAS2` should point to the directory containing the das2C include 
     directory, `das2`.
 

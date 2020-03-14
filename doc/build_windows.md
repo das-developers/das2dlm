@@ -8,126 +8,78 @@ main README.md file as soon as a release is ready.
 Windows development has been tested on Windows 10 using the command line
 Visual C++ tool set.
 
-# Install Visual Studio Tools
+## First build das2C
 
-First you need a compiler.  Since most system DLLs were compiled with Visual
-C++, this is the compiler we'll use:
+The big one.  First download and build
+[das2C](https://github.com/das-developers/das2C) on your system.  This can be
+involved but much of the system setup for building das2C applies to building
+das2dlm.  Most of the environment and tool setup needed for build das2dlm is
+handled by the das2C build instructions.
 
-  Microsoft Visual C++ 14.2 standalone.
+Keep the location of your das2C build output handy.  You will need to know
+the path to `libdas2.3.lib` and the header files from the das2C project in
+the "Check Makefile" section below.
+
+In case you have already done that but it has been a while, you will need to
+initialize your Visual Studio tools environment by opening a `cmd.exe` prompt
+and issuing the following command to run the config script:
+
+  `C:\opt\vs\2019\buildtools\VC\Auxiliary\Build\vcvars64.bat`
   
-Go here:
+or 
 
-  (https://visualstudio.microsoft.com/downloads/)
+  `"C:\Program Files(x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat"`
 
-Open the "Tools for Visual Studio 2019" accordian and find:
+if you using the default VC tools install location.  You should get the output:
 
- "Build Tools for Visual Studio 2019"
-
-Click "Download" to get the installer.  It should be a small file named:
-
-  vs_BuildTools.exe
-  
-Run this file as Administrator.
-
-From the installer screen select "C++ build tools" then on the sidebar select
-at least the following opitons:
-
-  * MSVC v142 - VS 2019 C++ x64/x86 build tools
-  * Windows 10 SDK
-  * CMake tools
-
-select other options as you see fit.  The CMake tools are needed by vcpkg below.
-
-In the "Install locations" tab, feel free to enter a much shorter paths for the
-install loacation.  The author shortened:
-```
-  C:\Program Files(x86)\Microsoft Visual Studio\2019\BuildTools
-  C:\ProgramData\Microsoft\VisualStudio\Packages
-  C:\Program Files(x86)\Microsoft Visual Studio\Shared
-```
-to:
-```
-  C:\opt\vs\2019\buildtools
-  C:\opt\vs\packages
-  C:\opt\vs\shared
-```
-The rest of these notes will assume the locations above.  Substitute as needed
-for your system.
-
-After install you will need to reboot your computer.
-
-After rebooting, open a dos shell and run the Visual C environment config
-script:
-
-  "\opt\vs\2019\buildtools\VC\Auxiliary\Build\vcvars64.bat"
-  
-or equivalent.  You should get the output:
-```
   **********************************************************************
   ** Visual Studio 2019 Developer Command Prompt v16.4.4
   ** Copyright (c) 2019 Microsoft Corporation
   **********************************************************************
   [vcvarsall.bat] Environment initialized for: 'x64'
-```
-Then try:
-```dos
+
+Then issue
+```batchfile
   cl.exe
 ```
-If this works, then you now have a compiler on your path!
+If this works, then you now have a compiler on your path!  
 
-# Install Dependencies
+**NOTE**: You will need to intialize the VC environment whenever you open
+a new `cmd.exe` window when building or changing das2dlm.
 
-As of 2018, Microsoft has relased a small dependency library handler tool called
-vcpkg (Visual C++ Package).  It downloads code, not binaries so that you can be
-sure that dependencies are build with the same version of the compiler as the
-final project.  Furthermore, all downloads, build products settings etc. are
-contained within the one top-level vcpgk git clone directory.  Multiple vcpkg
-clones can be placed on the same computer without interferring with each other.
+## Get idl_export.h
 
-This is a welcome development.  
+You will need the `idl_export.h` file from your IDL distribution.  This is the
+only file that is needed from the distribution.  There is no need to install
+the full IDL package to get this file.  Just copy it from an existing 
+installation that you own.  Unfortunatly the `idl_export.h` file cannot be
+redistribute with the das2dlm sources due to usage restrictions.  You'll have
+to get it on you're own.
 
-To install vcpkg:
+## Check Makefile
 
-$ git https://github.com/microsoft/vcpkg.git
-$ cd vcpkg
-$ .\bootstrap-vcpkg.bat -disableMetrics
+Open the file `Windows.mak` and check on the following variables:
 
+  * `SYSLIB_DIR` should point to the directory containing `libssl.a`, etc.
+  * `I_IDL` should point to the directory containing `idl_export.h`
+  * `L_DAS2` should point to the directory containing `libdas2.3.a`
+  * `I_DAS2` should point to the directory containing the das2C include 
+    directory, `das2`.
 
-Then gather and build the dependencies:
+The default paths for the variables above assume that you clone git projects
+under the path `%USERPROFIE%\git`. Undoubtable you'll have your own convention
+and will need to modify the make file variables above.
 
-.\vcpkg install openssl fftw3 zlib expat pthreads --triplet x64-windows-static
+## Build
 
-After this command is finished (will take a while), you should see the static
-library files and headers you need under the subdirectory subdirectory:
+Build the DLM by running the command:
+```batchfile
+> nmake /f makefiles\Windows.mak
+```
+Output is in the `dlm` subdirectory.  If the build runs successfully, you
+should see the output file `das2c.x86_64.dll`
 
-  installed\x64-windows-static
-
-# Checkout and build
-
-You'll need to know the directory where you git cloned vcpkg.  Will this
-directory will be called VCPKG_ROOT, below.  Change all instances of VCPGK_ROOT
-as appropriate for your situation.
-
-This variable prevents putting binary files in a windows specific sub-folder.
-  
-  set N_ARCH=\
-
-These variables provide Windows.mak with library and header locations:
-
-  set LIBRARY_INC=%VCPGK_ROOT%\installed\x64-windows-static\include
-  set LIBRARY_LIB=%VCPGK_ROOT%\installed\x64-windows-static\lib
-
-This variable determines where the output will be installed:
-
-  set LIBRARY_PREFIX=C:\opt     # for example
-  
-  
-Then build, test and install the software...
-
-nmake.exe /nologo /f makefiles\Windows.mak build
-nmake.exe /nologo /f makefiles\Windows.mak run_test
-nmake.exe /nologo /f makefiles\Windows.mak install
-
+## Testing
 
 
 

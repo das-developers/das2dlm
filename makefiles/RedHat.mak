@@ -1,6 +1,6 @@
 # IDL Location ################################################################
 
-IDL_DIR=/usr/local/harris/idl87
+I_IDL=/usr/local/harris/idl87/external/include
 
 # das2C location ##############################################################
 
@@ -50,7 +50,7 @@ SRCS_IN=$(patsubst %, src/%, $(SRCS))
 # Composite Defs ##############################################################
 
 CC=gcc
-CFLAGS=-g -std=c99 -Wall -fPIC -I$(IDL_DIR)/external/include -I$(I_DAS2)
+CFLAGS=-g -std=c99 -Wall -fPIC -I$(I_IDL) -I$(I_DAS2)
 
 STATIC_LIBS=$(L_DAS2) $(L_FFTW3) $(L_EXPAT) $(L_SSL) $(L_CRYPTO) $(L_Z)
 LFLAGS=-Wall -fPIC -shared -Wl,-Bsymbolic $(STATIC_LIBS) $(DYN_LIBS)
