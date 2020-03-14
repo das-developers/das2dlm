@@ -29,73 +29,114 @@
 /* ************************************************************************* */
 /* API Function, careful with changes! */
 
-#define D2C_DATA_MINA 4
-#define D2C_DATA_MAXA 5
+#define D2C_DATA_MINA 1
+#define D2C_DATA_MAXA 2
 #define D2C_DATA_FLAG 0
 
-
-/*
-;+
-
-;
-;    'idxmap': 8 Long   ; How to map indices for this variables array into the
-;                       ; overall datest index space.  A -1 means array values
-;                       ; are degenerate in a given dataset index.
-*/
-		
 /*
 ;+
 ; FUNCTION:
-;  das2c_array
+;  das2c_data
 ;
 ; PURPOSE:
-;  Get low-level backing arrays.  
-;  See das2c_get for general data access
+;  Get data arrays from das2 variables
 ;
 ; CALLING SEQUENCE:
-;  Result = das2c_array(query_id, ds_index, pdim, role)
+;  Result = das2c_data(var)
+;  Result = das2c_data(var, slice)
 ;
 ; INPUTS:
-;  query_id: The identification integer for the stored query result as
-;            returned by das2c_readhttp() or das2c_queries.
+;  var:  A DAS2C_VAR structure as returned by das2c_vars()
 ;
-;  ds_index: The dataset index, often 0.  See das2c_datasets() for details.
+; OPTIONAL INPUTS:
+;  slice: An anoymous structure providing a sub range in index space.  By 
+;         default das2c_data() returns an array that has the same extent in
+;         index space as the overall dataset (see DAS2C_DSET.SHAPE).  This
+;         makes it easy to plot data as all correlated values, no matter the
+;         underlying storage format, appear at the exact same index set.
+; 
+;         To save output memory, or when working with a subset of the data, a
+;         slice structure be provided which has the following fields:
+; 
+;           I - The location in the left-most (fastest moving) index.
+;           J - The location in the next to fastest moving index
+; 
+;          ... and so on up to the letter 'P'.
+; 
+;          The following example specifies a single point in an 8 dimensional
+;          index space, which is the maximum number of array dimensions in IDL:
+; 
+;            {I:-2, J:3, K:13, L:7, M:1567, N:-2, O:42, P:117}
+; 
+;          Which is equivalent to:
+;	 	
+;            [-2,3,13,7,1567,-2,42,117]
+; 
+;          in standard IDL array subset notation.  Negative intergers are 
+;          interpreted to indicate offsets from the end of the index range.
+;          Where -1 is the last legal index value.
+; 
+;          To indicate that an index should be allowed to vary over it's entire
+;          range, use the string '*' for the field value.  See the examples 
+;          below for the use of '*'.
+;	
+;          Any field not specified is assumed to have the value '*'.  Thus the
+;          following two calls produce identical outputs:
 ;
-;  pdim:     Either the physical dimension index (long), or the dimension's
-;            name (string).  For more infor see das2c_physdims().
+;             das2c_data(var, {I:'*', J:'*', K:'*'})
+;             das2c_data(var)
 ;
-;  role:     A string providing the variable role. Variable role names are
-;            standardized.  The most common one is 'center' which represents
-;            the central point of a measurement in a particular physical
-;            dimension.  The full set is:
+;          Any fields in the slice structure that apply to dimensions higher
+;          than the RANK of the dataset are ignored. (see DAS2C_DSET.RANK)
 ;
-;            'center', 'offest', 'min', 'max', 'width', 'mean', 'median',
-;            'mode', 'reference', 'offset', 'max_error', 'min_error',
-;            'uncertainty',  'std_dev', 'point_spread', 'weight'
+;          Currently only integers (both positive and negative) and the string
+;          '*' are understood as slice field values.  Arrays and ranges are not
+;          currently supported, though such support could be added if desired.
+;         
 ;
 ; OUTPUT:
-;            An array of values.  The IDL data type of the array depends
-;            on the input data.  If the specified variable is a virtual
-;            variable then this function return !NULL
+;          An array of values.  The IDL data type of the array is the same
+;          as the DAS2C_VAR.TYPE field.
 ;
 ; EXAMPLES:
-;  List summary of all variable roles for the 'time' dimension in dataset 0 of
-;  query result 27
-;    das2c_vars(27, 0, 'time')
+;  Get all time and frequency center coordinates from a dataset regardless of 
+;  its RANK and iterate over all coordinates.  This opperation is common when
+;  generating spectrograms.
 ;
-;  List summary information of the 'center' variable for 'time' in dataset 0 for
-;  query result 27
-;    das2c_vars(27, 0, 'time', 'center')
+;    v_time  = das2c_vars( das2c_pdims(ds, 'time'),      'center' )
+;    v_freq  = das2c_vars( das2c_pdims(ds, 'frequency'), 'center' )
+;    v_amp   = das2c_vars( das2c_pdims(ds, 'electric'),  'center' )
 ;
-;  List summary information for the first variable in the first physical
-;  physical dimension of the first datasets, what ever it happens to be.
-;    das2c_vars(27, 0, 0, 0)
+;    a_time  = das2c_data(v_time)
+;    a_freq  = das2c_data(v_time)
+;    a_amp   = das2c_data(v_time)
+;
+;    a_time  = reform(a_time, n_elements(a_time) )
+;    a_freq  = reform(a_freq, n_elements(a_freq) )
+;    a_amp   = reform(a_amp,  n_elements(a_amp)  )
+;
+;    for I=0,n_elements(a_time)-1 do begin
+;      ; some plotting/binning code here
+;    endfor
+;
+;  So long as the dataset has the indicated physical dimensions, this code 
+;  works regardless of the internal storage mechanisims.
+;
+;  Get a all unique center time values for a rank 2 dataset where time is not a
+;  function of the first index.
+;
+;    pd_time = das2c_pdims(ds, 'time')
+;    v_time = das2c_vars(pd_time, 'center')
+;    a_time = das2c_data(vTime, {I:0, J:'*'})
+;
+;  Get all unique frequency values for a rank
+;
 ;
 ; MODIFICATION HISTORY:
-;  Written by: Chris Piker, 2020-03-10
+;  Written by: Chris Piker, 2020-03-14
 ;-
 */
-static IDL_VPTR das2c_api_array(int argc, IDL_VPTR* argv)
+static IDL_VPTR das2c_api_data(int argc, IDL_VPTR* argv)
 {
 	
 	return IDL_GettmpNULL();
