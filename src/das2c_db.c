@@ -86,7 +86,7 @@ void das2c_free_ent(QueryDbEnt* pEnt)
    if(pEnt == NULL) return;
 
    if((pEnt->lDs != NULL)&&(pEnt->uDs > 0)){
-      for(size_t u; u < pEnt->uDs; ++u)
+      for(size_t u = 0; u < pEnt->uDs; ++u)
          del_DasDs(pEnt->lDs[u]);
    }
 
