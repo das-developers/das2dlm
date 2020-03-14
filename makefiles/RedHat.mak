@@ -18,10 +18,10 @@ I_DAS2=$(HOME)/git/das2C
 
 SYSLIB_DIR=/usr/lib64
 
-# yum install fftw-devel fftw-static    (Fixme: Add Debian hints)
+# yum install fftw-devel fftw-static 
 L_FFTW3=$(SYSLIB_DIR)/libfftw3.a
 
-# yum install expat-devel expat-static  (Fixme: Add Debian hints)
+# yum install expat-devel expat-static
 L_EXPAT=$(SYSLIB_DIR)/libexpat.a
 
 # yum install openssl-devel openssl-static
@@ -41,8 +41,9 @@ P_SUFFIX=linux.x86_64.so
 
 # Warning: keep das2c.c first in the list below!  Since we are usin a wierd
 #          #include scheme
-SRCS=das2c.c das2c_message.c das2c_db.c das2c_queries.c das2c_dsinfo.c \
- das2c_datasets.c das2c_physdims.c das2c_readhttp.c
+SRCS=das2c.c das2c_message.c das2c_db.c das2c_readhttp.c das2c_queries.c \
+ das2c_dsinfo.c das2c_datasets.c das2c_pdims.c das2c_vars.c das2c_props.c \
+ das2c_data.c das2c_free.c
  
 SRCS_IN=$(patsubst %, src/%, $(SRCS))
 

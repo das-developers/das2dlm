@@ -17,7 +17,157 @@
  * You should have received a copy of the GNU Lesser General Public License
  * version 2.1 along with libdas2; if not, see <http://www.gnu.org/licenses/>.
  */
- 
+
+/* ************************************************************************* */
+/* DAS2C_QUERY structure */
+
+/* IDL defininiton of DAS2C_QUERY */
+static IDL_STRUCT_TAG_DEF DAS2C_QUERY_tags[] = {
+	{"QUERY",    0, (void*)IDL_TYP_LONG},
+
+	{"SERVER",   0, (void*)IDL_TYP_STRING},
+	{"SOURCE",   0, (void*)IDL_TYP_STRING},
+	{"BEGIN",    0, (void*)IDL_TYP_STRING},
+	{"END",      0, (void*)IDL_TYP_STRING},
+	{"RES",      0, (void*)IDL_TYP_STRING},
+	{"EXTRA",    0, (void*)IDL_TYP_STRING},
+
+	{"N_DSETS",  0, (void*)IDL_TYP_LONG},
+	{"N_VALS",   0, (void*)IDL_TYP_LONG64},
+	{0}
+};
+
+/* Global struct definition pointer */
+static IDL_StructDefPtr DAS2C_QUERY_pdef;
+
+static void define_DAS2C_QUERY()
+{
+	DAS2C_QUERY_pdef = IDL_MakeStruct("DAS2C_QUERY", DAS2C_QUERY_tags);
+}
+
+/* C structure to use in casts for manipulating IDL struct memory */
+typedef struct das2c_query_data_s{
+	IDL_LONG   query;
+	
+	IDL_STRING server;
+	IDL_STRING source;
+	IDL_STRING begin;
+	IDL_STRING end;
+	IDL_STRING res;
+	IDL_STRING extra;
+
+	IDL_LONG   n_dsets;
+	IDL_LONG64 n_vals;
+} DAS2C_QUERY_data;
+
+
+/* Formating a query struct using an entry object pointer */
+static bool das2c_ent2query(DAS2C_QUERY_data* pDest, const QueryDbEnt* pSrc)
+{		
+	pDest->query = pSrc->nQueryId;
+	pDest->n_dsets = (IDL_LONG) pSrc->uDs;
+
+	char sBuf[512] = {'\0'};
+	if(!das2c_db_getPath(pSrc, sBuf, 511)) return false;
+	IDL_StrStore(&(pDest->server), sBuf);
+	
+	/* Loop over the params, pulling out ones of interest */
+	size_t u = 0;
+	for(u = 0; u < pSrc->uParam; ++u){
+				
+		/* WARNING: Knowledge of das2 server interface used here
+		   may need updates for das2.3 compatability */
+		if(strcmp(pSrc->psKey[u], "dataset") == 0){
+			if(pSrc->psVal[u] != NULL) 
+				IDL_StrStore(&(pDest->source), pSrc->psVal[u]);
+		}
+		if(strcmp(pSrc->psKey[u], "start_time") == 0){
+			if(pSrc->psVal[u] != NULL) 
+				IDL_StrStore(&(pDest->begin), pSrc->psVal[u]);
+		}
+		if(strcmp(pSrc->psKey[u], "end_time") == 0){
+			if(pSrc->psVal[u] != NULL) 
+				IDL_StrStore(&(pDest->end), pSrc->psVal[u]);
+		}
+		if(strcmp(pSrc->psKey[u], "resolution") == 0){
+			if(pSrc->psVal[u] != NULL) 
+				IDL_StrStore(&(pDest->res), pSrc->psVal[u]);
+		}
+		if(strcmp(pSrc->psKey[u], "interval") == 0){
+			if(pSrc->psVal[u] != NULL) 
+				IDL_StrStore(&(pDest->res), pSrc->psVal[u]);
+		}
+		if(strcmp(pSrc->psKey[u], "params") == 0){
+			if(pSrc->psVal[u] != NULL) 
+				IDL_StrStore(&(pDest->extra), pSrc->psVal[u]);
+		}
+	}
+			
+	/* Now compute the total number of values in all arrays in
+	   in all datasets */
+	size_t a = 0;
+	DasDs* pDs = NULL;
+	DasAry* pAry = NULL;
+	
+	pDest->n_vals = 0;
+	for(u = 0; u < pSrc->uDs; ++u){
+		pDs = pSrc->lDs[u];
+		for(a = 0; a < pDs->uArrays; ++a){
+			pAry = pDs->lArrays[a];
+			pDest->n_vals += DasAry_size(pAry);
+		}
+	}	
+	return true;
+}
+
+/* Get a DB entry from a query struct arg */
+static const QueryDbEnt* das2c_arg_to_ent(int argc, IDL_VPTR* argv, int iArg)
+{	
+	if(argc <= iArg) das2c_IdlMsgExit("Expecting a structure for argument %d", iArg+1);
+	
+	/* See if this is a query struct */
+	IDL_VPTR pVar = argv[iArg];
+	
+	if(pVar->type != IDL_TYP_STRUCT)
+		das2c_IdlMsgExit("Argument %d is not a structure", iArg);	
+	
+	/* Get the query ID.  Use duck-typing here.  If there is a
+	   field named "QUERY" and it can be converted to a LONG
+		then good enough.  Consider it a DAS2C_QUERY structure */
+	
+	IDL_VPTR pFakeVar = NULL;
+	IDL_MEMINT nOffset = IDL_StructTagInfoByName(
+		pVar->value.s.sdef, "QUERY", IDL_MSG_LONGJMP, &pFakeVar
+	);
+	
+	/* Get pointer to query field in first element of the structure array */
+	/* Skipping the (i * elt_len) clause since i = 0 for first row */
+	UCHAR* pData = pVar->value.s.arr->data + nOffset;
+	
+	/* Get the query ID value, accept a few different types */
+	int32_t iQueryId = 0;  /* 0 is always a bad query ID */
+	switch(pFakeVar->type){
+	case IDL_TYP_INT:  iQueryId = *((IDL_INT*)pData);  break;
+	case IDL_TYP_UINT: iQueryId = *((IDL_UINT*)pData); break;
+	case IDL_TYP_LONG: iQueryId = *((IDL_LONG*)pData); break;
+	/* other types have range larger than uint32_t */
+	default:
+		das2c_IdlMsgExit(" 'QUERY' value should be an INT, UINT or LONG");
+		break;
+	}
+
+	const QueryDbEnt* pEnt = das2c_db_getent(iQueryId);
+	if(pEnt == NULL) das2c_IdlMsgExit("No query result has ID %d", iQueryId);
+	return pEnt;
+}
+
+/* ************************************************************************* */
+/* API Function, careful with changes! */
+
+#define D2C_QUERIES_MINA 0
+#define D2C_QUERIES_MAXA 1
+#define D2C_QUERIES_FLAG 0
+
 /*
 ;+
 ; FUNCTION:
@@ -27,6 +177,7 @@
 ;  List stored das2 query results
 ;
 ; CALLING SEQUENCE:
+;  Result = das2c_queries()
 ;  Result = das2c_queries(query_id)
 ;
 ; OPTIONAL INPUTS:
@@ -37,66 +188,38 @@
 ;  This function returns an array of structures providing an overview of
 ;  each stored result.  Output structures have the fields:
 ;
-;    'id':       Long    ; A unique ID for this query result
-;    'datasets': Long    ; The number of datasets returned
-;    'server':   String  ; The network URL from which data were loaded
-;    'source':   String  ; The data source ID string on the server, if known
-;    'begin':    String  ; The min time value
-;    'end':      String  ; the max time value
-;    'res':      String  ; The resolution requested if any
-;    'extra':    String  ; Any extra arguments sent to the server
-;    'size':     Long64  ; The total number of values in the query result
+;    QUERY:    Long     ; The ID number of the query that producted this
+;                       ; dataest, starts from 1
+;
+;    N_DSETS:  Long     ; The number of datasets returned by the query
+;
+;    N_VALS:   Long64   ; The total number of actual data values in the
+;                       ; dataset.  Due to virtual variables this may be less
+;                       ; sum of the shapes of all variables.
+;
+; ADDITIONAL OUTPUT:
+;  If the query was to a das2 server the following structure memebers 
+;  will also be present:
+;
+;    SERVER:   String   ; The network URL from which data were loaded
+;    SOURCE:   String   ; The data source ID string on the server, if known
+;    BEGIN:    String   ; The min time value
+;    END:      String   ; the max time value
+;    RES:      String   ; The resolution requested if any
+;    EXTRA:    String   ; Any extra arguments sent to the server
 ;
 ; EXAMPLES:
 ;  List summary information on all stored results
 ;    das2c_queries()
 ;
-;  List summary information on a single stored result
+;  List summary information given a single stored result ID.
 ;    das2c_queries(23);
 ;
 ; MODIFICATION HISTORY:
-;  Written by: Chris Piker, 2020-03-01
+;  Written by: Chris Piker, 2020-03-11
 ;-
 */
-
-/* Output structure definition */
-static IDL_STRUCT_TAG_DEF _das2c_result_tags[] = {
-	{"id",       0, (void*)IDL_TYP_LONG},
-	{"datasets", 0, (void*)IDL_TYP_LONG},
-	{"server",   0, (void*)IDL_TYP_STRING},
-	{"source",   0, (void*)IDL_TYP_STRING},
-	{"begin",    0, (void*)IDL_TYP_STRING},
-	{"end",      0, (void*)IDL_TYP_STRING},
-	{"res",      0, (void*)IDL_TYP_STRING},
-	{"extra",    0, (void*)IDL_TYP_STRING},
-	{"size",     0, (void*)IDL_TYP_LONG64},
-	{0}
-};
-
-typedef struct _das2c_result_sum{
-	IDL_LONG   id;
-	IDL_LONG   datasets;
-	IDL_STRING server;
-	IDL_STRING source;
-	IDL_STRING begin;
-	IDL_STRING end;
-	IDL_STRING res;
-	IDL_STRING extra;
-	IDL_LONG64 size;
-} das2c_ResultSummary;
-		
-#define D2C_QUERIES_MINA 0
-#define D2C_QUERIES_MAXA 1
-#define D2C_QUERIES_FLAG 0
-
-static IDL_StructDefPtr g_das2c_pResultDef;
-
-static void DAS2C_QUERY_def()
-{
-	g_das2c_pResultDef = IDL_MakeStruct("DAS2C_QUERY", _das2c_result_tags);
-}
-		
-static IDL_VPTR das2c_queries(int argc, IDL_VPTR* argv)
+static IDL_VPTR das2c_api_queries(int argc, IDL_VPTR* argv)
 {
 	/* If no queries are stored, return the !NULL variable */
 	if(g_nDbStored == 0) return IDL_GettmpNULL();
@@ -134,84 +257,27 @@ static IDL_VPTR das2c_queries(int argc, IDL_VPTR* argv)
 	if(nFound == 0) return IDL_GettmpNULL();
 		
 	IDL_MEMINT dims = nFound;
-	
 	IDL_VPTR pRet;
 	
-	/* Returns pRet->value.s.arr.data, if _das2c_queries_ret_s and
-	 * _das2c_queries_tags are correct */
-	das2c_ResultSummary* pData = (das2c_ResultSummary*) IDL_MakeTempStruct(
-		g_das2c_pResultDef,   /* The opaque structure definition */
-		1,      /* Number of dimesions */
-		&dims,  /* Size of each dimension, (only one dimension) */
-		&pRet,  /* The actual structure variable */
-		TRUE    /* Zero out the array */
+	/* Returns pRet->value.s.arr.data */
+	DAS2C_QUERY_data* pData = (DAS2C_QUERY_data*) IDL_MakeTempStruct(
+		DAS2C_QUERY_pdef, 1, /* ary dims */ &dims,  /* Sz of each dim */
+		&pRet,  /* Actual idl varabile */  TRUE    /* Zero out the array */
 	);
 	
 	/* Now fill in the values.  Pray that some other thread hasn't
 	   screwed up the query database */
 	nFound = 0;
 	
-	DasIdlDbEnt* pEnt = NULL;
-	size_t v = 0;
-	const DasDs* pDs = NULL;
-	size_t d = 0;
-	const DasAry* pAry = NULL;
-	size_t a = 0;
+	QueryDbEnt* pEnt = NULL;
 	for(u = 0; u < g_nLastQueryId && nFound < g_nDbStored; ++u){		
 		if(g_pDasIdlDb[u] == NULL) continue;
-		pEnt = g_pDasIdlDb[u];
-		
-		if((iQueryId == 0)||(pEnt->nQueryId == iQueryId)){
-			pData->id = pEnt->nQueryId;
-			
-			
-			pData->datasets = (IDL_LONG) pEnt->uDs;
-			
-			/* TODO: Add path component */
-			if(pEnt->sHost) IDL_StrStore(&(pData->server), pEnt->sHost);
-			
-			/* Loop over the params, pulling out ones of interest */
-			for(v = 0; v < pEnt->uParam; ++v){
+	
 				
-				/* WARNING: Knowledge of das2 server interface used here
-				            may need updates for das2.3 compatability */
-				if(strcmp(pEnt->psKey[v], "dataset") == 0){
-					if(pEnt->psVal[v] != NULL) 
-						IDL_StrStore(&(pData->source), pEnt->psVal[v]);
-				}
-				if(strcmp(pEnt->psKey[v], "start_time") == 0){
-					if(pEnt->psVal[v] != NULL) 
-						IDL_StrStore(&(pData->begin), pEnt->psVal[v]);
-				}
-				if(strcmp(pEnt->psKey[v], "end_time") == 0){
-					if(pEnt->psVal[v] != NULL) 
-						IDL_StrStore(&(pData->end), pEnt->psVal[v]);
-				}
-				if(strcmp(pEnt->psKey[v], "resolution") == 0){
-					if(pEnt->psVal[v] != NULL) 
-						IDL_StrStore(&(pData->res), pEnt->psVal[v]);
-				}
-				if(strcmp(pEnt->psKey[v], "interval") == 0){
-					if(pEnt->psVal[v] != NULL) 
-						IDL_StrStore(&(pData->res), pEnt->psVal[v]);
-				}
-				if(strcmp(pEnt->psKey[v], "params") == 0){
-					if(pEnt->psVal[v] != NULL) 
-						IDL_StrStore(&(pData->extra), pEnt->psVal[v]);
-				}
-			}
-			
-			/* Now compute the total number of values in all arrays in
-			   in all datasets */
-			pData->size = 0;
-			for(d = 0; d < pEnt->uDs; ++d){
-				pDs = pEnt->lDs[d];
-				for(a = 0; a < pDs->uArrays; ++a){
-					pAry = pDs->lArrays[a];
-					pData->size += DasAry_size(pAry);
-				}
-			}
-			
+		if((iQueryId == 0)||(pEnt->nQueryId == iQueryId)){
+			pEnt = g_pDasIdlDb[u];
+			das2c_ent2query(pData, pEnt);	
+					
 			++pData;
 			++nFound;
 			if(iQueryId != 0) break;

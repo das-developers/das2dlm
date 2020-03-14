@@ -41,9 +41,10 @@
 ;       'das2dlm/VERSION' is sent as the user agent.
 ;
 ; OUTPUT:
-;  This function returns a unique ID for the results of this query, or 0 if
-;  the query failed.  The QueryID can be used to retrieve data arrays and
-;  metadata returned from the server.
+;  This function returns a structure of type DAS2C_QUERY if it succeeds, or
+;  !NULL on failure.  The query structure is small.  It does not contain the
+;  actual data but may be used to get data and metadata on the query result.
+;  See das2c_queries() for a description of the DAC2_QUERY structure fields.
 ;
 ; SIDE EFFECTS:
 ;  Output data from the query are loaded into RAM.  Use the function das2c_free
@@ -61,28 +62,27 @@
 ;    sFmt = '%s?server=dataset&dataset=%s&start_time=%s&end_time=%s&resolution=%s'
 ;    sUrl = string(sSrv, sDs, sBeg, sEnd, sRes, format=sFmt)
 ;
-;    id = das2c_readhttp(sUrl, "spedas/3.20")
+;    query = das2c_readhttp(sUrl, "spedas/3.20")
 ;
 ;  Now get information about the query:
 ;
-;    das2c_dataset(id)
-;    das2c_dsinfo(id, 0)
+;    das2c_datasets(query)
+;    das2c_info(query, 0)
 ;
 ; MODIFICATION HISTORY:
-;  Written by: Chris Piker, 2020-03-01
-;
+;  Written by: Chris Piker, 2020-03-11
 ;-
 */
 #define D2C_READHTTP_MINA  1
 #define D2C_READHTTP_MAXA  2
 #define D2C_READHTTP_FLAG  0
 
-static IDL_VPTR das2c_readhttp(int argc, IDL_VPTR* argv)
+/* ************************************************************************* */
+/* API Function, careful with changes! */
+static IDL_VPTR das2c_api_readhttp(int argc, IDL_VPTR* argv)
 {
 	if(argc < 1)
-		IDL_Message(
-			IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP,"HTTP GET URL string not provided"
-		);
+		das2c_IdlMsgExit("HTTP GET URL string not provided");
 	
 	const char* sInitialUrl = IDL_VarGetString(argv[0]);
 	
@@ -105,8 +105,8 @@ static IDL_VPTR das2c_readhttp(int argc, IDL_VPTR* argv)
 			sError, 1023, "%d, Could not get body for URL, reason: %s", 
 			res.nCode, res.sError
 		);
-		IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, sError);
 		DasHttpResp_clear(&res);
+		IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, sError);
 	}
 	
 	char sUrl[512] = {'\0'};
@@ -149,13 +149,23 @@ static IDL_VPTR das2c_readhttp(int argc, IDL_VPTR* argv)
 	DasDsBldr_release(pBldr); /* Detach datasets from builder */
 	del_DasIO(pIn);           /* No longer need the IO object */
 	
-	DasIdlDbEnt* pEnt = das2c_db_addHttpEnt(&res, lDs, uDs);
+	const QueryDbEnt* pEnt = das2c_db_addHttpEnt(&res, lDs, uDs);
 	DasHttpResp_clear(&res);
 	
 	/* addHttpEnt cleans up any memory on an error */
-	IDL_VPTR pRet;
-	if(pEnt == NULL)  pRet = IDL_GettmpLong(0);
-	else              pRet = IDL_GettmpLong(pEnt->nQueryId);
 	
+	if(pEnt == NULL)
+		return IDL_GettmpNULL();
+	
+	IDL_VPTR pRet;
+	IDL_MEMINT dims = 1;
+	DAS2C_QUERY_data* pData = (DAS2C_QUERY_data*) IDL_MakeTempStruct(
+		DAS2C_QUERY_pdef, 1, /* ary dims */ &dims,  /* Sz of each dim */
+		&pRet,  /* Actual idl varabile */  TRUE    /* Zero out the array */
+	);
+	
+	if(! das2c_ent2query(pData, pEnt)) /* only 1 value in the output struct array */
+		das2c_IdlMsgExit("Logic error in das2c_ent2query()");
+			
 	return pRet;
 }

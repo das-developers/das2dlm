@@ -30,37 +30,38 @@
 */
 
 #define D2C_ENT_HTTP_QUERY 0xA
+#define D2C_ENT_HTTPS_QUERY 0xB
 
 /* ************************************************************************* */
 /* DB entry "class" */
 
-typedef struct das2_idl_db{
-	int nQueryId;  /* The query ID.  0 is never a legal ID */
-	DasDs** lDs;   /* Pointer to the resulting datasets */
-	size_t  uDs;   /* Number of resulting datasets */
+typedef struct query_db_ent{
+	int nQueryId;   /* The query ID.  0 is never a legal ID */
+	DasDs** lDs;    /* Pointer to the resulting datasets */
+	size_t  uDs;    /* Number of resulting datasets */
 	
 	/* Query info */
-	time_t  nTime; /* The time at which the query was performed, seconds since
-	                * 1970 (unix epoch) */
-	int     nType; /* The query type, only HTTP (nType=0xA) allowed right now */
-	char*   sHost; /* The host that was queried */
-	char*   sPort; /* The port that was queried */	
-	char*   sPath; /* The path that was queried */
+	time_t  nTime;  /* The time at which the query was performed, seconds since
+	                 * 1970 (unix epoch) */
+	int     nType;  /* The query type, only HTTP & HTTPS allowed right now */
+	char*   sHost;  /* The host that was queried */
+	char*   sPort;  /* The port that was queried */	
+	char*   sPath;  /* The path that was queried */
 	
 	size_t  uParam; /* The number of query parameters */
-	char**  psKey; /* The query param pointers  */
-	char**  psVal; /* The query value pointers  */
-	char*   sQuery;  /* The buffer containing the query */	
-} DasIdlDbEnt;
+	char**  psKey;  /* The query param pointers  */
+	char**  psVal;  /* The query value pointers  */
+	char*   sQuery; /* The buffer containing the query */	
+} QueryDbEnt;
 
 /* ************************************************************************* */
 /* Initalize the db (only call this once) */
 
 /* TODO: Make thread safe! */
-static DasIdlDbEnt** g_pDasIdlDb;      /* Pointer to result array */
-static size_t        g_uDasIdlDbSz;    /* Size of the results storage array */
-static int           g_nDbStored;      /* Number of results stored */
-static int           g_nLastQueryId;   /* Last query ID used       */
+static QueryDbEnt** g_pDasIdlDb;      /* Pointer to result array */
+static size_t       g_uDasIdlDbSz;    /* Size of the results storage array */
+static int          g_nDbStored;      /* Number of results stored */
+static int          g_nLastQueryId;   /* Last query ID used       */
 
 static bool das2c_db_init(size_t uLen){
 	
@@ -68,7 +69,7 @@ static bool das2c_db_init(size_t uLen){
 	g_nDbStored = 0;
 	
 	g_uDasIdlDbSz = uLen;
-	g_pDasIdlDb = (DasIdlDbEnt**) calloc(g_uDasIdlDbSz, sizeof(char*));
+	g_pDasIdlDb = (QueryDbEnt**) calloc(g_uDasIdlDbSz, sizeof(char*));
 	if(g_pDasIdlDb == NULL){
 		das_error(DLMERR, "Could not allocate internal DB memory");
 		return false;
@@ -79,8 +80,9 @@ static bool das2c_db_init(size_t uLen){
 /* ************************************************************************* */
 /* Free a DB entry */
 
-void das2c_free_ent(DasIdlDbEnt* pEnt)
+void das2c_free_ent(QueryDbEnt* pEnt)
 {
+	
    if(pEnt == NULL) return;
 
    if((pEnt->lDs != NULL)&&(pEnt->uDs > 0)){
@@ -100,8 +102,6 @@ void das2c_free_ent(DasIdlDbEnt* pEnt)
 	if(pEnt->sQuery != NULL) free(pEnt->sQuery);
 
    free(pEnt);
-
-   g_nDbStored -= 1;
 }
 
 /* ************************************************************************* */
@@ -111,12 +111,12 @@ void das2c_free_ent(DasIdlDbEnt* pEnt)
  * 
  * Returns a blank DB entry structure, only the nQueryID field is valid.
  */
-static DasIdlDbEnt* das2c_db_newEnt()
+static QueryDbEnt* das2c_db_newEnt()
 {
 	size_t u = 0;
 	for(u = 0; u < g_uDasIdlDbSz; ++u){
 		if(g_pDasIdlDb[u] == NULL){
-			g_pDasIdlDb[u] = (DasIdlDbEnt*) calloc(1, sizeof(DasIdlDbEnt));
+			g_pDasIdlDb[u] = (QueryDbEnt*) calloc(1, sizeof(QueryDbEnt));
 			if(g_pDasIdlDb[u] == NULL){
 				das_error(DLMERR, "Could not allocate new DB entry");
 				return NULL;
@@ -131,7 +131,7 @@ static DasIdlDbEnt* das2c_db_newEnt()
 		}
 	}
 	/* Okay no room in the inn */
-	DasIdlDbEnt** pTmp = (DasIdlDbEnt**) realloc(g_pDasIdlDb, g_uDasIdlDbSz*2);
+	QueryDbEnt** pTmp = (QueryDbEnt**) realloc(g_pDasIdlDb, g_uDasIdlDbSz*2);
 	if(pTmp == NULL){
 		das_error(DLMERR, "Could not re-allocate new DB entry");
 		return NULL;
@@ -145,7 +145,7 @@ static DasIdlDbEnt* das2c_db_newEnt()
 	g_uDasIdlDbSz *= 2;
 	
 	/* Now try to make an entry */
-	g_pDasIdlDb[u] = (DasIdlDbEnt*) calloc(1, sizeof(DasIdlDbEnt));
+	g_pDasIdlDb[u] = (QueryDbEnt*) calloc(1, sizeof(QueryDbEnt));
 	
 	if(g_pDasIdlDb[u] == NULL){
 		das_error(DLMERR, "Could not allocate new DB entry");
@@ -165,25 +165,33 @@ static DasIdlDbEnt* das2c_db_newEnt()
 /* Return true if the entry existed, false otherwise */
 static bool das2c_db_free_ent(int nQueryId)
 {
-	if((g_pDasIdlDb == NULL)||(g_uDasIdlDbSz = 0)) return false;
+	if((g_pDasIdlDb == NULL)||(g_uDasIdlDbSz == 0)) return false;
 	
-	DasIdlDbEnt* pEnt = NULL;
-	for(size_t u = 0; u < g_uDasIdlDbSz; ++u){
+	size_t u = 0;
+	int nFound = 0;
+	QueryDbEnt* pEnt = NULL;
+	
+	for(u = 0; u < g_nLastQueryId && nFound < g_nDbStored; ++u){
+		if(g_pDasIdlDb[u] == NULL) continue;
 		pEnt = g_pDasIdlDb[u];
+		
 		if(pEnt->nQueryId == nQueryId){
 			das2c_free_ent(pEnt);
 			g_pDasIdlDb[u] = NULL;
+			g_nDbStored -= 1;
+			break;
 		}
+		
 	}
 	
-	return false;
+	return true;
 }
 
 /* ************************************************************************* */
-static const DasIdlDbEnt* das2c_db_getent(int nQueryId)
+static const QueryDbEnt* das2c_db_getent(int nQueryId)
 {
 	size_t u;
-	const DasIdlDbEnt* pEnt = NULL;
+	const QueryDbEnt* pEnt = NULL;
 	
 	int nFound = 0;
 	for(u = 0; u < g_nLastQueryId && nFound < g_nDbStored; ++u){		
@@ -192,6 +200,7 @@ static const DasIdlDbEnt* das2c_db_getent(int nQueryId)
 		
 		if((nQueryId != 0) && (pEnt->nQueryId == nQueryId))
 			return pEnt;
+		++nFound;
 	}
 	
 	return NULL;
@@ -202,7 +211,7 @@ static const DasIdlDbEnt* das2c_db_getent(int nQueryId)
  *
  * Returns: The new entry, or NULL if there was a problem. 
  */
-static DasIdlDbEnt* das2c_db_addHttpEnt(
+static QueryDbEnt* das2c_db_addHttpEnt(
 	const DasHttpResp* pRes, DasDs** lDs, size_t uDs
 ){
 	char sBuf[1024] = {'\0'};
@@ -218,14 +227,15 @@ static DasIdlDbEnt* das2c_db_addHttpEnt(
 		return NULL;
 	}
 	
-	DasIdlDbEnt* pEnt = das2c_db_newEnt();
+	QueryDbEnt* pEnt = das2c_db_newEnt();
 	if(pEnt == NULL) 
 		return NULL;
 	
 	pEnt->lDs = lDs;
 	pEnt->uDs = uDs;
 	pEnt->nTime = time(NULL);
-	pEnt->nType = D2C_ENT_HTTP_QUERY;
+	if(strcmp(pRes->url.sScheme, "https") == 0) pEnt->nType = D2C_ENT_HTTPS_QUERY;
+	else pEnt->nType = D2C_ENT_HTTP_QUERY;
 	pEnt->sHost = das_strdup(pRes->url.sHost);
 	pEnt->sPort = das_strdup(pRes->url.sPort);
 	pEnt->sPath = das_strdup(pRes->url.sPath);
@@ -302,5 +312,59 @@ static DasIdlDbEnt* das2c_db_addHttpEnt(
 	
 	return pEnt;	
 }
+
+/* ************************************************************************* */
+
+bool das2c_db_getPath(const QueryDbEnt* pEnt, char* sBuf, size_t uSz)
+{
+	size_t uLen = 0;
+	size_t uWrote = 0;
+	bool bAddPort = false;
+	
+	memset(sBuf, 0, uSz);
+	
+	switch(pEnt->nType){
+	case D2C_ENT_HTTP_QUERY:  strncpy(sBuf, "http://", 7);   uWrote = 7; break;
+	case D2C_ENT_HTTPS_QUERY:  strncpy(sBuf, "https://", 8); uWrote = 8; break;
+	default:
+		daslog_error_v("Unknown query type 0x%X", pEnt->nType);
+		return false;
+	}
+
+	uLen = strlen(pEnt->sHost);
+	if(pEnt->sHost && ((uWrote + uLen) < uSz) ){
+		strncpy(sBuf + uWrote, pEnt->sHost, uLen);
+		uWrote += uLen;
+	}
+	
+	if(pEnt->sPort != NULL){
+		if(pEnt->nType == D2C_ENT_HTTP_QUERY){
+			bAddPort = (strcmp(pEnt->sPort, "80") != 0);
+		}
+		else{
+			if(pEnt->nType == D2C_ENT_HTTP_QUERY)
+				bAddPort = (strcmp(pEnt->sPort, "443") != 0);
+		}
+	}
+	if(bAddPort){
+		uLen = strlen(pEnt->sPort);
+		if((uWrote + uLen + 1) < uSz){
+			sBuf[uWrote] = ':'; ++uWrote;
+			strncpy(sBuf + uWrote, pEnt->sPort, uLen);
+			uWrote += uLen;
+		}
+	}
+	
+	if(pEnt->sPath != NULL){
+		uLen = strlen(pEnt->sPath);
+		if((uWrote + uLen) < uSz){
+			strncpy(sBuf + uWrote, pEnt->sPath, uLen);
+			/* uWrote += uLen; */
+		}
+	}
+	
+	return true;
+}
+
 
 

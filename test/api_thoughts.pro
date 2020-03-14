@@ -1,3 +1,5 @@
+; Higher level API thoughts, maybe useful later.  Really just a quick note.
+
 ;+
 ; PROCEDURE:
 ;   das2_load_data
