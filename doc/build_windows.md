@@ -1,4 +1,4 @@
-# Building das2dlm on Windows 10
+# Building das2dlm on Windows 10 from Source
 
 Building das2dlm is some what tricky on Windows.  Using a prebuilt releases may
 save time if your focus is on writing IDL code that uses das2dlm instead of
@@ -8,17 +8,17 @@ main README.md file as soon as a release is ready.
 Windows development has been tested on Windows 10 using the command line
 Visual C++ tool set.
 
-## First build das2C
+## Prequisite: Build das2C
 
 The big one.  First download and build
 [das2C](https://github.com/das-developers/das2C) on your system.  This can be
 involved but much of the system setup for building das2C applies to building
-das2dlm.  Most of the environment and tool setup needed for build das2dlm is
-handled by the das2C build instructions.
+das2dlm.  Most of the environment and tool configuration needed for building
+das2dlm is handled by the das2C build instructions.
 
-Keep the location of your das2C build output handy.  You will need to know
+Keep the location of your das2C directory handy.  You will need to know
 the path to `libdas2.3.lib` and the header files from the das2C project in
-the "Check Makefile" section below.
+the "Check the Makefile" section below.
 
 ## Get idl_export.h and idl.lib
 
@@ -29,7 +29,7 @@ existing installation that you are licensed to use.  Unfortunatly these files
 cannot be redistrubed by anyone but Harris Geospatial. You'll have to get them
 on you're own.
 
-## Check Makefile
+## Check the Makefile
 
 Open the file `Windows.mak` and check on the following variables:
 
@@ -90,7 +90,7 @@ Build the DLM by running the command:
 Output is in the `dlm` subdirectory.  If the build runs successfully, you
 should see the output file `das2c.x86_64.dll`
 
-## Testing
+## Test
 
 Open a cmd.exe window and navigate to the root of the cloned das2dlm repository
 for example:
