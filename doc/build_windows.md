@@ -1,4 +1,4 @@
-# Building das2dlm on Windows 10  (in progress)
+# Building das2dlm on Windows 10
 
 Building das2dlm is some what tricky on Windows.  Using a prebuilt releases may
 save time if your focus is on writing IDL code that uses das2dlm instead of
