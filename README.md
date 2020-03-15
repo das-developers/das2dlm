@@ -7,21 +7,23 @@ library.
 
 Reading local files and command pipes is not yet implemented.  Only queries
 to non password protected HTTP servers providing a GET API are currently
-supported.
+supported.  Saving queries to local data files is also not supported in this
+early version.
 
 This DLM is not that concerned with any particular server's query API.  It
 issues an HTTP request to a URL that you format.  For details of the das2
 server HTTP GET query interface see the
 [das2.2.2 Interface Control Document](https://das2.org/Das2.2.2-ICD_2017-05-09.pdf).
-If some of the HTTP GET paramaters are recognised they will be saved in 
-named fields in DAS2C_QUERY structures, but otherwise the code is GET API
+If some of the HTTP GET paramaters are recognised, they will be saved in 
+named fields in DAS2C_QUERY structures. Otherwise the code is GET API
 independent.
 
-On the otherhand, this DLM very much cares about the format of the data
+On the other hand, this DLM very much cares about the format of the data
 stream output by the server.  The supported stream formats are limited to
 those that are parseable by the [das2C](https://github.com/das-developers/das2C)
 library.  At the time of writing that is only das2.2.2 (or lower) streams,
-though plans are in the works for supporting das2.3 and HAPI 2.0 streams.
+are supported, though once das2C supports das2.3 and HAPI 2.0 streams this
+library will too.
   
 ## Build/Install
 
