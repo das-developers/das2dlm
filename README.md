@@ -31,8 +31,8 @@ Once the DLM has been build, you can place it somewhere on your `IDL_DLM_PATH`
 and it will work.  Currently you'll have to build the DLM from source code.
 Instructions for doing so can be found in:
 
-  * doc/build_linux.md
-  * doc/build_windows.md
+  * [doc/build_linux.md](https://github.com/das-developers/das2dlm/blob/master/doc/build_linux.md)
+  * [doc/build_windows.md](https://github.com/das-developers/das2dlm/blob/master/doc/build_windows.md)
 
 Follow one of the files above to create the DLM.
 
