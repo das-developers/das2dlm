@@ -194,12 +194,10 @@ IDL> das2c_vars(pd_freq)
 
 Turns out there is only one.  Also, since all variables have the same shape as
 the overall dataset, SHAPE fields for variables are only as long as the RANK 
-of the dataset.  The `-3` values in the SHAPE array is a degeneracy flag.  This
-says that it doesn't matter what value is given for the first index when accesing
-data for this variable, it won't affect the output.
-
-The 'TYPE' field gives the IDL data type for data values provided by this
-variable
+of the dataset.  The `-3` in the SHAPE array above is a degeneracy flag.  It
+means that the value of the first index does affect the output from the 
+`das2c_data()` function. The 'TYPE' field gives the IDL data type for data
+values provided by this variable
 
 ### Geting Data Ararys
 
@@ -221,9 +219,10 @@ for any valid first index.  The code below illustrates a slice operation:
 ```idl
 IDL> ary = das2c_data(v_freq, {I:0, J:'*'})
 ```
-The anoymous structure given for the second argument is a `slice structure`.
-It says, "hold the first index constant at 0 and let the second index vary over
-all valid indices".  The fields in a slice structure are:
+The anoymous structure given for the second argument is a *slice structure*.
+The slice structure above indicates that a rank 1 array should be output and
+this is to be accomplished by holding the first index constant at 0 and letting
+the second index vary over all valid values.  The fields in a slice structure are:
 
   * I - The first index
   * J - The second index
@@ -298,16 +297,8 @@ To delete a das2c object and free it's memory use the `das2c_free` function as i
 ```idl
 IDL> das2c_free(query)
 ```
-The das2c_free function can be called on any of the following structure types:
-  * DAS2C_QUERY
-  * DAS2C_DSET
-  * DAS2C_PDIM
-  * DAS2C_VAR_*  (all versions)
-
-Calling `das2c_free` on a higher level object deletes all the child objects.  Note that any
-internal data arrays that have been wrapped by 
+Calling `das2c_free` on a query frees all internal data structures and memory associated
+with the query; however, any internal data arrays that have been wrapped by 
 [IDL_ImportArray](https://www.harrisgeospatial.com/docs/CreateArrayFromExistingData.html)
 and passed out to your application code without a memory copy will not be deleted until
 IDL is done with them.
-
-
