@@ -120,7 +120,6 @@ Dataset: 'electric_10' from group 'electric' | i:0..4483, j:0..152
       Variable: center | frequency[j] Hz | i:-, j:0..152
 ```
 The following call provides a summary of all the datasets in the query result.
-(output manually collapsed)
 
 ```idl
 IDL> das2c_datasets(query)
@@ -234,7 +233,7 @@ the second index vary over all valid values.  The fields in a slice structure ar
   * P - The eigth index
 
 Fields for indexes larger than the RANK of the dataset are ignored.  Currently
-only positive and negative intergers and the string `'*'` are undersood by the
+only positive and negative integers and the string `'*'` are undersood by the
 `das2c_data` function.  So for example `-1` could have been used for field I
 to indicate the highest valid first index value, whatever that happened to be.
 
