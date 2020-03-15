@@ -91,7 +91,91 @@ should see the output file `das2c.x86_64.dll`
 
 ## Testing
 
-TODO:
+Open a cmd.exe window and navigate to the root of the cloned das2dlm repository
+for example:
+
+```batchfile
+cd %USERPROFILE%\git\das2dlm
+```
+
+Set the `IDL_DLM_PATH` environment variable to include your newly build *.DLL:
+
+```batchfile
+set IDL_DLM_PATH="%cd%\dlm;<IDL_DEFAULT>"
+```
+The section `<IDL_DEFAULT>` is not replacement text.  It is the a literal token that
+IDL uses to indicate the default module directory, so use it as is.
+
+There is a test IDL batch file to use it start IDL and issue a batch command
+as follows.  The path to your 64-bit IDL executable may be in a different 
+directory so adjust as needed:
+
+```batchfile
+C:\Users\you\git\das2dlm> "C:\Program Files\Harris\IDL87\bin\bin.x86_64\idl.exe"
+
+IDL> @test/das2c_test.pro
+```
+
+The `@` symbol tells IDL to run the lines in the file as if they were typed
+directly into the IDL interpreter.  If you get a lot of output that ends in...
+```
+{
+    "QUERY": 1,
+    "DSET": 0,
+    "PDIM": "frequency",
+    "VAR": "center",
+    "UNITS": "Hz",
+    "TYPE": "DOUBLE",
+    "SHAPE": [152, -3],
+    "N_VALS": 152
+}
+```
+
+The congradulations, the DLM works.
+
+## Install
+
+There are at least two ways to install the DLM.
+
+ 1. Copy the `das2c.dlm` and `das2c.x86_64.dll` files to the IDL system
+    module directory.  This varies based on where IDL is installed and what
+    version you are running.  An example directory is:
+    
+    `C:\Program Files\Harris\IDL87\bin\bin.x86_64`
+    
+    In this case the install proceedure would just be the equivalent of:
+    
+    `copy dlm\das2c.dlm dlm\das2c.x86_64.dll "C:\Program Files\Harris\IDL87\bin\bin.x86_64"`
+    
+
+ 2. Copy the whole das2dlm/dlm directory, not just the two files above,
+    to some location on your computer and update your `IDL_DLM_PATH`
+    environment variable to include the new directory.
+    
+    For example if you want to put the files in %USERPROFILE%\idl\dlm, then
+    issue the following.
+    
+    ```batchfile
+    mkdir %USERPROFILE%\idl\das2c
+    copy dlm\*.* %USERPROFILE%\idl\das2c
+    ```
+
+    Next you'll need to update the IDL_DLM_PATH variable associated with your
+    user environment.  To do this from the command line use the setx.exe
+    command as illustrated below:
+    
+    ```batchfile
+    setx IDL_DLM_PATH """%USERPROFILE%\idl\das2c;<IDL_DEFAULT>"""
+    ```
+    The **triple quotes** are critical.  Setx.exe will not affect the current
+    cmd.exe session, but it will affect future command prompts.  You'll have
+    to open a second command prompt to test it.  Do so now by issuing:
+    
+    ```batchfile
+    echo %IDL_DLM_PATH%
+    ```
+    in a fresh command prompt.
+    
 
 
 
