@@ -20,34 +20,6 @@ Keep the location of your das2C build output handy.  You will need to know
 the path to `libdas2.3.lib` and the header files from the das2C project in
 the "Check Makefile" section below.
 
-In case you have already done that but it has been a while, you will need to
-initialize your Visual Studio tools environment by opening a `cmd.exe` prompt
-and issuing the following command to run the config script:
-
-  `C:\opt\vs\2019\buildtools\VC\Auxiliary\Build\vcvars64.bat`
-  
-or 
-
-  `"C:\Program Files(x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat"`
-
-if you using the default VC tools install location.  You should get the output:
-```
-  **********************************************************************
-  ** Visual Studio 2019 Developer Command Prompt v16.4.4
-  ** Copyright (c) 2019 Microsoft Corporation
-  **********************************************************************
-  [vcvarsall.bat] Environment initialized for: 'x64'
-```
-
-Then issue
-```batchfile
-  cl.exe
-```
-If this works, then you now have a compiler on your path!  
-
-**NOTE**: You will need to intialize the VC environment whenever you open
-a new `cmd.exe` window when building or changing das2dlm.
-
 ## Get idl_export.h and idl.lib
 
 You will need the `idl_export.h` and `idl.lib` files from your IDL distribution.
@@ -61,26 +33,55 @@ on you're own.
 
 Open the file `Windows.mak` and check on the following variables:
 
-  * `SYSLIB_DIR` should point to the directory containing `libssl.a`, etc.
+  * `I_VCPGK` should point to the directory containing `expat.h`, etc.
+  * `L_VCPGK` should point to the directory containing `libssl.a`, etc.
   * `I_IDL` should point to the directory containing `idl_export.h`
-  * `L_DAS2` should be the full path to `libdas2.3.a`
+  * `L_IDL` should point to the directory containing `idl.lib`
+  * `L_DAS2` should be the to directory containing `libdas2.3.a`
   * `I_DAS2` should point to the directory containing the das2C include 
-    directory, `das2`.
+    directory, `das2`, which in turn contains `core.h`
 
 The default paths for the variables above assume that you clone git projects
 under the path `%USERPROFIE%\git`. Undoubtable you'll have your own convention
-and will need to modify the make file variables above.
+and will need to use the `set` command to alter one or more of the variables
+above in your shell environment prior to calling `nmake`.
 
-If any of these are incorrect for your system then override them with 
-environment variables, for example:
-
+The following cmd.exe shell command provide an example of overriding these
+variables in your shell.
 ```batchfile
-set I_IDL="C:\Program Files\Exelis\IDL84\bin\bin.x86_64\external\include\"
-set L_DAS2="e:\Codes\SPEDAS\das2\das2C\build\libdas2.3.lib"
-set I_DAS2="e:\Codes\SPEDAS\das2\das2C"
-
+set I_VCPKG="E:\Codes\SPEDAS\das2\vcpgk\installed\x64-windows-static\include"
+set L_VCPKG="E:\Codes\SPEDAS\das2\vcpgk\installed\x64-windows-static\lib"
+set I_IDL="C:\Program Files\Exelis\IDL84\external\include"
+set L_IDL="C:\Program Files\Exelis\IDL84\bin\bin.x86_64"
+set I_DAS2="E:\Codes\SPEDAS\das2\das2C"
+set L_DAS2="E:\Codes\SPEDAS\das2\das2C\build.windows"
+```
 
 ## Build
+
+To put the compiler and linker on your %PATH%, issue the following command
+for each new cmd.exe window you open:
+  `"C:\Program Files(x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat"`
+or if you've setup your build environment using the instructions in the 
+das2C module:
+  `C:\opt\vs\2019\buildtools\VC\Auxiliary\Build\vcvars64.bat`
+
+You should get the output:
+```
+  **********************************************************************
+  ** Visual Studio 2019 Developer Command Prompt v16.4.4
+  ** Copyright (c) 2019 Microsoft Corporation
+  **********************************************************************
+  [vcvarsall.bat] Environment initialized for: 'x64'
+```
+Then issue
+```batchfile
+  cl.exe
+```
+If this works, then the VC++ build tools are on your path!  
+
+**NOTE**: You will need to intialize the VC environment whenever you open
+a new `cmd.exe` window when building or changing das2dlm.
 
 Build the DLM by running the command:
 ```batchfile
