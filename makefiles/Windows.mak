@@ -1,6 +1,6 @@
 # Windows makefile
 MAKE=nmake /nologo
-CC=cl.exe /nologo
+CC=cl.exe /nologo /DWIN32
 
 # Where to find stuff #########################################################
 #
@@ -12,7 +12,11 @@ CC=cl.exe /nologo
 
 # The directory containing idl_export.h
 !IFNDEF I_IDL
-I_IDL="C:\Program Files\Exelis\IDL84\bin\bin.x86_64\external\include"
+I_IDL="C:\Program Files\Harris\IDL87\external\include"
+!ENDIF
+
+!IFNDEF L_IDL
+L_IDL="C:\Program Files\Harris\IDL87\bin\bin.x86_64"
 !ENDIF
 
 # Directory contaning das2 include directory.  (i.e. the one above the
@@ -40,9 +44,9 @@ I_VCPKG="$(USERPROFILE)\git\vcpkg\installed\x64-windows-static\include"
 
 ALL_INC=/I $(I_DAS2) /I $(I_IDL) /I $(I_VCPKG)
 
-STATIC_LIBS=$(L_DAS2)\libdas2.3.lib $(L_VCPKG)\expat.lib $(L_VCPKG)\fftw3.lib \
- $(L_VCPKG)\libssl.lib $(L_VCPKG)\libcrypto.lib $(L_VCPKG)\zlib.lib \
- $(L_VCPKG)\pthreadVC3.lib
+STATIC_LIBS=$(L_DAS2)\libdas2.3.lib $(L_IDL)\idl.lib $(L_VCPKG)\expat.lib \
+ $(L_VCPKG)\fftw3.lib $(L_VCPKG)\libssl.lib $(L_VCPKG)\libcrypto.lib \
+ $(L_VCPKG)\zlib.lib $(L_VCPKG)\pthreadVC3.lib
 
 ALL_LIBS= $(STATIC_LIBS) Advapi32.lib User32.lib Crypt32.lib ws2_32.lib
 
@@ -55,7 +59,7 @@ SRCS=src\das2c.c src\das2c_message.c src\das2c_db.c src\das2c_queries.c \
  src\das2c_datasets.c src\das2c_dsinfo.c src\das2c_pdims.c src\das2c_vars.c \
  src\das2c_data.c src\das2c_readhttp.c
  
-BD=build.windows64
+BD=build.windows
 
 # next line is wierd, it's due to all the static functions in DLMs so we just
 # include all the .c files in one.

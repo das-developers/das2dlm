@@ -1,4 +1,6 @@
 build.*
 dlm/*.so
 dlm/*.dll
+dlm/*.exp
+dlm/*.lib
 *.swp
