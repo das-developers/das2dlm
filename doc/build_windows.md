@@ -1,12 +1,15 @@
 # Building das2dlm on Windows 10 from Source
 
-Building das2dlm is some what tricky on Windows.  Using a prebuilt releases may
-save time if your focus is on writing IDL code that uses das2dlm instead of
-working on the module itself.  Using the pre-built DLM will be coverd in the
-main README.md file as soon as a release is ready.
+*Do you have to build from source?* Building das2dlm is somewhat tricky on
+Windows.  Using a prebuilt releases may save time if your focus is on writing
+IDL code that uses das2dlm instead of working on the module itself.  Using
+the pre-built DLM will be covered in the main README.md file as soon as a
+release is ready.
 
-Windows development has been tested on Windows 10 using the command line
-Visual C++ tool set.
+Similar to [das2C](https://github.com/das-developers/das2C), these build
+instructions only assume that the command line Visual C++ tools are available
+on your Windows system.  The full Visual Studio integrated development
+environment is not requried.
 
 ## Prequisite: Build das2C
 
