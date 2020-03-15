@@ -125,7 +125,7 @@ static void das2c_ds_to_dset(
 }
 
 /* Get a DB entry from a query struct arg */
-static const DasDs* das2c_arg_to_ds(
+static DasDs* das2c_arg_to_ds(
 	int argc, IDL_VPTR* argv, int iArg, int* piQuery, int* piDset
 ){	
 	const QueryDbEnt* pEnt = das2c_arg_to_ent(argc, argv, iArg);

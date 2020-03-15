@@ -102,6 +102,7 @@ int IDL_Load(void){
 	define_DAS2C_PDIM();
 	define_DAS2C_VAR();
 	define_DAS2C_PROP();
+	define_DAS_TIME();
 		
  	static IDL_SYSFUN_DEF2 function_addr[] = {
 		{ 

@@ -18,6 +18,45 @@
  * version 2.1 along with libdas2; if not, see <http://www.gnu.org/licenses/>.
  */
 
+static IDL_STRUCT_TAG_DEF DAS_TIME_tags[] = {
+   {"YEAR",   NULL,  (void*)IDL_TYP_LONG},
+	{"MONTH",  NULL,  (void*)IDL_TYP_LONG},
+	{"MDAY",   NULL,  (void*)IDL_TYP_LONG},
+	{"YDAY",   NULL,  (void*)IDL_TYP_LONG},
+	{"HOUR",   NULL,  (void*)IDL_TYP_LONG},
+	{"MINUTE", NULL,  (void*)IDL_TYP_LONG},
+	{"SECOND", NULL,  (void*)IDL_TYP_DOUBLE},
+	{0}
+};
+
+/* DAS2C_TIME_data struct already defined. It is just the das_time from das2C.
+	The tags above supply the IDL definition. */
+#define DAS_TIME_data das_time
+
+static IDL_StructDefPtr DAS_TIME_pdef;
+
+static void define_DAS_TIME()
+{
+	DAS_TIME_pdef = IDL_MakeStruct("DAS_TIME", DAS_TIME_tags);
+}
+
+int das2c_vtype_2_idlcode(das_val_type vt)
+{
+	switch(vt){
+	case vtUnknown: return IDL_TYP_BYTE;  /* Must state length somehow */
+	case vtByte:    return IDL_TYP_BYTE;
+	case vtUShort:  return IDL_TYP_UINT;
+	case vtShort:   return IDL_TYP_INT;
+	case vtInt:     return IDL_TYP_LONG;
+	case vtLong:    return IDL_TYP_LONG64;
+	case vtFloat:   return IDL_TYP_FLOAT;
+	case vtDouble:  return IDL_TYP_DOUBLE;
+	case vtTime:    return IDL_TYP_STRUCT;
+	case vtText:    return IDL_TYP_STRING;
+	default: return IDL_TYP_UNDEF;
+	}	
+}
+
 /* ************************************************************************* */
 /* API Function, careful with changes! */
 
@@ -129,16 +168,7 @@
 */
 static IDL_VPTR das2c_api_data(int argc, IDL_VPTR* argv)
 {
-	/* Get the variable or quit */
-	
-	/*ptrdiff_t aDsShape[DASIDX_MAX] = DASIDX_INIT_UNUSED;
-	int nDsRank = 0;
-	const DasVar* pVar = NULL;
-	pVar = das2c_arg_to_var(argc, argv, 0, NULL, NULL, &nDsRank, aDsShape); * /
-	
-	*/
-	
-	/* Simplistic Algorithm:  
+	/* Simplistic Algorithm:
 	
 	   1. Get total extent requested
 		
@@ -154,11 +184,96 @@ static IDL_VPTR das2c_api_data(int argc, IDL_VPTR* argv)
 		4. Wrap the array either the permanent or temporary array
 	*/
 	
-	/*int aExtents[IDL_MAX_ARRAY_DIM]; */
 	
+	/* Get the variable or quit */
+	int iQuery       = -1;
+	DasDs*  pvDs  = NULL;
+	DasDim* pvDim = NULL;
+	DasVar* pvVar = NULL;
+	pvVar = das2c_arg_to_var(argc, argv, 0, &iQuery, NULL, &pvDs, &pvDim);
 	
-	/* Just wrap the basic array now as a test */
+	/* Safety cast to const usage */
+	const DasDs* pDs = (const DasDs*)pvDs;
+	const DasDim* pDim = (const DasDim*)pvDim;
+	const DasVar* pVar = (const DasVar*)pvVar;
 	
+	ptrdiff_t aDsShape[DASIDX_MAX] = DASIDX_INIT_UNUSED;
+	int nDsRank = DasDs_shape(pDs, aDsShape);
+	
+	ptrdiff_t aReqShape[DASIDX_MAX] = DASIDX_INIT_UNUSED; /* requested shape */
+	int nReqRank = -1;
+	
+	if(argc < 2){
+		/* Easy, requested shape is just the ds shape */
+		memcpy(aReqShape, aDsShape, nDsRank*sizeof(ptrdiff_t));
+		nReqRank = nDsRank;
+	}
+	else{
+		/* Hard, now we have to parse a slice structure */
+		das2c_IdlMsgExit("TODO: Handle slice structures.");
 		
-	return IDL_GettmpNULL();
+	}
+	
+	/* Grab the array if it exists */
+	DasAry* pvAry;
+	if( (pvAry = DasVarAry_getArray(pvVar)) == NULL){
+		das2c_IdlMsgExit("TODO: Handle virtual variables.");
+	}
+	
+	/* Just wrap the top level array now as a test of index layout */
+	IDL_VPTR pRet = NULL;
+	
+	/* low level byte pointer to head */
+	size_t uVals = 0;
+	size_t uBytes = 0;
+	
+	/* Going to copy out data for now.  Can change this if needed. */
+	/* Having IDL reach deep into protected buffers seems like a   */
+	/* recipe for disaster */
+	const byte* pSrc = DasAry_getIn(pvAry, pVar->vt, DIM0, &uVals);
+	
+	uBytes = uVals*DasAry_valSize(pvAry);
+	
+	/* Quick an dirty test for 'electric' with no slice */
+	IDL_MEMINT dim[2]; dim[0] = aReqShape[1]; dim[1] = aReqShape[0];
+	
+	char* pDest = IDL_MakeTempArray(
+		das2c_vtype_2_idlcode(pVar->vt),
+		nReqRank,
+		dim,
+		IDL_ARR_INI_NOP,
+		&pRet
+	);
+		
+	/* Memcpy over the data block */
+	memcpy(pDest, pSrc, uBytes);
+		
+	return pRet;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

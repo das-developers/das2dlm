@@ -223,7 +223,8 @@ IDL> ary = das2c_data(v_freq, {I:0, J:'*'})
 The anoymous structure given for the second argument is a *slice structure*.
 The slice structure above indicates that a rank 1 array should be output and
 this is to be accomplished by holding the first index constant at 0 and letting
-the second index vary over all valid values.  The fields in a slice structure are:
+the second index vary over all valid values.  The recognized fields in a slice
+structure are:
 
   * I - The first index
   * J - The second index
@@ -232,7 +233,7 @@ the second index vary over all valid values.  The fields in a slice structure ar
   * M - The fifth index
   * N - The sixth index
   * 0 - The seventh index
-  * P - The eigth index
+  * P - The eighth index
 
 Fields for indexes larger than the RANK of the dataset are ignored.  Currently
 only positive and negative integers and the string `'*'` are undersood by the

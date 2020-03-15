@@ -17,7 +17,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * version 2.1 along with libdas2; if not, see <http://www.gnu.org/licenses/>.
  */
- 
+
+
 void das2c_vtype_2_idltype(das_val_type vt, size_t vsize, char* sBuf, size_t uLen)
 {
 	switch(vt){
@@ -257,85 +258,59 @@ static IDL_StructDefPtr das2c_get_var_pdef(int nRank)
 	}
 }
 
-/* ************************************************************************* */
-/* Downstream arg helpers */
-
-/* returns either a var id, or -1 and a var role string */
-static int das2c_args_var_id(
-	int argc, IDL_VPTR* argv, int iArg, char* sRole, size_t uLen
+/* Given a variable structure pointer, return items often needed for
+   working with variables */
+		
+DasVar* das2c_arg_to_var(
+	int argc, IDL_VPTR* argv, int iArg, int* piQuery, int* piDs, 
+	DasDs** ppDs, DasDim** ppDim
 ){
-	int iVar= -1;
-	const char* sTmp = NULL;
-	memset(sRole, 0, uLen);
+	int iQuery = -1;
+	int iDs = -1;
+	DasDs* pDs = NULL;
+	DasDim* pDim = das2c_arg_to_dim(argc, argv, iArg, &iQuery, &iDs, &pDs);
+	if(pDs == NULL) return NULL;
 	
-	if(uLen < 2) das2c_IdlMsgExit("uLen too short");
+	/* Get the PDIM string field */
+	IDL_VPTR pVar = argv[iArg];
 	
-	if(argc <= iArg)
+	if(pVar->type != IDL_TYP_STRUCT)
+		das2c_IdlMsgExit("Argument %d is not a structure", iArg+1);
+	
+	/* Ducktyping: Any field names 'VAR' that has type string will do */
+	IDL_VPTR pFakeVar = NULL;
+	IDL_MEMINT nOffset = IDL_StructTagInfoByName(
+		pVar->value.s.sdef, "VAR", IDL_MSG_LONGJMP, &pFakeVar
+	);
+	
+	if(pFakeVar->type != IDL_TYP_STRING)
+		das2c_IdlMsgExit("Field VAR in argument %d is not a string", iArg+1);
+	
+	UCHAR* pData = pVar->value.s.arr->data + nOffset;
+	
+	const char* sRole = IDL_STRING_STR( (IDL_STRING*)pData);
+	if((sRole == NULL)||(sRole[0] == '\0'))
 		das2c_IdlMsgExit(
-			"Variable role was not specified, either a string or an integer "
-			"is required for argument number %d", iArg
+			"Field VAR is empty in the structure at argument %d", iArg+1
 		);
 	
-	/* See if this is as string */
-	if(argv[iArg]->type == IDL_TYP_STRING){
-		sTmp = IDL_VarGetString(argv[iArg]);
-		if(*sTmp == '\0') das2c_IdlMsgExit("Role string is empty");
-		
-		strncpy(sRole, sTmp, uLen-1);
-		return iVar;
-	}
+	/* D, Rust, etc. would not allow this... */
+	DasVar* pDasVar = (DasVar*) DasDim_getVar(pDim, sRole);
 	
-	IDL_VPTR pTmpVar = IDL_BasicTypeConversion(1, argv + iArg, IDL_TYP_LONG);
-	
-	iVar = pTmpVar->value.l;
-	IDL_DELTMP(pTmpVar);
-	if(iVar < 0) das2c_IdlMsgExit("Invalid variable index %d", iVar);
+	if(pDasVar == NULL)
+		das2c_IdlMsgExit(
+			"Mismatch, VAR '%s' is not present in query %d, dataset %d, "
+			"dimenison %s", sRole, iQuery, iDs, DasDim_id(pDim)
+		);
 		
-	return iVar;
-}
+	if(piQuery != NULL) *piQuery = iQuery;
+	if(piDs    != NULL) *piDs    = iDs;
+	if(ppDs    != NULL) *ppDs    = pDs;	
+	if(ppDim   != NULL) *ppDim   = pDim;
 
-
-/* if var role or id is valid, set the missing item and return the var ptr */
-/*
-static const DasVar* das2c_check_var_id(
-	const DasIdlDbEnt* pEnt, int iDs, const DasDim* pDim,
-	int* iVar, char* sRole, size_t uLen  / * one of these is valid * /
-){
-	int i = 0;
-	const DasVar* pVar = NULL;
-	
-	if((sRole == NULL)||(sRole[0] == '\0')){
-		/ * Lookup by index and save the name * /
-		if((*iVar > 0)&&(*iVar < pDim->uVars))
-			pVar = pDim->aVars[*iVar];
-		else
-			das2c_IdlMsgExit(
-				"Query result %d, dataset %d, dimension '%s', doesn't have a"
-				" variable with index number '%d'", 
-				pEnt->nQueryId, iDs, pDim->sId, *iVar
-			);
-		
-		strncpy(sRole, pDim->aRoles[*iVar], uLen);
-	}
-	else{
-		/ * Lookup by name and save the index * /
-		pVar = DasDim_getVar(pDim, sRole);
-		if(pVar == NULL)
-			das2c_IdlMsgExit(
-				"Query result %d, dataset %d, dimension '%s', doesn't have a"
-				" variable for role '%s'", pEnt->nQueryId, iDs, pDim->sId,
-				sRole
-			);
-		
-		for(i = 0; i < pDim->uVars; ++i){
-			if(pDim->aVars[i] == pVar) *iVar = i;
-		}
-		if(*iVar == -1) das2c_IdlMsgExit("Logic error1 das2c_check_var_id");
-	}
-	
-	return pVar;
+	return pDasVar;
 }
-*/
+	
 		
 /* ************************************************************************* */
 /* API Function, careful with changes! */
@@ -465,9 +440,12 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 	int iQuery = -1;
 	int iDs = -1;
 	
-	const DasDs*  pDs  = das2c_arg_to_ds( argc, argv, 0, &iQuery, &iDs);
+	DasDs*  pvDs = NULL;
+	const DasDim* pDim = das2c_arg_to_dim(argc, argv, 0, &iQuery, &iDs, &pvDs);
+	const DasDs* pDs = pvDs;
+	
 	int nDsRank = DasDs_rank(pDs);
-	const DasDim* pDim = das2c_arg_to_dim(argc, argv, 0, NULL, NULL);
+	
 	const char* sDim = DasDim_id(pDim);
 	const char* sRole = NULL;
 	

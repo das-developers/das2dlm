@@ -117,47 +117,14 @@ static void define_DAS2C_PDIM()
 	DAS2C_PDIM_pdef = IDL_MakeStruct("DAS2C_PDIM", DAS2C_PDIM_tags);
 }
 
-/* returns either a dim id, or -1 and a dim string */
-static int das2c_args_dim_id(
-	int argc, IDL_VPTR* argv, int iArg, char* sName, size_t uLen
-){
-	int iDim = -1;
-	const char* sTmp = NULL;
-	memset(sName, 0, uLen);
-	
-	if(uLen < 2) das2c_IdlMsgExit("uLen too short");
-	
-	if(argc <= iArg)
-		das2c_IdlMsgExit(
-			"Physical dimension not specified, either a string or an integer "
-			"is required for argument number %d", iArg
-		);
-	
-	/* See if this is as string */
-	if(argv[iArg]->type == IDL_TYP_STRING){
-		sTmp = IDL_VarGetString(argv[iArg]);
-		if(*sTmp == '\0') das2c_IdlMsgExit("Dimension name is empty");
-		
-		strncpy(sName, sTmp, uLen-1);
-		return iDim;
-	}
-	
-	IDL_VPTR pTmpVar = IDL_BasicTypeConversion(1, argv + iArg, IDL_TYP_LONG);
-	
-	iDim = pTmpVar->value.l;
-	IDL_DELTMP(pTmpVar);
-	if(iDim < 0) das2c_IdlMsgExit("Invalid physical dimension index %d", iDim);
-		
-	return iDim;
-}
 
-
-static const DasDim* das2c_arg_to_dim(
-	int argc, IDL_VPTR* argv, int iArg, int* piQuery, int* piDs
+static DasDim* das2c_arg_to_dim(
+	int argc, IDL_VPTR* argv, int iArg, int* piQuery, int* piDs,
+	DasDs** ppDs
 ){
 	int iQuery = -1;
 	int iDs = -1;
-	const DasDs* pDs = das2c_arg_to_ds(argc, argv, iArg, &iQuery, &iDs);
+	DasDs* pDs = das2c_arg_to_ds(argc, argv, iArg, &iQuery, &iDs);
 	if(pDs == NULL) return NULL;
 	
 	/* Get the PDIM string field */
@@ -182,18 +149,34 @@ static const DasDim* das2c_arg_to_dim(
 	   Assume they do for now and use valgrind to see for sure later */
 	const char* sDim = IDL_STRING_STR( (IDL_STRING*)pData);
 	if((sDim == NULL)||(sDim[0] == '\0'))
-		das2c_IdlMsgExit("Field PDIM is empty in the structure at argument %d", iArg+1);
+		das2c_IdlMsgExit(
+			"Field PDIM is empty in the structure at argument %d", iArg+1
+		);
 	
-	const DasDim* pDim = DasDs_getDimById(pDs, sDim);
+	
+	/* Skip immutable call for now, get mutable object. 
+		DasDim* pDim = DasDs_getDimById(pDs, sDim);
+		
+	   Copying in code from dataset.c, probably means dataset.c should change
+		it's function definition.
+	*/
+	const char* sIterDim = NULL;
+	DasDim* pDim = NULL;
+	for(size_t u = 0; u < pDs->uDims; ++u){
+		sIterDim = DasDim_id(pDs->lDims[u]);
+		if(strcmp(sDim, sIterDim) == 0){ pDim = pDs->lDims[u]; break; }
+	}
+		
 	if(pDim == NULL)
 		das2c_IdlMsgExit(
-			"Mismatch PDIM '%s' is not present in query %d, dataset %d",
+			"Mismatch, PDIM '%s' is not present in query %d, dataset %d",
 			sDim, iQuery, iDs
 		);
 	
 	if(piQuery != NULL) *piQuery = iQuery;
 	if(piDs    != NULL) *piDs    = iDs;
 	
+	if(ppDs != NULL) *ppDs = pDs;
 	return pDim;
 }
 
