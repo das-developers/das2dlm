@@ -58,6 +58,46 @@ int das2c_vtype_2_idlcode(das_val_type vt)
 }
 
 /* ************************************************************************* */
+/* Helper, a memset that handles multi-byte items, from das2C */
+               
+/* Use memcpy because the amount of data written in each call goes up
+ * exponentially and memcpy is freaking fast, much faster than a linear
+ * write loop for large arrays.
+ */
+byte* das2c_memset(byte* pDest, const byte* pSrc, size_t uElemSz, size_t uCount)
+{
+	if(uCount == 0) return pDest;  /* Successfully did nothing */
+	if(uElemSz == 0) das2c_IdlMsgExit("Invalid element size");
+	if(pDest == NULL) das2c_IdlMsgExit("Invalid destination");
+	if(pDest == NULL) das2c_IdlMsgExit("Invalid source");
+	
+	size_t uDone = 0, uWrite = 0;		
+	
+	memcpy(pDest, pSrc, uElemSz);
+	uDone = 1;
+	
+	byte* pWrite = pDest;
+	while(uDone < uCount){
+		
+		if(uDone > (uCount - uDone))  
+			uWrite = uCount - uDone;
+		else
+			uWrite = uDone;	
+		
+		pWrite += uDone*uElemSz;
+		
+		/* write from ourselves so that the amount of data written each time 
+		   goes as the square of the number of loops */
+		memcpy(pWrite, pDest, uElemSz*uWrite);
+		
+		uDone += uWrite;
+	}
+	
+	return pDest;	
+}
+		
+
+/* ************************************************************************* */
 /* API Function, careful with changes! */
 
 #define D2C_DATA_MINA 1
@@ -194,25 +234,28 @@ static IDL_VPTR das2c_api_data(int argc, IDL_VPTR* argv)
 	
 	/* Safety cast to const usage */
 	const DasDs* pDs = (const DasDs*)pvDs;
-	const DasDim* pDim = (const DasDim*)pvDim;
+	/* const DasDim* pDim = (const DasDim*)pvDim; */
 	const DasVar* pVar = (const DasVar*)pvVar;
 	
 	ptrdiff_t aDsShape[DASIDX_MAX] = DASIDX_INIT_UNUSED;
 	int nDsRank = DasDs_shape(pDs, aDsShape);
 	
-	ptrdiff_t aReqShape[DASIDX_MAX] = DASIDX_INIT_UNUSED; /* requested shape */
-	int nReqRank = -1;
+	/* ptrdiff_t aReqShape[DASIDX_MAX] = DASIDX_INIT_UNUSED; */ /* requested shape */
+	/* int nReqRank = -1; */
 	
-	if(argc < 2){
-		/* Easy, requested shape is just the ds shape */
+	ptrdiff_t aVarShape[DASIDX_MAX] = DASIDX_INIT_UNUSED;
+	int nVarRank = DasVar_shape(pVar, aVarShape);
+	
+	/*if(argc < 2){
+		/ * Easy, requested shape is just the ds shape * /
 		memcpy(aReqShape, aDsShape, nDsRank*sizeof(ptrdiff_t));
 		nReqRank = nDsRank;
 	}
-	else{
+	else{*/
+	if(argc > 1)
 		/* Hard, now we have to parse a slice structure */
 		das2c_IdlMsgExit("TODO: Handle slice structures.");
 		
-	}
 	
 	/* Grab the array if it exists */
 	DasAry* pvAry;
@@ -220,33 +263,82 @@ static IDL_VPTR das2c_api_data(int argc, IDL_VPTR* argv)
 		das2c_IdlMsgExit("TODO: Handle virtual variables.");
 	}
 	
-	/* Just wrap the top level array now as a test of index layout */
 	IDL_VPTR pRet = NULL;
 	
 	/* low level byte pointer to head */
 	size_t uVals = 0;
+	size_t uValSz = 0;
 	size_t uBytes = 0;
 	
 	/* Going to copy out data for now.  Can change this if needed. */
 	/* Having IDL reach deep into protected buffers seems like a   */
 	/* recipe for disaster */
 	const byte* pSrc = DasAry_getIn(pvAry, pVar->vt, DIM0, &uVals);
+	uValSz = DasAry_valSize(pvAry);
+	uBytes = uVals * uValSz;
 	
-	uBytes = uVals*DasAry_valSize(pvAry);
+	/* just quick and dirty for today */
 	
-	/* Quick an dirty test for 'electric' with no slice */
-	IDL_MEMINT dim[2]; dim[0] = aReqShape[1]; dim[1] = aReqShape[0];
+	IDL_MEMINT dim[IDL_MAX_ARRAY_DIM];
+	
+	size_t u;
+	for(u = 0; u < nDsRank; ++u)
+		dim[u] = aDsShape[(nDsRank - 1) - u];
 	
 	char* pDest = IDL_MakeTempArray(
 		das2c_vtype_2_idlcode(pVar->vt),
-		nReqRank,
+		nDsRank,
 		dim,
 		IDL_ARR_INI_NOP,
 		&pRet
 	);
+	
+	/* Staying with quick and dirty.  Here's the memcopys, thinking
+	 * in C array layout...
+	 *
+	 * nReqRank == nVarRank -> nothing to do (for now)
+	 * nReqRank > nVarRank
+	 *
+	 * if aVarShape [-3, N] repeated mem copy in a loop I times
+	 * if aVarShape [N, -3] repeated mem set in a loop J times
+	*/ 
+	
+	size_t I = 0;
+	size_t uSlowestBytes = 0;
+	
+	if(nDsRank == nVarRank){
+		memcpy(pDest, pSrc, uBytes);
+	}
+	else{
+		if(nDsRank != 2) das2c_IdlMsgExit("Logic error 1 in das2c_data()");
 		
-	/* Memcpy over the data block */
-	memcpy(pDest, pSrc, uBytes);
+		if(aVarShape[0] == DASIDX_UNUSED){
+			
+			if(aVarShape[1] != aDsShape[1]) das2c_IdlMsgExit("Logic error 2 in das2c_data()");
+			
+			/* for each I, copy a single run of J values */
+			for(I = 0; I < aDsShape[0]; ++I)
+				memcpy(pDest + (I*uBytes), pSrc, uBytes);
+		}
+		else{
+			if(aVarShape[1] == DASIDX_UNUSED){
+				
+				if(aVarShape[0] != aDsShape[0]) das2c_IdlMsgExit("Logic error 3 in das2c_data()");
+				
+				uSlowestBytes = aDsShape[0] * uValSz;
+				
+				/* for each I, fill with a single I value J times */
+				for(I = 0; I < aDsShape[0]; ++I)					
+					das2c_memset(
+						(byte*)(pDest + (I*uSlowestBytes)), pSrc + I*uValSz, uValSz, aDsShape[1]
+					);
+				
+			}
+			else{
+				das2c_IdlMsgExit("Logic error 4 in das2c_data()");
+			}
+		}
+	}
 		
 	return pRet;
 }

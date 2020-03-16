@@ -109,7 +109,57 @@
 
 static IDL_VPTR das2c_api_convert(int argc, IDL_VPTR* argv)
 {
+	
+	DasVar* pVar = das2c_arg_to_var(argc, argv, 0, NULL, NULL, NULL, NULL);
+	
+	/* Get new units */
+	if(argc < 2)
+		das2c_IdlMsgExit("Units not given in for argument 2");
+	
+	if(argv[1]->type != IDL_TYP_STRING)
+		das2c_IdlMsgExit("Units string exected for argument 2");
 
+	const char* sNewUnits = IDL_VarGetString(argv[1]);
+	if(*sNewUnits == '\0') das2c_IdlMsgExit("Units string is empty");
+	
+	das_units new_units = Units_fromStr(sNewUnits);
+	if(new_units == UNIT_INVALID)
+		das2c_error2idl();
+	
+	if(! Units_canConvert(pVar->units, new_units) )
+		das2c_IdlMsgExit(
+			"Data in units of %s can't be converted to units of %s",
+			Units_toStr(pVar->units), sNewUnits
+		);
+	
+	/* See if this variable has an array, if not there's no need to run 
+	   conversions here. */
+	if(pVar->vartype != D2V_ARRAY)
+		das2c_IdlMsgError(
+			"Unit conversions for virtual variables and sequences is not yet supported."
+		);
+
+	DasAry* pAry = DasVarAry_getArray(pVar);
+	if(pAry == NULL) das2c_IdlMsgError("das2C logic error in DasVarAry_getArray()");
+	
+	/* get a pointer to the top of the variable and get it's length, ignore the
+	   shape, we don't care for this operation. */
+	size_t u = 0, uVals = 0;
+	const byte* pSrc = DasAry_getIn(pAry, pVar-vt, DIM0, &uVals);
+	
+	/* For time units we just have to run the function on everything (slow)
+	   for non-time units we can get a factor and convert in a loop (fast) */
+	if(Units_haveCalRep(new_units)){
+		/* TODO:  Update das2C to provide a function to get the factor and
+		   the displacement so that times can be converted in a loop as well */	
+		
+		
+	}
+	else{
+		double rFactor = Units_convertTo(
+			
+	}
+	
 	
 }
 

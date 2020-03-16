@@ -76,6 +76,7 @@ static IDL_MEMINT g_aShape8[2];
 #include "das2c_vars.c"
 #include "das2c_props.c"
 #include "das2c_data.c"
+/*#include "das2c_convert.c"*/
 #include "das2c_free.c"
 #include "das2c_readhttp.c"
 
@@ -133,7 +134,11 @@ int IDL_Load(void){
 			{(IDL_SYSRTN_GENERIC)das2c_api_data}, "DAS2C_DATA",
 			D2C_DATA_MINA, D2C_DATA_MAXA, D2C_DATA_FLAG, NULL
 		},
-		{
+/*		{
+			{(IDL_SYSRTN_GENERIC)das2c_api_convert}, "DAS2C_CONVERT",
+			D2C_CONVERT_MINA, D2C_CONVERT_MAXA, D2C_CONVERT_FLAG, NULL
+		},		
+*/		{
 			{(IDL_SYSRTN_GENERIC)das2c_api_free}, "DAS2C_FREE",
 			D2C_FREE_MINA, D2C_FREE_MAXA,  D2C_FREE_FLAG, NULL
 		},
