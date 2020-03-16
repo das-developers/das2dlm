@@ -64,9 +64,12 @@ set L_DAS2="E:\Codes\SPEDAS\das2\das2C\build.windows"
 
 To put the compiler and linker on your %PATH%, issue the following command
 for each new cmd.exe window you open:
+
   `"C:\Program Files(x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat"`
+
 or if you've setup your build environment using the instructions in the 
 das2C module:
+
   `C:\opt\vs\2019\buildtools\VC\Auxiliary\Build\vcvars64.bat`
 
 You should get the output:
@@ -123,19 +126,16 @@ IDL> @test/das2c_test.pro
 The `@` symbol tells IDL to run the lines in the file as if they were typed
 directly into the IDL interpreter.  If you get a lot of output that ends in...
 ```
-{
-    "QUERY": 1,
-    "DSET": 0,
-    "PDIM": "frequency",
-    "VAR": "center",
-    "UNITS": "Hz",
-    "TYPE": "DOUBLE",
-    "SHAPE": [152, -3],
-    "N_VALS": 152
-}
+    {
+        "KEY": "fill",
+        "TYPE": "double",
+        "VALUE": "0.0"
+    }
+]
+           0
 ```
 
-The congradulations, the DLM works.
+The congratulations, the DLM works.
 
 ## Install
 
