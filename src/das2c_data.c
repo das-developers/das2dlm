@@ -304,7 +304,7 @@ static IDL_VPTR das2c_api_data(int argc, IDL_VPTR* argv)
 	*/ 
 	
 	size_t I = 0;
-	size_t uSlowestBytes = 0;
+	size_t uFastestBytes = 0;
 	
 	if(nDsRank == nVarRank){
 		memcpy(pDest, pSrc, uBytes);
@@ -325,12 +325,12 @@ static IDL_VPTR das2c_api_data(int argc, IDL_VPTR* argv)
 				
 				if(aVarShape[0] != aDsShape[0]) das2c_IdlMsgExit("Logic error 3 in das2c_data()");
 				
-				uSlowestBytes = aDsShape[0] * uValSz;
+				uFastestBytes = aDsShape[1] * uValSz;
 				
 				/* for each I, fill with a single I value J times */
 				for(I = 0; I < aDsShape[0]; ++I)					
 					das2c_memset(
-						(byte*)(pDest + (I*uSlowestBytes)), pSrc + I*uValSz, uValSz, aDsShape[1]
+						(byte*)(pDest + (I*uFastestBytes)), pSrc + I*uValSz, uValSz, aDsShape[1]
 					);
 				
 			}

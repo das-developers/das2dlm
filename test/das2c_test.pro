@@ -24,6 +24,13 @@ v_freq
 v_amp   = das2c_vars(pd_amp,  'center')
 v_amp
 
+;aTimes  = das2c_data(v_time, {i:0,   j:'*'} )  ; TODO
+aTimes  = das2c_data(v_time)
+;aFreqs  = das2c_data(v_freq, {i:'*', j:0  } )  ; TODO
+aFreqs  = das2c_data(v_freq)
+
+aAmp    = das2c_data(v_amp)
+
 das2c_props(ds, 'title')
 
 das2c_props(pd_time, 'label')
@@ -35,11 +42,6 @@ das2c_props(pd_amp)
 
 das2c_free(query)
 exit
-
-aTimes  = das2c_data(v_time, {i:0,   j:'*'} )
-aFreqs  = das2c_data(v_freq, {i:'*', j:0  } )
-aAmp    = das2c_data(v_amp)
-
 
 ; Next interation, for waveforms
 exit
