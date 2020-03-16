@@ -76,7 +76,6 @@ byte* das2c_memset(byte* pDest, const byte* pSrc, size_t uElemSz, size_t uCount)
 	memcpy(pDest, pSrc, uElemSz);
 	uDone = 1;
 	
-	byte* pWrite = pDest;
 	while(uDone < uCount){
 		
 		if(uDone > (uCount - uDone))  
@@ -84,11 +83,9 @@ byte* das2c_memset(byte* pDest, const byte* pSrc, size_t uElemSz, size_t uCount)
 		else
 			uWrite = uDone;	
 		
-		pWrite += uDone*uElemSz;
-		
 		/* write from ourselves so that the amount of data written each time 
 		   goes as the square of the number of loops */
-		memcpy(pWrite, pDest, uElemSz*uWrite);
+		memcpy(pDest + uDone*uElemSz, pDest, uElemSz*uWrite);
 		
 		uDone += uWrite;
 	}
