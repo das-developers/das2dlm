@@ -4,25 +4,25 @@ sUrl = 'http://planet.physics.uiowa.edu/das/das2Server?server=dataset' + $
 ; good tests, not testing failure modes at this time
 query = das2c_readhttp(sUrl)
 
-query
-das2c_datasets(query)
+;query
+;das2c_datasets(query)
 ds = das2c_datasets(query, 0)
-ds
-das2c_dsinfo(ds)
+help, ds
+;das2c_dsinfo(ds)
 
 pd_time = das2c_pdims(ds, 'time')
-pd_time
+help, pd_time
 pd_freq = das2c_pdims(ds, 'frequency')
-pd_freq
+help, pd_freq
 pd_amp  = das2c_pdims(ds, 'electric')
-pd_amp
+help, pd_amp
 
 v_time  = das2c_vars(pd_time, 'center')
-v_time
+help, v_time
 v_freq  = das2c_vars(pd_freq, 'center')
-v_freq
+help, v_freq
 v_amp   = das2c_vars(pd_amp,  'center')
-v_amp
+help, v_amp
 
 ;aTimes  = das2c_data(v_time, {i:0,   j:'*'} )  ; TODO
 aTimes  = das2c_data(v_time)
@@ -31,22 +31,13 @@ aFreqs  = das2c_data(v_freq)
 
 aAmp    = das2c_data(v_amp)
 
-das2c_props(ds, 'title')
+help, das2c_props(ds, 'title')
+help, das2c_props(pd_time, 'label')
+help, das2c_props(pd_time)
+help, das2c_props(pd_freq, 'label')
+help, das2c_props(pd_freq)
+help, das2c_props(pd_amp,  'label')
+help, das2c_props(pd_amp)
 
-das2c_props(pd_time, 'label')
-das2c_props(pd_time)
-das2c_props(pd_freq, 'label')
-das2c_props(pd_freq)
-das2c_props(pd_amp,  'label')
-das2c_props(pd_amp)
-
-das2c_free(query)
-exit
-
-; Next interation, for waveforms
-exit
-v_start  = das2c_vars(pd_time, 'reference')
-v_offest = das2c_vars(pd_time, 'offset')
-v_time   = das2c_mk_var(pd_time, 'reference', '+', 'offset')
-
-aTimes   = das2c_data(v_time)
+help, das2c_free(query)
+end
