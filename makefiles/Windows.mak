@@ -23,27 +23,27 @@ L_IDL=C:\Program Files\Exelis\IDL84\bin\bin.x86_64
 
 # Directory containing das2 include directory.  (i.e. the one above the
 # actual header files)
-!IFNDEF USERPROFILE
-USERPROFILE=e:\Codes\SPEDAS\das2
+!IFNDEF DAS2PATH
+DAS2PATH=e:\Codes\SPEDAS\das2
 !ENDIF
 
 !IFNDEF I_DAS2
-I_DAS2=$(USERPROFILE)\das2C
+I_DAS2=$(DAS2PATH)\das2C
 !ENDIF
 
 # Directory contaning libdas2.3.lib
 !IFNDEF L_DAS2
-L_DAS2=$(USERPROFILE)\das2C\build
+L_DAS2=$(DAS2PATH)\das2C\build
 !ENDIF
 
 # Directory containing vcpkg static libraries
 !IFNDEF L_VCPKG
-L_VCPKG=$(USERPROFILE)\vcpkg\installed\x64-windows-static\lib
+L_VCPKG=$(DAS2PATH)\vcpkg\installed\x64-windows-static\lib
 !ENDIF
 
 # Directory containing vcpkg header files
 !IFNDEF I_VCPKG
-I_VCPKG=$(USERPROFILE)\vcpkg\installed\x64-windows-static\include
+I_VCPKG=$(DAS2PATH)\vcpkg\installed\x64-windows-static\include
 !ENDIF
 
 # Derived definitions ##########################################################
