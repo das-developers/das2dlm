@@ -52,8 +52,10 @@
 /* Set the version number advertised in user agent strings by default */
 #define DAS2DLM_S_VER "0.2"
 
-/* Include IDL_GettmpNULL if needed*/
+/*
+/ * Include IDL_GettmpNULL if needed * /
 #include "das2c_GettmpNull.c"
+*/
 
 /* ************************************************************************* */
 /* Include C files directly since the module is composed almost entirely of  */
@@ -82,7 +84,9 @@ static IDL_MEMINT g_aShape8[2];
 /*#include "das2c_convert.c"*/
 #include "das2c_free.c"
 #include "das2c_readhttp.c"
+/*
 #include "das2c_null_test.c" // Test of the null pointer
+*/
 
 /* ************************************************************************* */
 /* Load the module definition tables.
@@ -150,10 +154,12 @@ int IDL_Load(void){
 			{(IDL_SYSRTN_GENERIC)das2c_api_readhttp}, "DAS2C_READHTTP",
 			D2C_READHTTP_MINA, D2C_READHTTP_MAXA, D2C_READHTTP_FLAG, NULL
 		},
+/*					
 		{
 			{(IDL_SYSRTN_GENERIC)das2c_null_test}, "DAS2C_NULL_TEST",
 			0, 1, 0, NULL
 		}
+*/
 	};
 
 	/*

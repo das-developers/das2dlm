@@ -8,7 +8,8 @@ query = das2c_readhttp(sUrl)
 ;das2c_datasets(query)
 ds = das2c_datasets(query, 0)
 help, ds
-;das2c_dsinfo(ds)
+s = das2c_dsinfo(ds)
+print, s
 
 pd_time = das2c_pdims(ds, 'time')
 help, pd_time
