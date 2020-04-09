@@ -14,7 +14,7 @@ This DLM is not that concerned with any particular server's query API.  It
 issues an HTTP request to a URL that you format.  For details of the das2
 server HTTP GET query interface see the
 [das2.2.2 Interface Control Document](https://das2.org/Das2.2.2-ICD_2017-05-09.pdf).
-If some of the HTTP GET paramaters are recognised, they will be saved in 
+If some of the HTTP GET parameters are recognized, they will be saved in 
 named fields in DAS2C_QUERY structures. Otherwise the code is GET API
 independent.
 
@@ -136,7 +136,7 @@ IDL> das2c_datasets(query)
   "N_VALS":  686051 
  }
 ```
-The SHAPE field bears explaination.  This is the overall extent of the dataset
+The SHAPE field bears explanation.  This is the overall extent of the dataset
 in index space.  Due to a limitation in the IDL DLM interface for structure
 arrays, all SHAPE fields must be the same size.  Since IDL arrays may accessed
 by up to 8 indexes (i.e have up to 8 array dimensions), the SHAPE value always
@@ -163,7 +163,7 @@ p-dim usually corresponds to a degree of freedom in the real world.  For example
 location, time, wave-amplitude etc.  These may happen to correspond to an array
 dimension, but that is only a happenstance.  Array dimensions are merely book
 keeping, as all datasets can be flattened into a set of 1-D arrays with out
-affecting thier physical meaning.
+affecting their physical meaning.
 
 The p-dims in play for this dataset are:
 
@@ -220,7 +220,7 @@ for any valid first index.  The code below illustrates a slice operation:
 ```idl
 IDL> ary = das2c_data(v_freq, {I:0, J:'*'})
 ```
-The anoymous structure given for the second argument is a *slice structure*.
+The anonymous structure given for the second argument is a *slice structure*.
 The slice structure above indicates that a rank 1 array should be output and
 this is to be accomplished by holding the first index constant at 0 and letting
 the second index vary over all valid values.  The recognized fields in a slice
@@ -249,7 +249,7 @@ IDL> ary = das2c_data(v_freq, {I:'*', J:'*'})
 **Hint** Building slice structures in a loop can be accomplished using the IDL
 [CREATE_STRUCT](https://www.harrisgeospatial.com/docs/create_struct.html)
 function.  As you iterate over each element in SHAPE, use CREATE_STRUCT to add
-fields to a slice struture.
+fields to a slice structure.
 
 ### Getting Metadata
 
@@ -295,7 +295,7 @@ IDL> das2c_props(pd_freq)
 
 ### Cleaning Up
 
-To delete a das2c object and free it's memory use the `das2c_free` function as illustated below:
+To delete a das2c object and free it's memory use the `das2c_free` function as illustrated below:
 ```idl
 IDL> das2c_free(query)
 ```
