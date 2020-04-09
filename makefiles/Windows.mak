@@ -7,52 +7,44 @@ CC=cl.exe /nologo /DWIN32
 # Set default locations or use environment overrides.  To override any of 
 # the macros below use (for example):
 #
-#   set I_IDL="C:\Program Files\Exelis\IDL87\bin\bin.x86_64\external\include"
+#  set I_IDL="C:\Program Files\Harris\IDL87\bin\bin.x86_64\external\include"
 #
 
 # The directory containing idl_export.h
 !IFNDEF I_IDL
-#I_IDL=C:\Program Files\Harris\IDL87\external\include
 I_IDL=C:\Program Files\Exelis\IDL84\external\include
 !ENDIF
 
 !IFNDEF L_IDL
-#L_IDL=C:\Program Files\Harris\IDL87\bin\bin.x86_64
-L_IDL=C:\Program Files\Exelis\IDL84\bin\bin.x86_64
-!ENDIF
-
-# Directory containing das2 include directory.  (i.e. the one above the
-# actual header files)
-!IFNDEF DAS2PATH
-DAS2PATH=e:\Codes\SPEDAS\das2
+L_IDL=C:\Program Files\Exelis\IDL84\bin\bin.x86_64\idl.lib
 !ENDIF
 
 !IFNDEF I_DAS2
-I_DAS2=$(DAS2PATH)\das2C
+I_DAS2=$(USERPROFILE)\git\das2C
 !ENDIF
 
-# Directory contaning libdas2.3.lib
+# libdas2.3.lib file or equivalent
 !IFNDEF L_DAS2
-L_DAS2=$(DAS2PATH)\das2C\build
+L_DAS2=$(USERPROFILE)\git\das2C\build\libdas2.3.lib
 !ENDIF
 
 # Directory containing vcpkg static libraries
 !IFNDEF L_VCPKG
-L_VCPKG=$(DAS2PATH)\vcpkg\installed\x64-windows-static\lib
+L_VCPKG=$(USERPROFILE)\git\vcpkg\installed\x64-windows-static\lib
 !ENDIF
 
 # Directory containing vcpkg header files
 !IFNDEF I_VCPKG
-I_VCPKG=$(DAS2PATH)\vcpkg\installed\x64-windows-static\include
+I_VCPKG=$(USERPROFILE)\git\vcpkg\installed\x64-windows-static\include
 !ENDIF
 
 # Derived definitions ##########################################################
 
-ALL_INC=/I $(I_DAS2) /I "$(I_IDL)" /I $(I_VCPKG)
+ALL_INC=/I "$(I_DAS2)" /I "$(I_IDL)" /I "$(I_VCPKG)"
 
-STATIC_LIBS=$(L_DAS2)\libdas2.3.lib "$(L_IDL)\idl.lib" $(L_VCPKG)\expat.lib \
- $(L_VCPKG)\fftw3.lib $(L_VCPKG)\libssl.lib $(L_VCPKG)\libcrypto.lib \
- $(L_VCPKG)\zlib.lib $(L_VCPKG)\pthreadVC3.lib
+STATIC_LIBS="$(L_DAS2)" "$(L_IDL)" "$(L_VCPKG)\expat.lib" \
+ "$(L_VCPKG)\fftw3.lib" "$(L_VCPKG)\libssl.lib" "$(L_VCPKG)\libcrypto.lib" \
+ "$(L_VCPKG)\zlib.lib" "$(L_VCPKG)\pthreadVC3.lib"
 
 ALL_LIBS= $(STATIC_LIBS) Advapi32.lib User32.lib Crypt32.lib ws2_32.lib
 
@@ -91,4 +83,3 @@ dlm\das2c$(DLM_SUFFIX).dll:$(BD)\das2c.obj
 clean:
 	if exist $(BD) rmdir /S /Q $(BD)
 	del dlm\das2c$(DLM_SUFFIX).exp dlm\das2c$(DLM_SUFFIX).lib dlm\das2c$(DLM_SUFFIX).dll
-

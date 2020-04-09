@@ -1,39 +1,56 @@
 # IDL Location ################################################################
 
+ifeq ($(I_IDL),)
 I_IDL=/usr/local/harris/idl87/external/include
+endif
 
 # das2C location ##############################################################
 
 # Defaults assume you have das2C in $HOME/git/das2C, and that you 
 # built it with "export N_ARCH=/".  Update as needed.
+ifeq ($(L_DAS2),)
 L_DAS2=$(HOME)/git/das2C/build./libdas2.3.a
+endif
 
 # Directory containing das2 with contains core.h
+ifeq ($(I_DAS2),)
 I_DAS2=$(HOME)/git/das2C
-
+endif
 
 # Library locations ###########################################################
 # We have to make a "fat shared object" so that the IDL DLM will be self 
 # contained.  This means that almost everything has to be staticlly linked.
-
+ifeq ($(SYSLIB_DIR),)
 SYSLIB_DIR=/usr/lib64
+endif
 
 # yum install fftw-devel fftw-static 
+ifeq ($(L_FFTW3),)
 L_FFTW3=$(SYSLIB_DIR)/libfftw3.a
+endif
 
 # yum install expat-devel expat-static
+ifeq ($(L_EXPAT),)
 L_EXPAT=$(SYSLIB_DIR)/libexpat.a
+endif
 
 # yum install openssl-devel openssl-static
+ifeq ($(L_SSL),)
 L_SSL=$(SYSLIB_DIR)/libssl.a
+endif
+
+ifeq ($(L_CRYPTO),)
 L_CRYPTO=$(SYSLIB_DIR)/libcrypto.a
+endif
 
 # yum install zlib-devel zlib-static
 # LibZ static seems to be breaking, find the problem 
 # L_Z=$(SYSLIB_DIR)/libz.a
 
 # Going to use dynamic pthread on Linux, on Windows it's a static item as well
+ifeq ($(DYN_LIBS),)
 DYN_LIBS=-lz -lm -lpthread
+endif
 
 P_SUFFIX=linux.x86_64.so
 
