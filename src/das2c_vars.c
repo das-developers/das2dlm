@@ -526,10 +526,10 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 		case 1:
 		pData1->query = iQuery;
 		pData1->dset  = iDs;
-		IDL_StrStore(&(pData1->pdim), sDim);
-		IDL_StrStore(&(pData1->var), pDim->aRoles[u]);
-		IDL_StrStore(&(pData1->units), Units_toStr(pVar->units));
-		IDL_StrStore(&(pData1->type), sIdlType);
+		IDL_StrStore(&(pData1->pdim),  (char*) sDim);
+		IDL_StrStore(&(pData1->var),   (char*) pDim->aRoles[u]);
+		IDL_StrStore(&(pData1->units), (char*) Units_toStr(pVar->units));
+		IDL_StrStore(&(pData1->type),  (char*) sIdlType);
 		for(r=0; r<nDsRank; ++r) pData1->shape[(nDsRank-1)-r] = shape[r];  /* Shape inversion */
 		pData1->n_vals = 0;
 		if((pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)
@@ -540,10 +540,10 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 		case 2:
 		pData2->query = iQuery;
 		pData2->dset  = iDs;
-		IDL_StrStore(&(pData2->pdim), sDim);
-		IDL_StrStore(&(pData2->var), pDim->aRoles[u]);
-		IDL_StrStore(&(pData2->units), Units_toStr(pVar->units));
-		IDL_StrStore(&(pData2->type), sIdlType);
+		IDL_StrStore(&(pData2->pdim),  (char*) sDim);
+		IDL_StrStore(&(pData2->var),   (char*) pDim->aRoles[u]);
+		IDL_StrStore(&(pData2->units), (char*) Units_toStr(pVar->units));
+		IDL_StrStore(&(pData2->type),  (char*) sIdlType);
 		for(r=0; r<nDsRank; ++r) pData2->shape[(nDsRank-1)-r] = shape[r];  /* Shape inversion */
 		pData2->n_vals = 0;
 		if((pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)
@@ -554,10 +554,10 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 		case 3:
 		pData3->query = iQuery;
 		pData3->dset  = iDs;
-		IDL_StrStore(&(pData3->pdim), sDim);
-		IDL_StrStore(&(pData3->var), pDim->aRoles[u]);
-		IDL_StrStore(&(pData3->units), Units_toStr(pVar->units));
-		IDL_StrStore(&(pData3->type), sIdlType);
+		IDL_StrStore(&(pData3->pdim),  (char*) sDim);
+		IDL_StrStore(&(pData3->var),   (char*) pDim->aRoles[u]);
+		IDL_StrStore(&(pData3->units), (char*) Units_toStr(pVar->units));
+		IDL_StrStore(&(pData3->type),  (char*) sIdlType);
 		for(r=0; r<nDsRank; ++r) pData3->shape[(nDsRank-1)-r] = shape[r];  /* Shape inversion */
 		pData3->n_vals = 0;
 		if((pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)
@@ -568,10 +568,10 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 		case 4:
 		pData4->query = iQuery;
 		pData4->dset  = iDs;
-		IDL_StrStore(&(pData4->pdim), sDim);
-		IDL_StrStore(&(pData4->var), pDim->aRoles[u]);
-		IDL_StrStore(&(pData4->units), Units_toStr(pVar->units));
-		IDL_StrStore(&(pData4->type), sIdlType);
+		IDL_StrStore(&(pData4->pdim),  (char*) sDim);
+		IDL_StrStore(&(pData4->var),   (char*) pDim->aRoles[u]);
+		IDL_StrStore(&(pData4->units), (char*) Units_toStr(pVar->units));
+		IDL_StrStore(&(pData4->type),  (char*) sIdlType);
 		for(r=0; r<nDsRank; ++r) pData4->shape[(nDsRank-1)-r] = shape[r];  /* Shape inversion */
 		pData4->n_vals = 0;
 		if((pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)
@@ -582,10 +582,10 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 		case 5:
 		pData5->query = iQuery;
 		pData5->dset  = iDs;
-		IDL_StrStore(&(pData5->pdim), sDim);
-		IDL_StrStore(&(pData5->var), pDim->aRoles[u]);
-		IDL_StrStore(&(pData5->units), Units_toStr(pVar->units));
-		IDL_StrStore(&(pData5->type), sIdlType);
+		IDL_StrStore(&(pData5->pdim),  (char*) sDim);
+		IDL_StrStore(&(pData5->var),   (char*) pDim->aRoles[u]);
+		IDL_StrStore(&(pData5->units), (char*) Units_toStr(pVar->units));
+		IDL_StrStore(&(pData5->type),  (char*) sIdlType);
 		for(r=0; r<nDsRank; ++r) pData5->shape[(nDsRank-1)-r] = shape[r];  /* Shape inversion */
 		pData5->n_vals = 0;
 		if((pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)
@@ -596,10 +596,10 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 		case 6:
 		pData6->query = iQuery;
 		pData6->dset  = iDs;
-		IDL_StrStore(&(pData6->pdim), sDim);
-		IDL_StrStore(&(pData6->var), pDim->aRoles[u]);
-		IDL_StrStore(&(pData6->units), Units_toStr(pVar->units));
-		IDL_StrStore(&(pData6->type), sIdlType);
+		IDL_StrStore(&(pData6->pdim),  (char*) sDim);
+		IDL_StrStore(&(pData6->var),   (char*) pDim->aRoles[u]);
+		IDL_StrStore(&(pData6->units), (char*) Units_toStr(pVar->units));
+		IDL_StrStore(&(pData6->type),  (char*) sIdlType);
 		for(r=0; r<nDsRank; ++r) pData6->shape[(nDsRank-1)-r] = shape[r];  /* Shape inversion */
 		pData6->n_vals = 0;
 		if((pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)
@@ -610,10 +610,10 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 		case 7:
 		pData7->query = iQuery;
 		pData7->dset  = iDs;
-		IDL_StrStore(&(pData7->pdim), sDim);
-		IDL_StrStore(&(pData7->var), pDim->aRoles[u]);
-		IDL_StrStore(&(pData7->units), Units_toStr(pVar->units));
-		IDL_StrStore(&(pData7->units), sIdlType);
+		IDL_StrStore(&(pData7->pdim),  (char*) sDim);
+		IDL_StrStore(&(pData7->var),   (char*) pDim->aRoles[u]);
+		IDL_StrStore(&(pData7->units), (char*) Units_toStr(pVar->units));
+		IDL_StrStore(&(pData7->units), (char*) sIdlType);
 		for(r=0; r<nDsRank; ++r) pData7->shape[(nDsRank-1)-r] = shape[r];  /* Shape inversion */
 		pData7->n_vals = 0;
 		if((pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)
@@ -624,10 +624,13 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 		case 8:
 		pData8->query = iQuery;
 		pData8->dset  = iDs;
-		IDL_StrStore(&(pData8->pdim), sDim);
-		IDL_StrStore(&(pData8->var), pDim->aRoles[u]);
-		IDL_StrStore(&(pData8->units), Units_toStr(pVar->units));
-		IDL_StrStore(&(pData8->units), sIdlType);
+		
+		/* Casts okay here, IDL_StrStore copies the string */
+		IDL_StrStore(&(pData8->pdim),  (char*)sDim);
+		IDL_StrStore(&(pData8->var),   (char*)pDim->aRoles[u]);
+		IDL_StrStore(&(pData8->units), (char*)Units_toStr(pVar->units));
+		IDL_StrStore(&(pData8->units), (char*)sIdlType);
+		
 		for(r=0; r<nDsRank; ++r) pData8->shape[(nDsRank-1)-r] = shape[r];  /* Shape inversion */
 		pData8->n_vals = 0;
 		if((pAry = DasVarAry_getArray((DasVar*)pVar)) != NULL)

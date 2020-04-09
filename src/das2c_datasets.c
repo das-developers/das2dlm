@@ -98,8 +98,8 @@ static void das2c_ds_to_dset(
 	pDest->query    = nQueryId;
 	pDest->dset     = iDs;
 	
-	if(DasDs_id(pSrc) != NULL) 
-		IDL_StrStore(&(pDest->name), DasDs_id(pSrc));
+	if(DasDs_id(pSrc) != NULL)
+		IDL_StrStore(&(pDest->name), (char*)DasDs_id(pSrc) /*strstore copies*/);
 		
 	/* Need to flag ragged datesets somehow */
 	nRank = DasDs_shape(pSrc, shape);	

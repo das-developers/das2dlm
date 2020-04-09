@@ -91,9 +91,11 @@ IDL_VPTR das2c_props_from_desc(const DasDesc* pDesc, const char* sKey)
 	);
 	
 	if(sKey != NULL){
-		IDL_StrStore(&(pData->key),   sKey);
-		IDL_StrStore(&(pData->type),  sType);
-		IDL_StrStore(&(pData->value), sVal);
+		/* https://www.harrisgeospatial.com/docs/StringProcessing.html#Setting
+		   says that the strings are copied in, casting is acceptable here */
+		IDL_StrStore(&(pData->key),   (char*)sKey);
+		IDL_StrStore(&(pData->type),  (char*)sType);
+		IDL_StrStore(&(pData->value), (char*)sVal);
 		return pRet;
 	}
 	
@@ -104,9 +106,11 @@ IDL_VPTR das2c_props_from_desc(const DasDesc* pDesc, const char* sKey)
 		sKey  = DasDesc_getNameByIdx(pDesc, u);
 		sType = DasDesc_getTypeByIdx(pDesc, u);
 		sVal  = DasDesc_getValByIdx(pDesc,  u);
-		IDL_StrStore(&(pData->key),   sKey);
-		IDL_StrStore(&(pData->type),  sType);
-		IDL_StrStore(&(pData->value), sVal);
+		
+		/* Casts okay here, IDL_StrStore copies the string */
+		IDL_StrStore(&(pData->key),   (char*)sKey);
+		IDL_StrStore(&(pData->type),  (char*)sType);
+		IDL_StrStore(&(pData->value), (char*)sVal);
 		++pData;
 	}
 	

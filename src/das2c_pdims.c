@@ -245,12 +245,13 @@ static IDL_VPTR das2c_api_pdims(int argc, IDL_VPTR* argv)
 		if(DasDim_id(pIterDim) == NULL)
 			das2c_IdlMsgExit("Logic error, das2c_pdims");
 		
-		IDL_StrStore(&(pData->pdim), DasDim_id(pIterDim));
+		/* Casts okay here, IDL_StrStore copies the string */
+		IDL_StrStore(&(pData->pdim), (char*) DasDim_id(pIterDim));
 		
 		if(pIterDim->dtype == DASDIM_COORD) 
-			IDL_StrStore(&(pData->use), "COORD");
+			IDL_StrStore(&(pData->use), (char*) "COORD"/* normally an error  */);
 		else
-			IDL_StrStore(&(pData->use), "DATA");
+			IDL_StrStore(&(pData->use), (char*) "DATA" /* but strtore copies */);
 			
 		pData->n_vars     = pIterDim->uVars;
 		pData->n_props    = DasDesc_length((DasDesc*)pIterDim);
