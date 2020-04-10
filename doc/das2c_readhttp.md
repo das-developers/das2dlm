@@ -42,7 +42,7 @@ query = das2c_readhttp(sUrl, "spedas/3.20")
 Now get information about the query:
  ```idl
 das2c_datasets(query)
-das2c_info(query, 0)
+print, das2c_info(query, 0)
 ```
 ## MODIFICATION HISTORY:
 Written by: Chris Piker, 2020-03-11
