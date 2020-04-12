@@ -80,7 +80,7 @@ For example, slicing an array with shape (10, 5, 4) dataset on i = 7, provides
 a continuous range:
 ```
                  |<8     |<6      |<4
-	offset =  24*i|  + 4*j|   + 1*k|
+   offset =  24*i|  + 4*j|   + 1*k|
                  |7      |0       |0
 ```
 The top of the range is given by the address:
@@ -93,18 +93,18 @@ a loop as each value has to be copied 4 times in a row to the output due to
 the degenericy in k:
 ```
                 |<8     |<6      |<4
-	offset =  0*i|  + 1*j|   + 0*k|
+   offset =  0*i|  + 1*j|   + 0*k|
                 |7      |0       |0
 ```
 However, if the user was to ask for a slice at (7,*,2) then we could again
 output a single pointer for the whole dataset:
 ```
                 |<8     |<6      |<3
-	offset =  0*i|  + 1*j|   + 0*k|
+   offset =  0*i|  + 1*j|   + 0*k|
                 |7      |0       |2
 
-   bose_offset = base_ary_ptr + 0*7 + 1*0 + 0*2 = base_ary_ptr
-	output_size = 1*6*1 = 6
+   base_offset = base_ary_ptr + 0*7 + 1*0 + 0*2 = base_ary_ptr
+   output_size = 1*6*1 = 6
 ```
 
 ### Optimization for continous ranges
@@ -116,5 +116,6 @@ out loop is short circuited for such ranges.  If the slowest moving index
 over which iteration is to occur is memcopy'able, then the entire copy loop
 is short circuited.
 
+-*cpiker*
 
                
