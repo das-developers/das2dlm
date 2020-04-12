@@ -110,11 +110,10 @@ output a single pointer for the whole dataset:
 ### Optimization for continous ranges
 
 Before the main copy loop runs, it inspects the requested slice from fastest
-moving index to slowest moving index.  For each output dimension that 
-satisfies the continous range condition is marked as memcpy'able.  The copy
-out loop is short circuited for such ranges.  If the slowest moving index
-over which iteration is to occur is memcopy'able, then the entire copy loop
-is short circuited.
+moving index to slowest moving index.  Each output dimension that satisfies
+the continous range condition is marked as memcpy'able.  The copy out loop is
+short circuited for such ranges.  If the slowest moving index over which iteration
+is to occur is memopy'able, then the entire copy loop is short circuited.
 
 -*cpiker*
 
