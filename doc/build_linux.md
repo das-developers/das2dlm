@@ -39,12 +39,13 @@ sudo apt install libssl libssl-dev
 
 ## Get idl_export.h
 
-You will need the `idl_export.h` file from your IDL distribution.  This is the
-only file that is needed from the distribution.  There is no need to install
-the full IDL package to get this file.  Just copy it from an existing 
-installation that you own.  Unfortunatly the `idl_export.h` file cannot be
-redistribute with the das2dlm sources due to usage restrictions.  You'll have
-to get it on you're own.
+You will need the `idl_export.h` file from your IDL 8.0 (or higher) distribution. 
+This is the only file that is needed from the distribution.  There is no need to
+install the full IDL package to get this file.  Just copy it from an existing 
+installation that you own.
+
+Unfortunatly the `idl_export.h` file cannot be redistribute with the das2dlm
+sources due to usage restrictions.  You'll have to get it on your own.
 
 
 ## Check makefile
