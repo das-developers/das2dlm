@@ -25,12 +25,13 @@ the "Check the Makefile" section below.
 
 ## Get idl_export.h and idl.lib
 
-You will need the `idl_export.h` and `idl.lib` files from your IDL distribution.
-These are the only file that is needed from the distribution.  There is no need
-to install the full IDL package to get these files.  Just copy them from an
-existing installation that you are licensed to use.  Unfortunatly these files
-cannot be redistrubed by anyone but Harris Geospatial. You'll have to get them
-on you're own.
+You will need the `idl_export.h` and `idl.lib` files from your IDL 8.0 (or 
+higher) distribution.  These are the only files that are needed from the distribution. 
+Full installation of IDL isn't needed, Just copy them from an existing IDL 
+installation that you are licensed to use.
+
+Unfortunatly these files cannot be redistrubed by anyone but Harris Geospatial.
+You'll have to get them on your own.
 
 ## Check the Makefile
 
