@@ -95,7 +95,7 @@ static IDL_VPTR das2c_api_readhttp(int argc, IDL_VPTR* argv)
 	bool bOkay = false;
 	DasHttpResp res;
 	
-	DasCredMngr* pAuth = NULL;
+	DasCredMngr* pAuth = g_pDefCred;  /* defined and initialized in das2c.c */
 
 	bOkay = das_http_getBody(sInitialUrl, sUserAgent, pAuth, &res, rConSec);
 

@@ -57,6 +57,9 @@
 #include "das2c_GettmpNull.c"
 */
 
+/* The one, the only (for now) default credentials manager */
+static DasCredMngr* g_pDefCred = NULL;
+
 /* ************************************************************************* */
 /* Include C files directly since the module is composed almost entirely of  */
 /* static functions.                                                         */
@@ -175,6 +178,11 @@ int IDL_Load(void){
 
 	/* Initialize das2, send das2 longs to the IDL message system */
 	das_init("das2c DLM", DASERR_DIS_RET, 0, DASLOG_INFO, das2c_log2idl);
+	
+	
+	/* Make a default credentials manager, it will not be able to 
+	   store keys to disk, but we can fix that */
+	g_pDefCred = new_CredMngr(NULL);
 	
 	/* Initialze the query result database.  Searches are linear so
 	 * start small */
