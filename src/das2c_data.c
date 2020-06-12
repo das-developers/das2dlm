@@ -154,60 +154,57 @@ void _das2c_data_setrng(
 	const ptrdiff_t* aShape, ptrdiff_t* aMin, ptrdiff_t* aMax, int r,
 	IDL_VPTR pStruct
 ){
-	IDL_VPTR pFakeVar = NULL;
+	IDL_VPTR pTagDesc = NULL;
 	
 	/* IDL interface should use const more often to make meaning clear */
-	IDL_MEMINT nOffset = IDL_StructTagInfoByName(
-		pStruct->value.s.sdef, (char*)g_sUpperIdx[r], IDL_MSG_RET, &pFakeVar
+	IDL_MEMINT nTagOffset = IDL_StructTagInfoByName(
+		pStruct->value.s.sdef, (char*)g_sUpperIdx[r], IDL_MSG_RET, &pTagDesc
 	);
-	if(nOffset == -1){
-		nOffset = IDL_StructTagInfoByName(
-			pStruct->value.s.sdef, (char*)g_sLowerIdx[r], IDL_MSG_RET, &pFakeVar
+	if(nTagOffset == -1){
+		nTagOffset = IDL_StructTagInfoByName(
+			pStruct->value.s.sdef, (char*)g_sLowerIdx[r], IDL_MSG_RET, &pTagDesc
 		);	
 	}
-	if(nOffset == -1) return;
+	if(nTagOffset == -1) return;
 	
-	UCHAR* pValData = pStruct->value.s.arr->data + nOffset;
-	IDL_ARRAY* pIdlAry = NULL;
-	UCHAR* pAryData = NULL;
+	UCHAR* pValData = pStruct->value.s.arr->data + nTagOffset;
 	const char* sVal = NULL;
 	
-	if(pFakeVar->flags & IDL_V_ARR){
-		pIdlAry = *((IDL_ARRAY**)pValData);
+	if(pTagDesc->flags & IDL_V_ARR){
 		
-		if((pIdlAry->n_elts) != 2)
+		if((pTagDesc->value.arr->n_elts) != 2)
 			das2c_IdlMsgExit("For index %s, range array should be two values long",
 				g_sUpperIdx[r]
 			);
 		
-		pAryData = pIdlAry->data;
-		
-		if(!_das2c_addrSzCompat(pFakeVar->type, pAryData)){
+		/* Lower bound */
+		if(!_das2c_addrSzCompat(pTagDesc->type, pValData)){
 			das2c_IdlMsgExit("Expected an integer type for lower %s index",
 				g_sUpperIdx[r]
 			);
 		}
 		else{
-			aMin[r] = _das2c_toOffset(pFakeVar->type, pAryData);
+			aMin[r] = _das2c_toOffset(pTagDesc->type, pValData);
 			if(aMin[r] < 0) aMin[r] = aShape[r] - aMin[r];
 		}
 		
-		pAryData += pIdlAry->elt_len;
-		if(!_das2c_addrSzCompat(pFakeVar->type, pAryData)){
+		/* Upper Bound */
+		pValData += pTagDesc->value.arr->elt_len;
+		
+		if(!_das2c_addrSzCompat(pTagDesc->type, pValData)){
 			das2c_IdlMsgExit("Expected an integer type for upper %s index", 
 				g_sUpperIdx[r]
 			);
 		}
 		else{
-			aMax[r] = _das2c_toOffset(pFakeVar->type, pAryData);
+			aMax[r] = _das2c_toOffset(pTagDesc->type, pValData);
 			if(aMax[r] < 0) aMax[r] = aShape[r] - aMax[r];
 		}
-		
 	}
 	
 	/* Single integer value */
-	if(_das2c_addrSzCompat(pFakeVar->type, pValData)){
-		aMin[r] = _das2c_toOffset(pFakeVar->type, pValData);
+	if(_das2c_addrSzCompat(pTagDesc->type, pValData)){
+		aMin[r] = _das2c_toOffset(pTagDesc->type, pValData);
 		if(aMin[r] < 0) aMin[r] = aShape[r] - aMin[r];
 		
 		/* Bug here, if aMin is = 2^31 this will fail on 32-bit machines */
@@ -217,7 +214,7 @@ void _das2c_data_setrng(
 	}
 	
 	/* The only supported string is '*', which is just syntax sugar */
-	if(pFakeVar->type == IDL_TYP_STRING){
+	if(pTagDesc->type == IDL_TYP_STRING){
 		
 		sVal = IDL_STRING_STR( (IDL_STRING*)pValData );
 		if(strcmp(sVal, "*") != 0){
@@ -437,10 +434,13 @@ static IDL_VPTR das2c_api_data(int argc, IDL_VPTR* argv)
 				nAryRank, 
 				dim,
 				das2c_vtype_2_idlcode(DasAry_valType(pAry)),
-				pSrc,
+				pBuf,
 				_das2c_data_free,
 				DasAry_valType(pAry) == vtTime ? DAS_TIME_pdef : NULL
 			);
+			
+			dec_DasAry(pAry);  /* Done with the array */
+			return pRet;       /* and we're outta here */
 		}
 		
 		/* Start of vals != start of buffer, IDL_ImportArray() won't work. */
@@ -472,6 +472,8 @@ static IDL_VPTR das2c_api_data(int argc, IDL_VPTR* argv)
 	}
 	
 	memcpy(pDest, pSrc, uVals * uValSz);
+	
+	dec_DasAry(pAry);  /* Done with the array */
 	
 	if(pBuf!=NULL) 
 		free(pBuf);  /* we took the memory but couldn't give it to IDL */

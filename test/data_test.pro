@@ -22,7 +22,7 @@ aTimes  = das2c_data(v_time, {i:1,j:1} )
 print, 'aTimes  = das2c_data(v_time, {i:[0,1], j:[0,1]} )'
 aTimes  = das2c_data(v_time, {i:[0,1], j:[0,1]} )
 
-print 'aTimes  = das2c_data(v_time, {i:[0,1], j:''*''} )'
+print, 'aTimes  = das2c_data(v_time, {i:[0,1], j:''*''} )'
 aTimes  = das2c_data(v_time, {i:[0,1], j:'*'} )
 
 ;aTimes  = das2c_data(v_time)
