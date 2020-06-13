@@ -57,10 +57,12 @@ int das2c_vtype_2_idlcode(das_val_type vt)
 	}	
 }
 
+/* ************************************************************************* */
+/* IDL ints to address offsets */
+
 static const int g_nHiBit_UINT = sizeof(IDL_UINT)*8 - 1;
 static const int g_nHiBit_ULONG = sizeof(IDL_UINT)*8 - 1;
 static const int g_nHiBit_ULONG64 = sizeof(IDL_UINT)*8 - 1;
-
 
 static bool _das2c_addrSzCompat(UCHAR type, UCHAR* pData)
 {
@@ -150,22 +152,24 @@ static const char* g_sUpperIdx[IDL_MAX_ARRAY_DIM] = {
 	"I", "J", "K", "L", "M", "N", "O", "P"
 };
 
-void _das2c_data_setrng(
+static ptrdiff_t _das2c_data_setrng(
 	const ptrdiff_t* aShape, ptrdiff_t* aMin, ptrdiff_t* aMax, int r,
 	IDL_VPTR pStruct
 ){
+	ptrdiff_t nDimLen = aShape[r];
+	
 	IDL_VPTR pTagDesc = NULL;
 	
 	/* IDL interface should use const more often to make meaning clear */
 	IDL_MEMINT nTagOffset = IDL_StructTagInfoByName(
-		pStruct->value.s.sdef, (char*)g_sUpperIdx[r], IDL_MSG_RET, &pTagDesc
+		pStruct->value.s.sdef, (char*)g_sUpperIdx[r], IDL_MSG_SUPPRESS, &pTagDesc
 	);
 	if(nTagOffset == -1){
 		nTagOffset = IDL_StructTagInfoByName(
-			pStruct->value.s.sdef, (char*)g_sLowerIdx[r], IDL_MSG_RET, &pTagDesc
+			pStruct->value.s.sdef, (char*)g_sLowerIdx[r], IDL_MSG_SUPPRESS, &pTagDesc
 		);	
 	}
-	if(nTagOffset == -1) return;
+	if(nTagOffset == -1) return nDimLen;
 	
 	UCHAR* pValData = pStruct->value.s.arr->data + nTagOffset;
 	const char* sVal = NULL;
@@ -185,7 +189,8 @@ void _das2c_data_setrng(
 		}
 		else{
 			aMin[r] = _das2c_toOffset(pTagDesc->type, pValData);
-			if(aMin[r] < 0) aMin[r] = aShape[r] - aMin[r];
+			if(aMin[r] < 0) 
+				aMin[r] = aShape[r] + aMin[r];
 		}
 		
 		/* Upper Bound */
@@ -198,19 +203,29 @@ void _das2c_data_setrng(
 		}
 		else{
 			aMax[r] = _das2c_toOffset(pTagDesc->type, pValData);
-			if(aMax[r] < 0) aMax[r] = aShape[r] - aMax[r];
+			
+			/* IDL uses inclusive upper bounds, hence the +1 */
+			if(aMax[r] < 0)
+				aMax[r] = aShape[r] + aMax[r] + 1; 
+			else
+				aMax[r] += 1;
 		}
+		nDimLen = aMax[r] - aMin[r];
+		
+		return nDimLen;
 	}
 	
 	/* Single integer value */
 	if(_das2c_addrSzCompat(pTagDesc->type, pValData)){
 		aMin[r] = _das2c_toOffset(pTagDesc->type, pValData);
-		if(aMin[r] < 0) aMin[r] = aShape[r] - aMin[r];
+		
+		if(aMin[r] < 0)
+			aMin[r] = (aShape[r] + aMin[r]);  /* IDL indexes are INCLUSIVE */
 		
 		/* Bug here, if aMin is = 2^31 this will fail on 32-bit machines */
 		/* of course they would have lots of other problems first I'd imagine */
 		aMax[r] = aMin[r] + 1;
-		return;
+		return 1;
 	}
 	
 	/* The only supported string is '*', which is just syntax sugar */
@@ -222,18 +237,114 @@ void _das2c_data_setrng(
 				sVal, g_sUpperIdx[r]
 			);
 		}
-		return;
+		return nDimLen;
 	}
 		
 	das2c_IdlMsgExit(
 		"Value for index %s is not understood, must be '*', a single integer"
 		" of any type or an array of two integers of any type."
-	);               
+	);
+	
+	return 0;
 }
 
-/* Mostly a hook for double free debugging */
+/* ************************************************************************* */
+/* Single value return */
 
-void _das2c_data_free(UCHAR* ptr)
+static IDL_VPTR _das2c_data_point(const DasVar* pVar, ptrdiff_t* aMin)
+{
+	
+	das_datum datum;
+	char* pDest;
+	IDL_VPTR pRet;
+			
+	if(!DasVar_getDatum(pVar, aMin, &datum))
+		return IDL_GettmpNULL();  /* Assume err msg was set in _getDatum */
+	
+	char sVal[64];
+	IDL_MEMINT dim = 1;
+	
+	switch(datum.vt){
+	case vtUnknown:  return IDL_GettmpNULL();
+	
+	/* Integer types */	
+	case vtByte:   return IDL_GettmpByte(   *( (uint8_t*)(&datum)  ) );
+	case vtUShort: return IDL_GettmpUInt(   *( (uint16_t*)(&datum) ) );
+	case vtShort:  return IDL_GettmpInt(    *( (int16_t*)(&datum)  ) );
+	case vtInt:    return IDL_GettmpLong(   *( (int32_t*)(&datum)  ) );
+	case vtLong:   return IDL_GettmpLong64( *( (int64_t*)(&datum)  ) );
+	
+	/* Float types */
+	case vtFloat:  return IDL_GettmpFloat(  *( (float*)(&datum)  ) );
+	case vtDouble: return IDL_GettmpDouble( *( (double*)(&datum) ) );
+	
+	/* Blob type */
+	case vtByteSeq:
+		pDest = NULL;
+		dim = ((das_byteseq*)(&datum))->sz;
+		pDest = IDL_MakeTempArray(
+			IDL_TYP_BYTE,
+			1,
+			&dim,
+			IDL_ARR_INI_NOP,
+			&pRet
+		);
+		memcpy(pDest, ((das_byteseq*)(&datum))->ptr, dim);
+		return pRet;
+	
+	/* Text type */
+	case vtText:
+		return IDL_StrToSTRING( *((const char**)(&datum)) );
+		
+	/* Wierd types */
+	case vtIndex:
+		das_datum_toStrValOnly(&datum, sVal, 63, 6);	
+		return IDL_StrToSTRING(sVal);
+	
+	case vtTime:
+		pDest = NULL;
+		pDest = IDL_MakeTempStruct(
+			DAS_TIME_pdef,
+			1,
+			&dim,
+			&pRet,
+			TRUE
+		);
+		memcpy(pDest, &datum, sizeof(das_time));
+		return pRet;
+	
+	}
+	
+	return IDL_GettmpNULL();
+			
+  /* Alternately, could make a one element array if that works better... 
+   * 
+	* if(datum.vt == vtTime){
+	*	pDest = IDL_MakeTempStruct(
+	* 	  DAS_TIME_pdef,
+	*	  nAryRank,
+	*	  dim,
+	*	  &pRet,
+	*    TRUE
+	* );
+	* }
+	* else{
+	*	pDest = IDL_MakeTempArray(
+	*		das2c_vtype_2_idlcode(datum.vt),
+	*		nAryRank,
+	*		dim,
+	*		IDL_ARR_INI_NOP,
+	*		&pRet
+	*	);
+	*}
+	*
+	* memcpy(pDest, pSrc, uVals * uValSz);
+	*/
+}
+
+
+/* Mostly a hook for double free debugging */
+static void _das2c_data_free(UCHAR* ptr)
 {
 	free((void*)ptr);
 }
@@ -378,6 +489,7 @@ static IDL_VPTR das2c_api_data(int argc, IDL_VPTR* argv)
 	
 	/* Trim to the requested shape if desired */
 	IDL_VPTR pStruct = NULL;
+	ptrdiff_t nSz = 1;
 	if(argc > 1){
 		pStruct = argv[1];
 		if(pStruct->type != IDL_TYP_STRUCT)
@@ -385,9 +497,28 @@ static IDL_VPTR das2c_api_data(int argc, IDL_VPTR* argv)
 		
 		/* Ducktyping: Any field name 'i or I' is the first range, and so on.
 		 * Stuff we don't understand is ignored */
-		for(r = 0; r < nDsRank; ++r)
-			_das2c_data_setrng((const ptrdiff_t*)aDsShape, aMin, aMax, r, pStruct);
+		for(r = 0; r < nDsRank; ++r){
+			nSz *= _das2c_data_setrng(
+				(const ptrdiff_t*)aDsShape, aMin, aMax, r, pStruct
+			);
+		}
 	}
+	else{
+		for(r = 0; r < nDsRank; ++r)
+			nSz *= aDsShape[r];
+	}
+	
+	if(nSz < 0)   /* Range is wacko */
+		das2c_IdlMsgExit("Illegal index range");
+	
+	if(nSz == 0)  /* No data in range */
+		return IDL_GettmpNULL();
+	
+	if(nSz == 1)  /* Single point in range */
+		return _das2c_data_point(pVar, aMin);
+	
+	
+	/* Many points in range.... */
 	
 	DasAry* pAry = DasVar_subset(pVar, nDsRank, aMin, aMax);
 	
@@ -395,8 +526,8 @@ static IDL_VPTR das2c_api_data(int argc, IDL_VPTR* argv)
 		return IDL_GettmpNULL();  /* no data in range */
 	}
 	
-	/* The output IDL array will have the transpose of the shape from the output
-	   of the _subset call */
+	/* The output IDL array will have the transpose of the shape from
+	   the output of the _subset call */
 	ptrdiff_t aAryShape[DASIDX_MAX] = DASIDX_INIT_UNUSED;
 	int nAryRank = DasAry_shape(pAry, aAryShape);
 	IDL_MEMINT dim[IDL_MAX_ARRAY_DIM];
