@@ -6,9 +6,8 @@ library.  It is compatable with IDL 8.0 an newer.
 ## What works and what doesn't
 
 Reading local files and command pipes is not yet implemented.  Only queries
-to non password protected HTTP servers providing a GET API are currently
-supported.  Saving queries to local data files is also not supported in this
-early version.
+to HTTP servers providing a GET API are currently supported.  Saving queries
+output to local data files is also not supported in this early version.
 
 This DLM is not that concerned with any particular server's query API.  It
 issues an HTTP request to a URL that you format.  For details of the das2
@@ -236,7 +235,7 @@ structure are:
   * P - The eighth index
 
 Fields for indexes larger than the RANK of the dataset are ignored.  Currently
-only positive and negative integers and the string `'*'` are undersood by the
+only integers, two-element arrays, and the string `'*'` are undersood by the
 `das2c_data` function.  So for example `-1` could have been used for field I
 to indicate the highest valid first index value, whatever that happened to be.
 
@@ -244,6 +243,17 @@ Given this interface, the following two lines of code are equivalent:
 ```idl
 IDL> ary = das2c_data(v_freq)
 IDL> ary = das2c_data(v_freq, {I:'*', J:'*'})
+```
+
+Further array slicing examples follow:
+```idl
+IDL> pd_spec = das2c_pdims(ds, 'electric')
+IDL> v_spec  = das2c_vars(pd_spec, 'center')       ;Center point electric spectral densities
+
+IDL> ary = das2c_data(v_spec, {i:0,j:0})           ;Slice struct tag names are case insensitive
+IDL> ary = das2c_data(v_spec, {I:0})               ;Here the J range defaults to '*' 
+IDL> ary = das2c_data(v_spec, {J:[-10,-1]})        ;get all I's, and last 10 J's
+IDL> ary = das2c_data(v_spec, {J:[2,4], K:6, L:7}) ;dataset rank = 2, so K and L are ignored
 ```
 
 **Hint** Building slice structures in a loop can be accomplished using the IDL
