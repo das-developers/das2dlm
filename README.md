@@ -59,9 +59,10 @@ You should get the output:
 The structure printed above is a DAS2C_QUERY structure.  Notice that value of the
 `N_DSETS` field is 1.  That means this query returned one dataset.  Datasets are
 *not* broken up by time.  A dataset does *not* represent a "files worth" of data.
-Files don't exist as an exposed concept for das2 clients.  Rather, a dataset is a
-set of arrays that are correlated in index space.  Most das2 queries will return
-a single dataset, but that is not required and should not be expected by clients.
+Files don't exist as an exposed concept for das2 clients.  Rather, a dataset is 
+defined as *a set of arrays correlated in index space*.  Most das2 queries
+will return a single dataset, but that is not required and should not be expected
+by clients.
 
 The Juno Waves Survey data source is an example of a das2 data source that 
 usually returns multiple datasets for a single query.  Often all electric field
@@ -78,7 +79,7 @@ All query result summarys can be listed by calling das2c_queries() with no argum
 IDL> das2c_queries()
 ```
 
-### Inspect Datasets
+### Inspecting Datasets
 
 Ask the query for dataset 0 and print some a human readable description.
 
@@ -192,7 +193,7 @@ means that the value of the first index does affect the output from the
 `das2c_data()` function. The 'TYPE' field gives the IDL data type for data
 values provided by this variable
 
-### Geting Data Ararys
+### Accessing Data Arrays
 
 The following code will get a single IDL array for all the center point values
 in the time dimension.  It will return an array that is 4483 by 152 values long,
@@ -254,7 +255,7 @@ IDL> ary = das2c_data(v_spec, {J:[2,4], K:6, L:7}) ;dataset rank = 2, so K and L
 function.  As you iterate over each element in SHAPE, use CREATE_STRUCT to add
 fields to a slice structure.
 
-### Getting Metadata
+### Reading Metadata
 
 Datasets contain metadata properties, such as titles and labels.  Metadata may be
 attached either for the dataset as a whole, such as the 'title' property above or
@@ -302,8 +303,8 @@ To delete a das2c object and free it's memory use the `das2c_free` function as i
 ```idl
 IDL> das2c_free(query)
 ```
-Calling `das2c_free` on a query frees all internal data structures and memory associated
-with the query; however, any internal data arrays that have been wrapped by 
+Calling `das2c_free` on a query releases all internal data structures and memory associated
+with the query; however, it will not pull the rug out from under your code.  Any internal
+data arrays that have been wrapped by
 [IDL_ImportArray](https://www.harrisgeospatial.com/docs/CreateArrayFromExistingData.html)
-and passed out to your application code without a memory copy will not be deleted until
-IDL is done with them.
+will not be deleted until IDL is done with them.
