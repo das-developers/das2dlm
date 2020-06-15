@@ -1,7 +1,9 @@
 # das2dlm
 Das2dlm is an IDL (Interactive Data Language) DLM (Dynamically Loadable Module) that
-provides system routines bindings for the [das2C](https://github.com/das-developers/das2C)
-library.  It is compatable with IDL 8.0 an newer.
+provides bindings for the [das2C](https://github.com/das-developers/das2C) library.  It
+is compatable with IDL 8.0 an newer.  Once installed, das2dlm functions are new IDL
+system rountines and thus do not required any specific initialization calls such as
+[linkimage](https://www.harrisgeospatial.com/docs/using_idl_LinkImage.html).
 
 ## Current Functionality
 
