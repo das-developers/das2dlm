@@ -1,28 +1,21 @@
-# das2dlm (in development)
+# das2dlm
 Das2dlm is an IDL (Interactive Data Language) DLM (Dynamically Loadable Module) that
 provides system routines bindings for the [das2C](https://github.com/das-developers/das2C)
 library.  It is compatable with IDL 8.0 an newer.
 
-## What works and what doesn't
+## Current Functionality
 
 Reading local files and command pipes is not yet implemented.  Only queries
-to HTTP servers providing a GET API are currently supported.  Saving queries
-output to local data files is also not supported in this early version.
+to HTTP servers providing a GET API are currently supported.  Caching query
+output in local data files is also not supported in this early version.
 
-This DLM is not that concerned with any particular server's query API.  It
-issues an HTTP request to a URL that you format.  For details of the das2
-server HTTP GET query interface see the
-[das2.2.2 Interface Control Document](https://das2.org/Das2.2.2-ICD_2017-05-09.pdf).
-If some of the HTTP GET parameters are recognized, they will be saved in 
-named fields in DAS2C_QUERY structures. Otherwise the code is GET API
-independent.
-
-On the other hand, this DLM very much cares about the format of the data
-stream output by the server.  The supported stream formats are limited to
-those that are parseable by the [das2C](https://github.com/das-developers/das2C)
+This DLM is not tied to an specific query API, such as das2 or HAPI.  It issues
+an HTTP request to a URL that you format.  On the other hand, this DLM very much
+cares about the format of the data stream output by the server.  The supported
+stream formats are limited to those that are parseable by the [das2C](https://github.com/das-developers/das2C)
 library.  At the time of writing that is only das2.2.2 (or lower) streams,
 are supported, though once das2C supports das2.3 and HAPI 2.0 streams this
-library will too.
+module will too.
   
 ## Build/Install
 
