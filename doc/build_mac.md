@@ -1,15 +1,17 @@
-# Building das2dlm on Linux
+# Building das2dlm on Mac OS X
 
-Building das2dlm is relativly easy on Linux, but a prebuild release may save
-you time if your focus is on writting IDL code that uses das2dlm instead of
-working on the module itself.  Using the pre-built DLM will be coverd in the
-main README.md.
+Building das2dlm is easy enough on MacOS, but a prebuild release may save
+you time if your focus is on writting IDL code uses das2dlm instead of working
+on the module itself.  Using the pre-built DLM is covered in the README.md
+file.  The binary module should be very easy to deploy, just copy it's top level
+directory and contents to the module path inside your IDL distribution.  If you still 
+want to compile the software on MacOS anyway, even if just for fun, read on.
 
-Linux development has been tested on CentOS 7 and KDE Neon.  Building on other
-systems should work fine but the makefile will need to be edited.  Instructions
+
+Mac development has been tested on 10.13 High Serria.  Building on other MacOS
+versions should work fine but the makefile may need to be edited.  Instructions
 for building on Windows are in the build_windows.md file and instructions for
-building on MacOS X are in the build_mac.md file.
-
+building on Linux are in the build_linux.md file.
 
 ## First build das2C
 
@@ -23,19 +25,13 @@ from the das2C project in the "Check Makefile" section below.
 
 ## Add system packages
 
-The DLM uses static libs for portability when ever possible.  Install these
-packages first.  For RedHat and CentOS the packages are:
+The DLM uses static libs for portability whenever possible.  The `fft` and 
+`openssl` packages installed by the `brew` commands in the das2C instructions
+should have already installed some of the required static libraries.  If for
+some reason you dont have these
 ```sh
-sudo yum install fftw-devel fftw-static
-sudo yum install expat-devel expat-static
-sudo yum install openssl-devel openssl-static
-sudo yum install zlib-devel
-```
-For Debian derived systems you'll need:
-```sh
-sudo apt install libfftw3 libfftw3-dev
-sudo apt install libexpat1 libexpat1-dev
-sudo apt install libssl libssl-dev
+brew install fftw
+brew install openssl
 ```
 
 ## Get idl_export.h
@@ -46,31 +42,35 @@ install the full IDL package to get this file.  Just copy it from an existing
 installation that you own.
 
 Unfortunatly the `idl_export.h` file cannot be redistribute with the das2dlm
-sources due to usage restrictions.  You'll have to get it on your own.
-
+sources due to usage restrictions.  You'll have to get it on your own.  On
+my Mac the file was found in:
+```bash
+/Applications/harris/idl/external/include/idl_export.h
+```
 
 ## Check makefile
 
-Open the file `RedHat.mak` or `Debian.mak` depending on if your Linux system
-is RedHat derived, or Debian derived, and check on the following variables:
+Open the file `Darwin.mak` and check on the following variables:
 
-  * `SYSLIB_DIR` should point to the directory containing `libssl.a`, etc.
+  * `BREWLIB_DIR` should point to the directory containing `libfftw3.a`
+  * `SSL_DIR` should point to the directory containing `libssl.a` and 
+             `libcrypto.a`
   * `I_IDL` should point to the directory containing `idl_export.h`
   * `L_DAS2` should point to the directory containing `libdas2.3.a`
   * `I_DAS2` should point to the directory containing the das2C include 
     directory, `das2`.
 
-If you're distribution is vastly different from either of these, copy over 
-one of the two makefiles above and edit it.
+If you use a different package manager such as MacPorts the default above will
+certianly need to be edited.
 
 ## Build
 
 Build the DLM by running the command:
 ```bash
-$ make -f makefiles/Debian.mak  # Or other suitable makefile in makefiles
+$ make -f makefiles/Darwin.mak  # Or other suitable makefile in makefiles
 ```
 Output is in the `dlm` subdirectory.  If the build runs successfully, you
-should see the output file `das2c.linux.x86_64.so`
+should see the output file `das2c.darwin.x86_64.so`
 
 ## Testing
 
@@ -90,7 +90,7 @@ To run the script, redirect the contents of the script to standard input as
 illustrated below.
 
 ```sh
-idl < test/das2c_test.pro
+/Applications/harris/idl/bin/bin.darwin.x86_64/idl < test/das2c_test.pro
 ```
 
 Or start IDL interactively and copy-and-paste the commands at the IDL 
@@ -98,17 +98,17 @@ interpreter prompt.
 
 ## Install
 
-There are at leas two ways to install the DLM.
+There are at least two ways to install the DLM.
 
- 1. Copy the `das2c.dlm` and `das2c.linux.x86_64.so` files to the IDL system
+ 1. Copy the `das2c.dlm` and `das2c.darwin.x86_64.so` files to the IDL system
     module directory.  This varies based on where IDL is installed and what
     version you are running.  An example directory is:
     
-    `/usr/local/harris/idl87/bin/bin.linux.x86_64`
+    `/Applications/harris/idl87/bin/bin.darwin.x86_64`
       
     In this case the install proceedure would just be:
     
-    `sudo cp dlm/das2c.dlm dlm/das2c.linux.x86_64.so /usr/local/harris/idl87/bin/bin.linux.x86_64`
+    `sudo cp dlm/das2c.dlm dlm/das2c.darwin.x86_64.so /Applications/harris/idl87/bin/bin.darwin.x86_64`
     
 
  2. Copy the whole das2dlm/dlm directory, not just the two files above,
