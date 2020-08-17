@@ -27,6 +27,7 @@ Instructions for doing so can be found in:
 
   * [doc/build_linux.md](https://github.com/das-developers/das2dlm/blob/master/doc/build_linux.md)
   * [doc/build_windows.md](https://github.com/das-developers/das2dlm/blob/master/doc/build_windows.md)
+  * [doc/build_mac.md](https://github.com/das-developers/das2dlm/blob/master/doc/build_mac.md)
 
 Follow one of the files above to create the DLM.
 
