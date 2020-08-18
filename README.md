@@ -267,7 +267,7 @@ the dataset
 ```idl
 IDL> das2c_props(ds)
 [
-   {"KEY":"title", "PTYPE":"String", "VALUE":"Galileo PWS - LRS Electric"}
+   {"KEY":"title", "TYPE":"String", "VALUE":"Galileo PWS - LRS Electric"}
 ]
 ```
 
@@ -277,26 +277,26 @@ manner.
 IDL> pd_amp = das2c_pdims(ds, 'electric')
 IDL> das2c_props(pd_amp)
 [
-  {"KEY":"label",     "PTYPE":"String",     "VALUE":"Spectral Density (V!a2!n m!a-2!n Hz!a-1!n)"},
-  {"KEY":"scaleType", "PTYPE":"String",     "VALUE":"log"},
-  {"KEY":"range",     "PTYPE":"DatumRange", "VALUE":"1.0e-17 to 1.0e-4 V**2 m**-2 Hz**-1"},
-  {"KEY":"fill",      "PTYPE":"double",     "VALUE":"0.0"}
+  {"KEY":"label",     "TYPE":"String",     "VALUE":"Spectral Density (V!a2!n m!a-2!n Hz!a-1!n)"},
+  {"KEY":"scaleType", "TYPE":"String",     "VALUE":"log"},
+  {"KEY":"range",     "TYPE":"DatumRange", "VALUE":"1.0e-17 to 1.0e-4 V**2 m**-2 Hz**-1"},
+  {"KEY":"fill",      "TYPE":"double",     "VALUE":"0.0"}
 ]
 
 IDL> pd_time = das2c_pdims(ds, 'time')
 IDL> das2c_props(pd_time)
 [
-   {"KEY":"tagWidth",   "PTYPE":"Datum",      "VALUE":"80 s"},
-   {"KEY":"cacheRange", "PTYPE":"DatumRange", "VALUE":"2001-01-01T00:00 to 2001-01-02T00:00 UTC"
+   {"KEY":"tagWidth",   "TYPE":"Datum",      "VALUE":"80 s"},
+   {"KEY":"cacheRange", "TYPE":"DatumRange", "VALUE":"2001-01-01T00:00 to 2001-01-02T00:00 UTC"
    },
 ]
 IDL> pd_freq = das2c_pdims(ds, 'frequency')
 IDL> das2c_props(pd_freq)
 
 [
-   {"KEY":"label",     "PTYPE":"String",     "VALUE":"Frequency (Hz)"},
-   {"KEY":"scaleType", "PTYPE":"String",     "VALUE":"log"},
-   {"KEY":"range",     "PTYPE":"DatumRange", "VALUE":"5 to 6000000 Hz"}
+   {"KEY":"label",     "TYPE":"String",     "VALUE":"Frequency (Hz)"},
+   {"KEY":"scaleType", "TYPE":"String",     "VALUE":"log"},
+   {"KEY":"range",     "TYPE":"DatumRange", "VALUE":"5 to 6000000 Hz"}
 ]
 ```
 
