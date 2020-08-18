@@ -287,8 +287,7 @@ IDL> pd_time = das2c_pdims(ds, 'time')
 IDL> das2c_props(pd_time)
 [
    {"KEY":"tagWidth",   "TYPE":"Datum",      "VALUE":"80 s"},
-   {"KEY":"cacheRange", "TYPE":"DatumRange", "VALUE":"2001-01-01T00:00 to 2001-01-02T00:00 UTC"
-   },
+   {"KEY":"cacheRange", "TYPE":"DatumRange", "VALUE":"2001-01-01T00:00 to 2001-01-02T00:00 UTC"}
 ]
 IDL> pd_freq = das2c_pdims(ds, 'frequency')
 IDL> das2c_props(pd_freq)
