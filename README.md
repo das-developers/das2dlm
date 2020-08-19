@@ -47,14 +47,13 @@ After downloading the DLM or building it from source, you have two installation 
      itself.  So for example copy in `das2c.darwin.x86_64.so` and `das2c.dlm` not the
      whole directory `das2dlm-dsym-0.4.0`.
      
-  2. Copy the contents of the DLM to some other directory and update your `IDL_DLM_PATH`
+  2. Or, copy the contents of the DLM to some other directory and update your `IDL_DLM_PATH`
      environment variable.  The default IDL path must be retained in the environment
      variable.  Examples of setting `IDL_DLM_PATH` for various operating systems follows:
      ```
      export IDL_DLM_PATH="/home/myname/das2dlm-dsym-0.4.0:<IDL_DEFAULT>"   (Linux/MacOS)
      set IDL_DLM_PATH=C:\Users\myname\das2dlm-dsym-0.4.0:<IDL_DEFAULT>     (Windows)
      ```
-     
      The text `<IDL_DEFAULT>` is a flag  that must be included as the last item in the
      path or else IDL will not be able to find it's own modules. See
      [DLMs](https://www.harrisgeospatial.com/docs/DLM.html) in the IDL documentation
