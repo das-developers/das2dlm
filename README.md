@@ -19,11 +19,13 @@ library.  At the time of writing that is only das2.2.2 (or lower) streams,
 are supported, though once das2C supports das2.3 and HAPI 2.0 streams this
 module will too.
   
-## Build/Install
+## Build/Download
 
-Once the DLM has been build, you can place it somewhere on your `IDL_DLM_PATH`
-and it will work.  Currently you'll have to build the DLM from source code.
-Instructions for doing so can be found in:
+The easiest way to get das2dlm is to download a [binary release](https://github.com/das-developers/das2dlm/releases).
+The most recent release is version [0.4.0](https://github.com/das-developers/das2dlm/releases/tag/0.4.0).
+
+If you would like to compile das2dlm from source code, instructions for doing so may be
+found in:
 
   * [doc/build_linux.md](https://github.com/das-developers/das2dlm/blob/master/doc/build_linux.md)
   * [doc/build_windows.md](https://github.com/das-developers/das2dlm/blob/master/doc/build_windows.md)
@@ -31,6 +33,33 @@ Instructions for doing so can be found in:
 
 Follow one of the files above to create the DLM.
 
+## Install
+After downloading the DLM or building it from source, you have two installation choices:
+  1. Copy the contents into the IDL default extension location.  Since IDL can be installed
+     in a variety of locations and absolute path can't be provided here, but example 
+     locations for various operating systems follows:
+     ```
+     /usr/local/harris/idl87/bin/bin.linux.x86_64    (Linux example)
+     /Applications/harris/idl/bin/bin.darwin.x86_64  (MacOS example)
+     C:\Program Files\Harris\IDL87\bin\bin.x86_64    (Windows example)
+     ```
+     Only the contents of the dlm directory should be copied in, not the whole directory
+     itself.  So for example copy in `das2c.darwin.x86_64.so` and `das2c.dlm` not the
+     whole directory `das2dlm-dsym-0.4.0`.
+     
+  2. Copy the contents of the DLM to some other directory and update your `IDL_DLM_PATH`
+     environment variable.  The default IDL path must be retained in the environment
+     variable.  Examples of setting `IDL_DLM_PATH` for various operating systems follows:
+     ```
+     export IDL_DLM_PATH="/home/myname/das2dlm-dsym-0.4.0:<IDL_DEFAULT>"   (Linux/MacOS)
+     set IDL_DLM_PATH=C:\Users\myname\das2dlm-dsym-0.4.0:<IDL_DEFAULT>     (Windows)
+     ```
+     
+     The text `<IDL_DEFAULT>` is a flag  that must be included as the last item in the
+     path or else IDL will not be able to find it's own modules. See
+     [DLMs](https://www.harrisgeospatial.com/docs/DLM.html) in the IDL documentation
+     for details.
+     
 ## Usage
 
 The following will download data from a Galileo mission das2 data source
