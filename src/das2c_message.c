@@ -66,14 +66,24 @@ static void das2c_error2idl()
 	
 	snprintf(
 		sErrBuf, ERROR2IDL_BUFSZ - 1,
-		"ERROR: %s\n       (Reported from %s in %s:%d)",
+		"%s\n(Reported from %s in %s:%d)",
 		pMsg->message, pMsg->sFunc, pMsg->sFile, pMsg->nLine
 	);
 	
 	das_error_free(pMsg);
 	
-	/* Assume stack memory pointers are safe to pass here... */
-	IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "%s", sErrBuf);
+	/* It appears that IDL_Message is not a standard varargs function.
+	   Providing %s and then the string results in no output.
+		
+	   To get around this, give it the buffer directly, but for safety, convert
+		any % characters to $ so that there cannot be any formatting 
+		information.  Hoeky I known, but it prevents error messages  
+		triggering an interpreter crash. 
+	*/
+	for(int i = 0; i < strlen(sErrBuf); ++i)
+		if(sErrBuf[i] == '%') sErrBuf[i] = '$';
+	
+	IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, sErrBuf);
 }
 
 
