@@ -36,8 +36,8 @@ Follow one of the files above to create the DLM.
 ## Install
 After downloading the DLM or building it from source, you have two installation choices:
   1. Copy the contents into the IDL default extension location.  Since IDL can be installed
-     in a variety of locations and absolute path can't be provided here, but example 
-     locations for various operating systems follows:
+     in a variety of locations an exact path can't be provided here, but example 
+     locations for various operating systems follow:
      ```
      /usr/local/harris/idl87/bin/bin.linux.x86_64    (Linux example)
      /Applications/harris/idl/bin/bin.darwin.x86_64  (MacOS example)
@@ -47,9 +47,10 @@ After downloading the DLM or building it from source, you have two installation 
      itself.  So for example copy in `das2c.darwin.x86_64.so` and `das2c.dlm` not the
      whole directory `das2dlm-dsym-0.4.0`.
      
-  2. Or, copy the contents of the DLM to some other directory and update your `IDL_DLM_PATH`
-     environment variable.  The default IDL path must be retained in the environment
-     variable.  Examples of setting `IDL_DLM_PATH` for various operating systems follows:
+  2. Alternatively, you can copy the contents of the DLM to some other directory and update
+     your `IDL_DLM_PATH` environment variable.  The default IDL path must be retained in
+     the environment variable.  Examples of setting `IDL_DLM_PATH` for various operating
+     systems follow:
      ```
      export IDL_DLM_PATH="/home/myname/das2dlm-dsym-0.4.0:<IDL_DEFAULT>"   (Linux/MacOS)
      set IDL_DLM_PATH=C:\Users\myname\das2dlm-dsym-0.4.0:<IDL_DEFAULT>     (Windows)
