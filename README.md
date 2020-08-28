@@ -22,7 +22,7 @@ module will too.
 ## Build/Download
 
 The easiest way to get das2dlm is to download a [binary release](https://github.com/das-developers/das2dlm/releases).
-The most recent release is version [0.4.0](https://github.com/das-developers/das2dlm/releases/tag/0.4.0).
+The most recent release is version [0.4.1](https://github.com/das-developers/das2dlm/releases/tag/0.4.1).
 
 If you would like to compile das2dlm from source code, instructions for doing so may be
 found in:
