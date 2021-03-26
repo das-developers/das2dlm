@@ -40,7 +40,7 @@
 ;  new_units: A UTF-8 string providing the requested units.  Generic SI unit
 ;             conversions are provide as well an converting times from one set
 ;             of intervals-from-epoch units to another.  The canonical unit 
-;             representation is taken from the PDS3 standard which use Frotran
+;             representation is taken from the PDS3 standard which use Fortran
 ;             exponetial notation.  For example, electric spectral density is
 ;             given as:
 ; 

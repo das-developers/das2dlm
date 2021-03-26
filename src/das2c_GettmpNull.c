@@ -1,4 +1,5 @@
-// IDL 8.4 does not have IDL_GettmpNULL() implementation. This is an attempt to implement it
+/* IDL 8.4 does not have IDL_GettmpNULL() implementation. This is an attempt to
+   implement it */
 #if IDL_VERSION_MINOR < 7
 
 #ifndef IDL_V_NULL
