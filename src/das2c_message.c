@@ -141,6 +141,67 @@ static void das2c_log2idl(int nLevel, const char* sMsg, bool bPrnTime)
 	IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_INFO, sOutMsg);
 }
 
+/* ************************************************************************* */
+/* API Function, careful with changes! */
 
-/* TODO: Add bindings to log level manipulation functions. */
+#define D2C_LOGLEVEL_MINA 0
+#define D2C_LOGLEVEL_MAXA 1
+#define D2C_LOGLEVEL_FLAG 0
+
+/*
+;+
+; FUNCTION:
+;  das2c_loglevel
+;
+; PURPOSE:
+;  Get or set the current logging verbosity level
+;
+; CALLING SEQUENCE:
+;  cur_level = das2c_loglevel()
+;  old_level = das2c_loglevel(new_level)
+;
+; OPTIONAL INPUTS:
+;  new_level:  A string definining the new logging level.  Must be one of
+;              'trace','debug','info','warning','error','critical' in order
+;              of decreasing verbosity.
+;
+; OUTPUT:
+;  Returns a string that represents the logging level.  If a new verbosity
+;  level is set, the old level is returned.
+;
+; EXAMPLES:
+;  Change the logging level from 'info', which is the default, to 'debug'
+;  to investigate a problem.
+;
+;     das2c_loglevel('debug')
+;     
+; MODIFICATION HISTORY:
+;  C. Piker, 2023-12-02 - Original
+;-
+*/
+
+static IDL_VPTR das2c_api_loglevel(int argc, IDL_VPTR* argv)
+{
+
+	int nLevel = daslog_level();
+	const char* sOldLevel = NULL;
+	
+	if(nLevel <= DASLOG_TRACE) sOldLevel = "trace";
+	else if (nLevel <= DASLOG_DEBUG) sOldLevel = "debug";
+	else if (nLevel <= DASLOG_INFO)  sOldLevel = "info";
+	else if (nLevel <= DASLOG_WARN)  sOldLevel = "warning";
+	else if (nLevel <= DASLOG_ERROR) sOldLevel = "error";
+	else if (nLevel <= DASLOG_CRIT)  sOldLevel = "critical";
+	else sOldLevel = "silent";
+
+	const char* sNewLevel = NULL;
+	if(argc > 0){
+		// Change the log level if desired
+		sNewLevel = IDL_VarGetString(argv[0]);
+		nLevel = daslog_strlevel(sNewLevel);
+		daslog_setlevel(nLevel);
+	}
+
+	return (IDL_StrToSTRING(sOldLevel));
+}
 

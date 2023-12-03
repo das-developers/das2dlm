@@ -1,0 +1,3 @@
+[submodule "deps/das2C"]
+	path = deps/das2C
+	url = git@github.com:das-developers/das2C.git

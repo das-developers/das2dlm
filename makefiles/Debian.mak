@@ -9,12 +9,12 @@ endif
 # Defaults assume you have das2C in $HOME/git/das2C, and that you 
 # built it with "export N_ARCH=/".  Update as needed.
 ifeq ($(L_DAS2),)
-L_DAS2=$(HOME)/git/das2C/build./libdas2.3.a
+L_DAS2=deps/das2C/build.Linux.x86_64/libdas2.3.a
 endif
 
 # Directory containing das2 with contains core.h
 ifeq ($(I_DAS2),)
-I_DAS2=$(HOME)/git/das2C
+I_DAS2=deps/das2C
 endif
 
 # Library locations ###########################################################
@@ -30,9 +30,8 @@ L_FFTW3=$(SYSLIB_DIR)/libfftw3.a
 endif
 
 # apt install libexpat1-dev
-# Can't use static expat on debian
 ifeq ($(L_EXPAT),)
-L_EXPAT=
+L_EXPAT=$(SYSLIB_DIR)/libexpat.a
 endif
 
 # apt install libssl-dev
@@ -50,16 +49,16 @@ endif
 
 # Going to use dynamic pthread on Linux, on Windows it's a static item as well
 ifeq ($(DYN_LIBS),)
-DYN_LIBS=-lexpat -lz -lm -lpthread
+DYN_LIBS=-lz -lm -lpthread
 endif
 
 P_SUFFIX=linux.x86_64.so
 
 # Sources #####################################################################
 
-# Warning: keep das2c.c first in the list below!  Since we are usin a wierd
-#          #include scheme
-SRCS=das2c.c das2c_message.c das2c_db.c das2c_readhttp.c das2c_queries.c \
+# Warning: keep das2c.c first in the list below!  Since we are using a wierd
+#          #include scheme  
+SRCS=das2c.c das2c_message.c das2c_db.c das2c_readhttp.c das2c_results.c \
  das2c_dsinfo.c das2c_datasets.c das2c_pdims.c das2c_vars.c das2c_props.c \
  das2c_data.c das2c_free.c
  
@@ -68,7 +67,8 @@ SRCS_IN=$(patsubst %, src/%, $(SRCS))
 # Composite Defs ##############################################################
 
 CC=gcc
-CFLAGS=-g -std=c99 -Wall -Wno-unused-function -fPIC -I$(I_IDL) -I$(I_DAS2)
+CFLAGS=-ggdb -std=c99 -Wall -Wno-unused-function -fPIC -I$(I_IDL) -I$(I_DAS2)
+#CFLAGS=-O2 -std=c99 -Wall -Wno-unused-function -fPIC -I$(I_IDL) -I$(I_DAS2)
 
 STATIC_LIBS=$(L_DAS2) $(L_FFTW3) $(L_EXPAT) $(L_SSL) $(L_CRYPTO) $(L_Z)
 LFLAGS=-Wall -fPIC -shared -Wl,-Bsymbolic $(STATIC_LIBS) $(DYN_LIBS)

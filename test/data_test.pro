@@ -1,4 +1,4 @@
-sUrl = 'http://jupiter.physics.uiowa.edu/das/server?server=dataset' + $
+sUrl = 'https://jupiter.physics.uiowa.edu/das/server?server=dataset' + $
 '&dataset=Galileo/PWS/Survey_Electric&start_time=2001-001&end_time=2001-002'
 
 ; good tests, not testing failure modes at this time

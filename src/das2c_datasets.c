@@ -21,7 +21,7 @@
 		
 /* Output structure definitions.*/
 static IDL_STRUCT_TAG_DEF DAS2C_DSET_tags[] = {
-   {"QUERY",    NULL,      (void*)IDL_TYP_LONG},
+   {"RESULT",    NULL,     (void*)IDL_TYP_LONG},
 	{"DSET",     NULL,      (void*)IDL_TYP_LONG},
 
 	{"NAME",     NULL,      (void*)IDL_TYP_STRING},
@@ -35,7 +35,7 @@ static IDL_STRUCT_TAG_DEF DAS2C_DSET_tags[] = {
 };
 
 typedef struct das2c_dset_data_s{
-	IDL_LONG   query;
+	IDL_LONG   result;
 	IDL_LONG   dset;
 	
 	IDL_STRING name;
@@ -65,19 +65,19 @@ static int das2c_args_ds_id(int argc, IDL_VPTR* argv, int iArg){
 }
 
 /* Returns dataset pointer if index is valid */
-static const DasDs* das2c_check_ds_id(const QueryDbEnt* pEnt, int iDs)
+static const DasDs* das2c_check_ds_id(const ResultDbEnt* pEnt, int iDs)
 {
 	if(pEnt == NULL) das2c_IdlMsgExit("Logic error, das2c_datasets.c");
 	
 	if(iDs >= pEnt->uDs){
 		if(pEnt->uDs == 0)
 			das2c_IdlMsgExit(
-				"Query result %d doesn't contain any datasets", pEnt->nQueryId
+				"Result ID %d doesn't contain any datasets", pEnt->nResultId
 			);
 		else
 			das2c_IdlMsgExit(
-				"Query result %d dataset indices are 0 to %zu", 
-				pEnt->nQueryId, pEnt->uDs - 1
+				"Result %d dataset indices are 0 to %zu", 
+				pEnt->nResultId, pEnt->uDs - 1
 			);
 	}
 	const DasDs* pDs = pEnt->lDs[iDs];
@@ -87,7 +87,7 @@ static const DasDs* das2c_check_ds_id(const QueryDbEnt* pEnt, int iDs)
 
 /* Put a Das2Ds into a DAS2C_DSET structure */
 static void das2c_ds_to_dset(
-	int nQueryId, int iDs, DAS2C_DSET_data* pDest, const DasDs* pSrc
+	int nResultId, int iDs, DAS2C_DSET_data* pDest, const DasDs* pSrc
 ){
 	size_t uDim = 0, uAry = 0;
 	const DasAry* pAry = NULL;
@@ -95,7 +95,7 @@ static void das2c_ds_to_dset(
 	int nRank, r = 0;  
 	
 	/* Write into IDL memory using parallel structure pointer */
-	pDest->query    = nQueryId;
+	pDest->result   = nResultId;
 	pDest->dset     = iDs;
 	
 	if(DasDs_id(pSrc) != NULL)
@@ -126,10 +126,10 @@ static void das2c_ds_to_dset(
 
 /* Get a DB entry from a query struct arg */
 static DasDs* das2c_arg_to_ds(
-	int argc, IDL_VPTR* argv, int iArg, int* piQuery, int* piDset
+	int argc, IDL_VPTR* argv, int iArg, int* piResult, int* piDset
 ){	
-	const QueryDbEnt* pEnt = das2c_arg_to_ent(argc, argv, iArg);
-	if(piQuery != NULL) *piQuery = pEnt->nQueryId;
+	const ResultDbEnt* pEnt = das2c_arg_to_ent(argc, argv, iArg);
+	if(piResult != NULL) *piResult = pEnt->nResultId;
 	
 	/* See if this is a query struct */
 	IDL_VPTR pVar = argv[iArg];
@@ -164,7 +164,7 @@ static DasDs* das2c_arg_to_ds(
 
 	if((iDs < 0)||(iDs > pEnt->uDs)||(pEnt->lDs[iDs]==NULL))
 		das2c_IdlMsgExit(
-			"No dataset at index %d for query result %d", iDs, pEnt->nQueryId
+			"No dataset at index %d for query result %d", iDs, pEnt->nResultId
 		);
 	
 	if(piDset != NULL) *piDset = iDs;
@@ -234,15 +234,15 @@ static DasDs* das2c_arg_to_ds(
 ;
 ; EXAMPLES:
 ;  Get an array of dataset strutures for datasets in a HTTP GET query.
-;    query = das2c_readhttp(url_string)
-;    ds_arr = das2c_datasets(query)
+;    result = das2c_readhttp(url_string)
+;    ds_arr = das2c_datasets(result)
 ;
-;  Get the first dataset struture for query ID 27.
-;    query = das2c_queries(27)
-;    ds = das2c_datasets(query, 0);
+;  Get the first dataset struture for result ID 27.
+;    result = das2c_queries(27)
+;    ds = das2c_datasets(result, 0);
 ;
 ;  Trim the shape array down to the actual rank of the dataset.
-;    ds = das2c_datesets(query, 0);
+;    ds = das2c_datesets(result, 0);
 ;    shape = ds.shape[8 - ds.rank : -1 ]
 ;
 ; MODIFICATION HISTORY:
@@ -252,7 +252,7 @@ static DasDs* das2c_arg_to_ds(
 static IDL_VPTR das2c_api_datasets(int argc, IDL_VPTR* argv)
 {
 	/* Get DB entry */
-	const QueryDbEnt* pEnt = das2c_arg_to_ent(argc, argv, 0);
+	const ResultDbEnt* pEnt = das2c_arg_to_ent(argc, argv, 0);
 	
 	int iDs = -1; /* Flag for all dims */
 	
@@ -283,7 +283,7 @@ static IDL_VPTR das2c_api_datasets(int argc, IDL_VPTR* argv)
 		pDs = pEnt->lDs[u];
 		if(pDs == NULL) das2c_IdlMsgExit("Logic error, das2c_datasets.c");
 		
-		das2c_ds_to_dset(pEnt->nQueryId, u, pData, pDs);
+		das2c_ds_to_dset(pEnt->nResultId, u, pData, pDs);
 		
 		++pData;
 	}

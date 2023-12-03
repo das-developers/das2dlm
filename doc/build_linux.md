@@ -11,16 +11,6 @@ for building on Windows are in the build_windows.md file and instructions for
 building on MacOS X are in the build_mac.md file.
 
 
-## First build das2C
-
-The big one.  First download and build
-[das2C](https://github.com/das-developers/das2C) on your system.  This can be
-involved but much of the system setup for building das2C applies to building
-das2dlm.
-
-You will need to know the location of the libdas2.3.a and the header files
-from the das2C project in the "Check Makefile" section below.
-
 ## Add system packages
 
 The DLM uses static libs for portability when ever possible.  Install these
@@ -37,6 +27,19 @@ sudo apt install libfftw3 libfftw3-dev
 sudo apt install libexpat1 libexpat1-dev
 sudo apt install libssl libssl-dev
 ```
+
+## Build das2C
+
+Change to the dependencies directory and build [das2C](https://github.com/das-developers/das2C) on your system.
+
+```bash
+cd deps/das2C
+make
+```
+
+This can be involved but much of the system setup for building das2C applies to building
+das2dlm.
+
 
 ## Get idl_export.h
 

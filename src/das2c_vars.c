@@ -1,4 +1,4 @@
-/* Copyright (C) 2020 Chris Piker <chris-piker@uiowa.edu>
+/* Copyright (C) 2020-2023 Chris Piker <chris-piker@uiowa.edu>
  *                    
  * This file is part of das2dlm, an Interactive Data Language (IDL) binding
  * for the das2C library.  IDL is a trademark of Harris Geospatial Solutions,
@@ -43,7 +43,7 @@ void das2c_vtype_2_idltype(das_val_type vt, size_t vsize, char* sBuf, size_t uLe
 	can't access LIST() or MAP() so have to repeate var definitions for every
 	dataset size.  */
 static IDL_STRUCT_TAG_DEF DAS2C_VAR_tags_1[] = {
-   {"QUERY",   NULL,      (void*)IDL_TYP_LONG},    /* ID items */
+   {"RESULT",  NULL,      (void*)IDL_TYP_LONG},    /* ID items */
 	{"DSET",    NULL,      (void*)IDL_TYP_LONG},
 	{"PDIM",    NULL,      (void*)IDL_TYP_STRING},
 	{"VAR",     NULL,      (void*)IDL_TYP_STRING},
@@ -56,7 +56,7 @@ static IDL_STRUCT_TAG_DEF DAS2C_VAR_tags_1[] = {
 	{0}
 };
 static IDL_STRUCT_TAG_DEF DAS2C_VAR_tags_2[] = {
-   {"QUERY",   NULL,      (void*)IDL_TYP_LONG},
+   {"RESULT",  NULL,      (void*)IDL_TYP_LONG},
 	{"DSET",    NULL,      (void*)IDL_TYP_LONG},
 	{"PDIM",    NULL,      (void*)IDL_TYP_STRING},
 	{"VAR",     NULL,      (void*)IDL_TYP_STRING},
@@ -67,7 +67,7 @@ static IDL_STRUCT_TAG_DEF DAS2C_VAR_tags_2[] = {
 	{0}
 };
 static IDL_STRUCT_TAG_DEF DAS2C_VAR_tags_3[] = {
-   {"QUERY",   NULL,      (void*)IDL_TYP_LONG},
+   {"RESULT",  NULL,      (void*)IDL_TYP_LONG},
 	{"DSET",    NULL,      (void*)IDL_TYP_LONG},
 	{"PDIM",    NULL,      (void*)IDL_TYP_STRING},
 	{"VAR",     NULL,      (void*)IDL_TYP_STRING},
@@ -78,7 +78,7 @@ static IDL_STRUCT_TAG_DEF DAS2C_VAR_tags_3[] = {
 	{0}
 };
 static IDL_STRUCT_TAG_DEF DAS2C_VAR_tags_4[] = {
-   {"QUERY",   NULL,      (void*)IDL_TYP_LONG},
+   {"RESULT",  NULL,      (void*)IDL_TYP_LONG},
 	{"DSET",    NULL,      (void*)IDL_TYP_LONG},
 	{"PDIM",    NULL,      (void*)IDL_TYP_STRING},
 	{"VAR",     NULL,      (void*)IDL_TYP_STRING},
@@ -89,7 +89,7 @@ static IDL_STRUCT_TAG_DEF DAS2C_VAR_tags_4[] = {
 	{0}
 };
 static IDL_STRUCT_TAG_DEF DAS2C_VAR_tags_5[] = {
-   {"QUERY",   NULL,      (void*)IDL_TYP_LONG},
+   {"RESULT",  NULL,      (void*)IDL_TYP_LONG},
 	{"DSET",    NULL,      (void*)IDL_TYP_LONG},
 	{"PDIM",    NULL,      (void*)IDL_TYP_STRING},
 	{"VAR",     NULL,      (void*)IDL_TYP_STRING},
@@ -100,7 +100,7 @@ static IDL_STRUCT_TAG_DEF DAS2C_VAR_tags_5[] = {
 	{0}
 };
 static IDL_STRUCT_TAG_DEF DAS2C_VAR_tags_6[] = {
-   {"QUERY",   NULL,      (void*)IDL_TYP_LONG},
+   {"RESULT",  NULL,      (void*)IDL_TYP_LONG},
 	{"DSET",    NULL,      (void*)IDL_TYP_LONG},
 	{"PDIM",    NULL,      (void*)IDL_TYP_STRING},
 	{"VAR",     NULL,      (void*)IDL_TYP_STRING},
@@ -111,7 +111,7 @@ static IDL_STRUCT_TAG_DEF DAS2C_VAR_tags_6[] = {
 	{0}
 };
 static IDL_STRUCT_TAG_DEF DAS2C_VAR_tags_7[] = {
-   {"QUERY",   NULL,      (void*)IDL_TYP_LONG},
+   {"RESULT",  NULL,      (void*)IDL_TYP_LONG},
 	{"DSET",    NULL,      (void*)IDL_TYP_LONG},
 	{"PDIM",    NULL,      (void*)IDL_TYP_STRING},
 	{"VAR",     NULL,      (void*)IDL_TYP_STRING},
@@ -122,7 +122,7 @@ static IDL_STRUCT_TAG_DEF DAS2C_VAR_tags_7[] = {
 	{0}
 };
 static IDL_STRUCT_TAG_DEF DAS2C_VAR_tags_8[] = {
-   {"QUERY",   NULL,      (void*)IDL_TYP_LONG},
+   {"RESULT",  NULL,      (void*)IDL_TYP_LONG},
 	{"DSET",    NULL,      (void*)IDL_TYP_LONG},
 	{"PDIM",    NULL,      (void*)IDL_TYP_STRING},
 	{"VAR",     NULL,      (void*)IDL_TYP_STRING},
@@ -134,7 +134,7 @@ static IDL_STRUCT_TAG_DEF DAS2C_VAR_tags_8[] = {
 };
 
 typedef struct _das2c_var_data_s1{
-	IDL_LONG   query;
+	IDL_LONG   result;
 	IDL_LONG   dset;
 	IDL_STRING pdim;
 	IDL_STRING var;
@@ -145,7 +145,7 @@ typedef struct _das2c_var_data_s1{
 } DAS2C_VAR_data1;
 
 typedef struct _das2c_var_data_s2{
-	IDL_LONG   query;
+	IDL_LONG   result;
 	IDL_LONG   dset;
 	IDL_STRING pdim;
 	IDL_STRING var;
@@ -156,7 +156,7 @@ typedef struct _das2c_var_data_s2{
 } DAS2C_VAR_data2;
 
 typedef struct _das2c_var_data_s3{
-	IDL_LONG   query;
+	IDL_LONG   result;
 	IDL_LONG   dset;
 	IDL_STRING pdim;
 	IDL_STRING var;
@@ -167,7 +167,7 @@ typedef struct _das2c_var_data_s3{
 } DAS2C_VAR_data3;
 
 typedef struct _das2c_var_data_s4{
-	IDL_LONG   query;
+	IDL_LONG   result;
 	IDL_LONG   dset;
 	IDL_STRING pdim;
 	IDL_STRING var;
@@ -178,7 +178,7 @@ typedef struct _das2c_var_data_s4{
 } DAS2C_VAR_data4;
 
 typedef struct _das2c_var_data_s5{
-	IDL_LONG   query;
+	IDL_LONG   result;
 	IDL_LONG   dset;
 	IDL_STRING pdim;
 	IDL_STRING var;
@@ -189,7 +189,7 @@ typedef struct _das2c_var_data_s5{
 } DAS2C_VAR_data5;
 
 typedef struct _das2c_var_data_s6{
-	IDL_LONG   query;
+	IDL_LONG   result;
 	IDL_LONG   dset;
 	IDL_STRING pdim;
 	IDL_STRING var;
@@ -200,7 +200,7 @@ typedef struct _das2c_var_data_s6{
 } DAS2C_VAR_data6;
 
 typedef struct _das2c_var_data_s7{
-	IDL_LONG   query;
+	IDL_LONG   result;
 	IDL_LONG   dset;
 	IDL_STRING pdim;
 	IDL_STRING var;
@@ -211,7 +211,7 @@ typedef struct _das2c_var_data_s7{
 } DAS2C_VAR_data7;
 
 typedef struct _das2c_var_data_s8{
-	IDL_LONG   query;
+	IDL_LONG   result;
 	IDL_LONG   dset;
 	IDL_STRING pdim;
 	IDL_STRING var;
@@ -262,13 +262,13 @@ static IDL_StructDefPtr das2c_get_var_pdef(int nRank)
    working with variables */
 		
 DasVar* das2c_arg_to_var(
-	int argc, IDL_VPTR* argv, int iArg, int* piQuery, int* piDs, 
+	int argc, IDL_VPTR* argv, int iArg, int* piResult, int* piDs, 
 	DasDs** ppDs, DasDim** ppDim
 ){
-	int iQuery = -1;
+	int iResult = -1;
 	int iDs = -1;
 	DasDs* pDs = NULL;
-	DasDim* pDim = das2c_arg_to_dim(argc, argv, iArg, &iQuery, &iDs, &pDs);
+	DasDim* pDim = das2c_arg_to_dim(argc, argv, iArg, &iResult, &iDs, &pDs);
 	if(pDs == NULL) return NULL;
 	
 	/* Get the PDIM string field */
@@ -299,14 +299,14 @@ DasVar* das2c_arg_to_var(
 	
 	if(pDasVar == NULL)
 		das2c_IdlMsgExit(
-			"Mismatch, VAR '%s' is not present in query %d, dataset %d, "
-			"dimenison %s", sRole, iQuery, iDs, DasDim_id(pDim)
+			"Mismatch, VAR '%s' is not present in result %d, dataset %d, "
+			"dimenison %s", sRole, iResult, iDs, DasDim_id(pDim)
 		);
 		
-	if(piQuery != NULL) *piQuery = iQuery;
-	if(piDs    != NULL) *piDs    = iDs;
-	if(ppDs    != NULL) *ppDs    = pDs;	
-	if(ppDim   != NULL) *ppDim   = pDim;
+	if(piResult != NULL) *piResult = iResult;
+	if(piDs     != NULL) *piDs     = iDs;
+	if(ppDs     != NULL) *ppDs     = pDs;	
+	if(ppDim    != NULL) *ppDim    = pDim;
 
 	return pDasVar;
 }
@@ -351,7 +351,7 @@ DasVar* das2c_arg_to_var(
 ;  variable in this physical dimension.  Output structures have the following
 ;  fields:
 ;
-;    QUERY (Long)       The query ID of this dataset, starts from 1
+;    RESULT(Long)       The result ID of this dataset, starts from 1
 ;
 ;    DSET  (Long)       The ID number of this dataset, starts from 0
 ;
@@ -419,9 +419,9 @@ DasVar* das2c_arg_to_var(
 ;
 ; EXAMPLES:
 ;  List summary of all variable roles for the 'time' dimension in dataset 0 of
-;  query result 27
-;    query = das2c_query(27)
-;    ds = das2c_datasets(0)
+;  result 27
+;    result = das2c_readhttp(27)
+;    ds = das2c_datasets(result, 0)
 ;    pd_time = das2c_pdims(ds, 'time')
 ;
 ;    das2c_vars(pd_time)
@@ -437,11 +437,11 @@ DasVar* das2c_arg_to_var(
 static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 {
 	/* Get the pdim, the ds nmuber and the entry number */
-	int iQuery = -1;
+	int iResult = -1;
 	int iDs = -1;
 	
 	DasDs*  pvDs = NULL;
-	const DasDim* pDim = das2c_arg_to_dim(argc, argv, 0, &iQuery, &iDs, &pvDs);
+	const DasDim* pDim = das2c_arg_to_dim(argc, argv, 0, &iResult, &iDs, &pvDs);
 	const DasDs* pDs = pvDs;
 	
 	int nDsRank = DasDs_rank(pDs);
@@ -524,7 +524,7 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 		switch(nDsRank){
 		
 		case 1:
-		pData1->query = iQuery;
+		pData1->result = iResult;
 		pData1->dset  = iDs;
 		IDL_StrStore(&(pData1->pdim),  (char*) sDim);
 		IDL_StrStore(&(pData1->var),   (char*) pDim->aRoles[u]);
@@ -538,7 +538,7 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 		break;
 		
 		case 2:
-		pData2->query = iQuery;
+		pData2->result = iResult;
 		pData2->dset  = iDs;
 		IDL_StrStore(&(pData2->pdim),  (char*) sDim);
 		IDL_StrStore(&(pData2->var),   (char*) pDim->aRoles[u]);
@@ -552,7 +552,7 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 		break;
 
 		case 3:
-		pData3->query = iQuery;
+		pData3->result = iResult;
 		pData3->dset  = iDs;
 		IDL_StrStore(&(pData3->pdim),  (char*) sDim);
 		IDL_StrStore(&(pData3->var),   (char*) pDim->aRoles[u]);
@@ -566,7 +566,7 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 		break;
 	
 		case 4:
-		pData4->query = iQuery;
+		pData4->result = iResult;
 		pData4->dset  = iDs;
 		IDL_StrStore(&(pData4->pdim),  (char*) sDim);
 		IDL_StrStore(&(pData4->var),   (char*) pDim->aRoles[u]);
@@ -580,7 +580,7 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 		break;
 	
 		case 5:
-		pData5->query = iQuery;
+		pData5->result = iResult;
 		pData5->dset  = iDs;
 		IDL_StrStore(&(pData5->pdim),  (char*) sDim);
 		IDL_StrStore(&(pData5->var),   (char*) pDim->aRoles[u]);
@@ -594,7 +594,7 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 		break;
 	
 		case 6:
-		pData6->query = iQuery;
+		pData6->result = iResult;
 		pData6->dset  = iDs;
 		IDL_StrStore(&(pData6->pdim),  (char*) sDim);
 		IDL_StrStore(&(pData6->var),   (char*) pDim->aRoles[u]);
@@ -608,7 +608,7 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 		break;
 	
 		case 7:
-		pData7->query = iQuery;
+		pData7->result = iResult;
 		pData7->dset  = iDs;
 		IDL_StrStore(&(pData7->pdim),  (char*) sDim);
 		IDL_StrStore(&(pData7->var),   (char*) pDim->aRoles[u]);
@@ -622,7 +622,7 @@ static IDL_VPTR das2c_api_vars(int argc, IDL_VPTR* argv)
 		break;
 	
 		case 8:
-		pData8->query = iQuery;
+		pData8->result = iResult;
 		pData8->dset  = iDs;
 		
 		/* Casts okay here, IDL_StrStore copies the string */

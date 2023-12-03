@@ -41,33 +41,33 @@
 ;       'das2dlm/VERSION' is sent as the user agent.
 ;
 ; OUTPUT:
-;  This function returns a structure of type DAS2C_QUERY if it succeeds, or
-;  !NULL on failure.  The query structure is small.  It does not contain the
-;  actual data but may be used to get data and metadata on the query result.
-;  See das2c_queries() for a description of the DAC2_QUERY structure fields.
+;  This function returns a structure of type DAS2C_RESULT if it succeeds, or
+;  !NULL on failure.  The result structure is small.  It does not contain the
+;  actual data but may be used to get data and metadata on the result.
+;  See das2c_queries() for a description of the DAC2_RESULT structure fields.
 ;
 ; SIDE EFFECTS:
 ;  Output data from the query are loaded into RAM.  Use the function das2c_free
-;  to release the query results after you are done with them.
+;  to release the results after you are done with them.
 ;
 ; EXAMPLE:
 ;  Load 60 second resolution Galileo PWS low-frequency electric field spectra
 ;  collected from noon Jan. 1st 2001 to 2:35 pm Jan 2nd 2001 UTC.
 ;
-;    sSrv = 'http://planet.physics.uiowa.edu/das/das2Server'
-;    sDs  = 'Galileo/PWS/Survey_Electric'
-;    sBeg = '2001-001T12:00'
-;    sEnd = '2001-002T14:35'
-;    sRes = '60'
-;    sFmt = '%s?server=dataset&dataset=%s&start_time=%s&end_time=%s&resolution=%s'
-;    sUrl = string(sSrv, sDs, sBeg, sEnd, sRes, format=sFmt)
+;    sSrv   = 'http://planet.physics.uiowa.edu/das/das2Server'
+;    sDs    = 'Galileo/PWS/Survey_Electric'
+;    sBeg   = '2001-001T12:00'
+;    sEnd   = '2001-002T14:35'
+;    sRes   = '60'
+;    sFmt   = '%s?server=dataset&dataset=%s&start_time=%s&end_time=%s&resolution=%s'
+;    sUrl   = string(sSrv, sDs, sBeg, sEnd, sRes, format=sFmt)
 ;
-;    query = das2c_readhttp(sUrl, "spedas/3.20")
+;    result = das2c_readhttp(sUrl, "IDL/8.9")
 ;
 ;  Now get information about the query:
 ;
-;    das2c_datasets(query)
-;    das2c_info(query, 0)
+;    ds = das2c_datasets(result, 0)
+;    das2c_dsinfo(ds)
 ;
 ; MODIFICATION HISTORY:
 ;  Written by: Chris Piker, 2020-03-11
@@ -149,7 +149,17 @@ static IDL_VPTR das2c_api_readhttp(int argc, IDL_VPTR* argv)
 	DasDsBldr_release(pBldr); /* Detach datasets from builder */
 	del_DasIO(pIn);           /* No longer need the IO object */
 	
-	const QueryDbEnt* pEnt = das2c_db_addHttpEnt(&res, lDs, uDs);
+	if(uDs == 0){
+		daslog_info_v("No datasets returned from server \"%s/%s%s\" for "
+			"query:\n\"%s\".\nHint: Try a wider coordinate range, on a "
+			"coverage dataset first.", 
+			res.url.sScheme, res.url.sHost, res.url.sPath, res.url.sQuery
+		);
+		DasHttpResp_clear(&res);
+		return IDL_GettmpNULL();
+	}
+
+	const ResultDbEnt* pEnt = das2c_db_addHttpEnt(&res, lDs, uDs);
 	DasHttpResp_clear(&res);
 	
 	/* addHttpEnt cleans up any memory on an error */
@@ -159,13 +169,13 @@ static IDL_VPTR das2c_api_readhttp(int argc, IDL_VPTR* argv)
 	
 	IDL_VPTR pRet;
 	IDL_MEMINT dims = 1;
-	DAS2C_QUERY_data* pData = (DAS2C_QUERY_data*) IDL_MakeTempStruct(
-		DAS2C_QUERY_pdef, 1, /* ary dims */ &dims,  /* Sz of each dim */
+	DAS2C_RESULT_data* pData = (DAS2C_RESULT_data*) IDL_MakeTempStruct(
+		DAS2C_RESULT_pdef, 1, /* ary dims */ &dims,  /* Sz of each dim */
 		&pRet,  /* Actual idl varabile */  TRUE    /* Zero out the array */
 	);
 	
-	if(! das2c_ent2query(pData, pEnt)) /* only 1 value in the output struct array */
-		das2c_IdlMsgExit("Logic error in das2c_ent2query()");
+	if(! das2c_ent2result(pData, pEnt)) /* only 1 value in the output struct array */
+		das2c_IdlMsgExit("Logic error in das2c_ent2result()");
 			
 	return pRet;
 }

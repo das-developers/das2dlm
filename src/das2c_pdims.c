@@ -48,7 +48,7 @@
 ;  each physical dimension represented in the dataset. Output structures
 ;  have the following fields:
 ;
-;    QUERY   (Long)    The query ID of this dataset, starts from 1
+;    RESULT  (Long)    The result ID of this dataset, starts from 1
 ;
 ;    DSET    (Long)    The ID number of this dataset, starts from 0
 ;
@@ -70,22 +70,23 @@
 ;
 ; EXAMPLES:
 ;  List summary information on all physical dimensions for dataset 0 in
-;  query result 27:
-;    query = das2c_query(27)
-;    ds = das2c_datasets(query, 0)
+;  result 27:
+;    result = das2c_result(27)
+;    ds = das2c_datasets(result, 0)
 ;    das2c_pdims(ds)
 ;
 ;  List summary information on the time dimension in the same dataset.
 ;    das2c_pdims(ds, 'time')
 ;
 ; MODIFICATION HISTORY:
-;  Written by: Chris Piker, 2020-03-12
+;  C. Piker, 2020-03-12 - First version
+;  C. Piker, 2023-12-03 - Var name switch query -> result
 ;-
 */
 
 /* Output structure definition */
 static IDL_STRUCT_TAG_DEF DAS2C_PDIM_tags[] = {
-	{"QUERY",    0, (void*)IDL_TYP_LONG},
+	{"RESULT",   0, (void*)IDL_TYP_LONG},
 	{"DSET",     0, (void*)IDL_TYP_LONG},
 	{"PDIM",     0, (void*)IDL_TYP_STRING},
 
@@ -98,7 +99,7 @@ static IDL_STRUCT_TAG_DEF DAS2C_PDIM_tags[] = {
 };	
 
 typedef struct _das2c_pdim_data_s{
-	IDL_LONG   query;
+	IDL_LONG   result;
 	IDL_LONG   dset;	
 	IDL_STRING pdim;
 	
@@ -119,12 +120,12 @@ static void define_DAS2C_PDIM()
 
 
 static DasDim* das2c_arg_to_dim(
-	int argc, IDL_VPTR* argv, int iArg, int* piQuery, int* piDs,
+	int argc, IDL_VPTR* argv, int iArg, int* piResult, int* piDs,
 	DasDs** ppDs
 ){
-	int iQuery = -1;
+	int iResult = -1;
 	int iDs = -1;
-	DasDs* pDs = das2c_arg_to_ds(argc, argv, iArg, &iQuery, &iDs);
+	DasDs* pDs = das2c_arg_to_ds(argc, argv, iArg, &iResult, &iDs);
 	if(pDs == NULL) return NULL;
 	
 	/* Get the PDIM string field */
@@ -169,11 +170,11 @@ static DasDim* das2c_arg_to_dim(
 		
 	if(pDim == NULL)
 		das2c_IdlMsgExit(
-			"Mismatch, PDIM '%s' is not present in query %d, dataset %d",
-			sDim, iQuery, iDs
+			"Mismatch, PDIM '%s' is not present in result %d, dataset %d",
+			sDim, iResult, iDs
 		);
 	
-	if(piQuery != NULL) *piQuery = iQuery;
+	if(piResult != NULL) *piResult = iResult;
 	if(piDs    != NULL) *piDs    = iDs;
 	
 	if(ppDs != NULL) *ppDs = pDs;
@@ -191,9 +192,9 @@ static DasDim* das2c_arg_to_dim(
 static IDL_VPTR das2c_api_pdims(int argc, IDL_VPTR* argv)
 {
 	/* Get dataset, entry number and dataset number */
-	int iQuery = -1;
+	int iResult = -1;
 	int iDs = -1;
-	const DasDs* pDs = das2c_arg_to_ds(argc, argv, 0, &iQuery, &iDs);
+	const DasDs* pDs = das2c_arg_to_ds(argc, argv, 0, &iResult, &iDs);
 	const DasDim* pTheDim = NULL;
 		
 	const char* sDim = NULL;
@@ -239,7 +240,7 @@ static IDL_VPTR das2c_api_pdims(int argc, IDL_VPTR* argv)
 		
 		/* TODO:  Consider adding a DasDim_getPointVar() call to flatten
 		          waveform data. */
-		pData->query    = iQuery;
+		pData->result    = iResult;
 		pData->dset     = iDs;
 		
 		if(DasDim_id(pIterDim) == NULL)

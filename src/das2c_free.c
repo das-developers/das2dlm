@@ -32,21 +32,21 @@
 ;  das2c_free
 ;
 ; PURPOSE:
-;  Delete resources associated with a single das2 query from memory
+;  Delete resources associated with a single das2 query result from memory
 ;
 ; CALLING SEQUENCE:
-;  Result = das2c_free(query)
+;  Result = das2c_free(result)
 ;
 ; INPUTS:
-;  query:  An integer query ID, or a DAS2C_QUERY structure as return by
-;          das2c_queries() or das2c_readhttp()
+;  result:  An integer result ID, or a DAS2C_RESULT structure as return by
+;           das2c_queries() or das2c_readhttp()
 ;
 ; OUTPUT:
-;   Returns the number of query results still in memory.
+;   Returns the number of results still in memory.
 ;
 ; SIDE EFFECTS:
 ;   All structures that have be returned by das2c_datasets, das2c_pdims,
-;   and das2c_vars, no longer map to objects in the internal query database.
+;   and das2c_vars, no longer map to objects in the internal result database.
 ;   The structures themselves are still valid, but not that useful.
 ;
 ;   Any arrays that have been returned by das2c_data are not deleted 
@@ -55,9 +55,9 @@
 ;
 ; EXAMPLES:
 ;  List summary information on all physical dimensions for dataset 0 in
-;  query result 27:
-;    query = das2c_query(27)
-;    ds = das2c_datasets(query, 0)
+;  result 27:
+;    response = das2c_result(27)
+;    ds = das2c_datasets(response, 0)
 ;    das2c_pdims(ds)
 ;
 ;  List summary information on the time dimension in the same dataset.
@@ -71,7 +71,7 @@
 static IDL_VPTR das2c_api_free(int argc, IDL_VPTR* argv){
 	
 	/* If this is a structure, make sure this structure is actually
-	   named DAS2C_QUERY */
+	   named DAS2C_RESULT */
 	if(argc < 1) das2c_IdlMsgExit("Argument 1 is missing");
 	
 	IDL_VPTR pVar = argv[0];
@@ -80,43 +80,43 @@ static IDL_VPTR das2c_api_free(int argc, IDL_VPTR* argv){
 	char* sStructName = NULL;
 	UCHAR* pData = NULL;
 	IDL_MEMINT nOffset = 0;
-	int32_t iQuery = -1;
+	int32_t iResult = -1;
 	
 	if(pVar->type == IDL_TYP_STRUCT){
 		IDL_StructTagNameByIndex(
 			pVar->value.s.sdef, 0, IDL_MSG_LONGJMP, &sStructName
 		);
-		if(strcmp("DAS2C_QUERY", sStructName) != 0)
+		if(strcmp("DAS2C_RESULT", sStructName) != 0)
 			das2c_IdlMsgExit(
-				"Structure type is '%s' expected a DAS2C_QUERY", sStructName
+				"Structure type is '%s' expected a DAS2C_RESULT", sStructName
 			);
 		
 		/* Code below is better commented in das2c_arg_to_ent() */
 		pFakeVar = NULL;
 		nOffset = IDL_StructTagInfoByName(
-			pVar->value.s.sdef, "QUERY", IDL_MSG_LONGJMP, &pFakeVar
+			pVar->value.s.sdef, "RESULT", IDL_MSG_LONGJMP, &pFakeVar
 		);
 		
 		pData = pVar->value.s.arr->data + nOffset;
 		switch(pFakeVar->type){
-		case IDL_TYP_INT:  iQuery = *((IDL_INT*)pData);  break;
-		case IDL_TYP_UINT: iQuery = *((IDL_UINT*)pData); break;
-		case IDL_TYP_LONG: iQuery = *((IDL_LONG*)pData); break;
+		case IDL_TYP_INT:  iResult = *((IDL_INT*)pData);  break;
+		case IDL_TYP_UINT: iResult = *((IDL_UINT*)pData); break;
+		case IDL_TYP_LONG: iResult = *((IDL_LONG*)pData); break;
 		/* other types have range larger than uint32_t */
 		default:
-			das2c_IdlMsgExit(" 'QUERY' value should be an INT, UINT or LONG");
+			das2c_IdlMsgExit(" 'RESULT' member variable should be an INT, UINT or LONG");
 			break;
 		}
 	}
 	else{
 		pTmpVar = IDL_BasicTypeConversion(1, argv + 0, IDL_TYP_LONG);
-		iQuery = pTmpVar->value.l;
+		iResult = pTmpVar->value.l;
 		IDL_DELTMP(pTmpVar);
 	}
 	
-	bool bExisted = das2c_db_free_ent(iQuery);
+	bool bExisted = das2c_db_free_ent(iResult);
 	if(!bExisted)
-		daslog_warn_v("Query ID %d was not present in the result table", iQuery);
+		daslog_warn_v("Result ID %d was not present in the result table", iResult);
 	
 	return IDL_GettmpLong(g_nDbStored);
 }

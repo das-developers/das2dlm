@@ -77,7 +77,7 @@ static IDL_MEMINT g_aShape6[2];
 static IDL_MEMINT g_aShape7[2];
 static IDL_MEMINT g_aShape8[2];
 
-#include "das2c_queries.c"   /* exported functions */
+#include "das2c_results.c"   /* exported functions */
 #include "das2c_datasets.c"  
 #include "das2c_dsinfo.c"
 #include "das2c_pdims.c"
@@ -109,7 +109,7 @@ int IDL_Load(void){
 	g_aShape8[0] = 1;  g_aShape8[1] = 8;
 
 	/* Define our structures */
-	define_DAS2C_QUERY();
+	define_DAS2C_RESULT();
 	define_DAS2C_DSET();
 	define_DAS2C_PDIM();
 	define_DAS2C_VAR();
@@ -118,8 +118,8 @@ int IDL_Load(void){
 		
  	static IDL_SYSFUN_DEF2 function_addr[] = {
 		{ 
-			{(IDL_SYSRTN_GENERIC)das2c_api_queries}, "DAS2C_QUERIES",
-			D2C_QUERIES_MINA, D2C_QUERIES_MAXA, D2C_QUERIES_FLAG, NULL
+			{(IDL_SYSRTN_GENERIC)das2c_api_results}, "DAS2C_RESULTS",
+			D2C_RESULTS_MINA, D2C_RESULTS_MAXA, D2C_RESULTS_FLAG, NULL
 		},		
 		{ 
 			{(IDL_SYSRTN_GENERIC)das2c_api_datasets}, "DAS2C_DATASETS",
@@ -157,6 +157,10 @@ int IDL_Load(void){
 			{(IDL_SYSRTN_GENERIC)das2c_api_readhttp}, "DAS2C_READHTTP",
 			D2C_READHTTP_MINA, D2C_READHTTP_MAXA, D2C_READHTTP_FLAG, NULL
 		},
+		{
+			{(IDL_SYSRTN_GENERIC)das2c_api_loglevel}, "DAS2C_LOGLEVEL",
+			D2C_LOGLEVEL_MINA, D2C_LOGLEVEL_MAXA, D2C_LOGLEVEL_FLAG, NULL
+		}
 /*					
 		{
 			{(IDL_SYSRTN_GENERIC)das2c_null_test}, "DAS2C_NULL_TEST",
@@ -176,7 +180,7 @@ int IDL_Load(void){
 	msg_block = IDL_MessageDefineBlock("das2c", IDL_CARRAY_ELTS(msg_arr), msg_arr);
 	if(msg_block == NULL) return IDL_FALSE;
 
-	/* Initialize das2, send das2 longs to the IDL message system */
+	/* Initialize das2, send das2 logs to the IDL message system */
 	das_init("das2c DLM", DASERR_DIS_RET, 0, DASLOG_INFO, das2c_log2idl);
 	
 	

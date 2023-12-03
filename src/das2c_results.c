@@ -19,18 +19,18 @@
  */
 
 /* ************************************************************************* */
-/* DAS2C_QUERY structure */
+/* DAS2C_RESULT structure */
 
-/* IDL defininiton of DAS2C_QUERY */
-static IDL_STRUCT_TAG_DEF DAS2C_QUERY_tags[] = {
-	{"QUERY",    0, (void*)IDL_TYP_LONG},
+/* IDL defininiton of DAS2C_RESULT */
+static IDL_STRUCT_TAG_DEF DAS2C_RESULT_tags[] = {
+	{"RESULT",   0, (void*)IDL_TYP_LONG},
 
 	{"SERVER",   0, (void*)IDL_TYP_STRING},
 	{"SOURCE",   0, (void*)IDL_TYP_STRING},
 	{"BEGIN",    0, (void*)IDL_TYP_STRING},
 	{"END",      0, (void*)IDL_TYP_STRING},
 	{"RES",      0, (void*)IDL_TYP_STRING},
-	{"EXTRA",    0, (void*)IDL_TYP_STRING},
+	{"PARAMS",   0, (void*)IDL_TYP_STRING},
 
 	{"N_DSETS",  0, (void*)IDL_TYP_LONG},
 	{"N_VALS",   0, (void*)IDL_TYP_LONG64},
@@ -38,15 +38,15 @@ static IDL_STRUCT_TAG_DEF DAS2C_QUERY_tags[] = {
 };
 
 /* Global struct definition pointer */
-static IDL_StructDefPtr DAS2C_QUERY_pdef;
+static IDL_StructDefPtr DAS2C_RESULT_pdef;
 
-static void define_DAS2C_QUERY()
+static void define_DAS2C_RESULT()
 {
-	DAS2C_QUERY_pdef = IDL_MakeStruct("DAS2C_QUERY", DAS2C_QUERY_tags);
+	DAS2C_RESULT_pdef = IDL_MakeStruct("DAS2C_RESULT", DAS2C_RESULT_tags);
 }
 
 /* C structure to use in casts for manipulating IDL struct memory */
-typedef struct das2c_query_data_s{
+typedef struct das2c_result_data_s{
 	IDL_LONG   query;
 	
 	IDL_STRING server;
@@ -54,17 +54,17 @@ typedef struct das2c_query_data_s{
 	IDL_STRING begin;
 	IDL_STRING end;
 	IDL_STRING res;
-	IDL_STRING extra;
+	IDL_STRING params;
 
 	IDL_LONG   n_dsets;
 	IDL_LONG64 n_vals;
-} DAS2C_QUERY_data;
+} DAS2C_RESULT_data;
 
 
 /* Formating a query struct using an entry object pointer */
-static bool das2c_ent2query(DAS2C_QUERY_data* pDest, const QueryDbEnt* pSrc)
+static bool das2c_ent2result(DAS2C_RESULT_data* pDest, const ResultDbEnt* pSrc)
 {		
-	pDest->query = pSrc->nQueryId;
+	pDest->query = pSrc->nResultId;
 	pDest->n_dsets = (IDL_LONG) pSrc->uDs;
 
 	char sBuf[512] = {'\0'};
@@ -99,7 +99,7 @@ static bool das2c_ent2query(DAS2C_QUERY_data* pDest, const QueryDbEnt* pSrc)
 		}
 		if(strcmp(pSrc->psKey[u], "params") == 0){
 			if(pSrc->psVal[u] != NULL) 
-				IDL_StrStore(&(pDest->extra), pSrc->psVal[u]);
+				IDL_StrStore(&(pDest->params), pSrc->psVal[u]);
 		}
 	}
 			
@@ -121,7 +121,7 @@ static bool das2c_ent2query(DAS2C_QUERY_data* pDest, const QueryDbEnt* pSrc)
 }
 
 /* Get a DB entry from a query struct arg */
-static const QueryDbEnt* das2c_arg_to_ent(int argc, IDL_VPTR* argv, int iArg)
+static const ResultDbEnt* das2c_arg_to_ent(int argc, IDL_VPTR* argv, int iArg)
 {	
 	if(argc <= iArg) das2c_IdlMsgExit("Expecting a structure for argument %d", iArg+1);
 	
@@ -132,12 +132,12 @@ static const QueryDbEnt* das2c_arg_to_ent(int argc, IDL_VPTR* argv, int iArg)
 		das2c_IdlMsgExit("Argument %d is not a structure", iArg);	
 	
 	/* Get the query ID.  Use duck-typing here.  If there is a
-	   field named "QUERY" and it can be converted to a LONG
-		then good enough.  Consider it a DAS2C_QUERY structure */
+	   field named "RESULT" and it can be converted to a LONG
+		then good enough.  Consider it a DAS2C_RESULT structure */
 	
 	IDL_VPTR pFakeVar = NULL;
 	IDL_MEMINT nOffset = IDL_StructTagInfoByName(
-		pVar->value.s.sdef, "QUERY", IDL_MSG_LONGJMP, &pFakeVar
+		pVar->value.s.sdef, "RESULT", IDL_MSG_LONGJMP, &pFakeVar
 	);
 	
 	/* Get pointer to query field in first element of the structure array */
@@ -145,28 +145,28 @@ static const QueryDbEnt* das2c_arg_to_ent(int argc, IDL_VPTR* argv, int iArg)
 	UCHAR* pData = pVar->value.s.arr->data + nOffset;
 	
 	/* Get the query ID value, accept a few different types */
-	int32_t iQueryId = 0;  /* 0 is always a bad query ID */
+	int32_t iResultId = 0;  /* 0 is always a bad result ID */
 	switch(pFakeVar->type){
-	case IDL_TYP_INT:  iQueryId = *((IDL_INT*)pData);  break;
-	case IDL_TYP_UINT: iQueryId = *((IDL_UINT*)pData); break;
-	case IDL_TYP_LONG: iQueryId = *((IDL_LONG*)pData); break;
+	case IDL_TYP_INT:  iResultId = *((IDL_INT*)pData);  break;
+	case IDL_TYP_UINT: iResultId = *((IDL_UINT*)pData); break;
+	case IDL_TYP_LONG: iResultId = *((IDL_LONG*)pData); break;
 	/* other types have range larger than uint32_t */
 	default:
-		das2c_IdlMsgExit(" 'QUERY' value should be an INT, UINT or LONG");
+		das2c_IdlMsgExit(" 'RESULT' ID should be an INT, UINT or LONG");
 		break;
 	}
 
-	const QueryDbEnt* pEnt = das2c_db_getent(iQueryId);
-	if(pEnt == NULL) das2c_IdlMsgExit("No query result has ID %d", iQueryId);
+	const ResultDbEnt* pEnt = das2c_db_getent(iResultId);
+	if(pEnt == NULL) das2c_IdlMsgExit("No result has ID %d", iResultId);
 	return pEnt;
 }
 
 /* ************************************************************************* */
 /* API Function, careful with changes! */
 
-#define D2C_QUERIES_MINA 0
-#define D2C_QUERIES_MAXA 1
-#define D2C_QUERIES_FLAG 0
+#define D2C_RESULTS_MINA 0
+#define D2C_RESULTS_MAXA 1
+#define D2C_RESULTS_FLAG 0
 
 /*
 ;+
@@ -177,12 +177,12 @@ static const QueryDbEnt* das2c_arg_to_ent(int argc, IDL_VPTR* argv, int iArg)
 ;  List stored das2 query results
 ;
 ; CALLING SEQUENCE:
-;  Result = das2c_queries()
-;  Result = das2c_queries(query_id)
+;  Result = das2c_results()
+;  Result = das2c_results(result_id)
 ;
 ; OPTIONAL INPUTS:
-;  query_id: Output information on only a single stored query instead of
-;            all that are loaded.
+;  result_id: Output information on only a single stored query instead of
+;             all that are loaded.
 ;
 ; OUTPUT:
 ;  This function returns an array of structures providing an overview of
@@ -206,7 +206,7 @@ static const QueryDbEnt* das2c_arg_to_ent(int argc, IDL_VPTR* argv, int iArg)
 ;    BEGIN:    String   ; The min time value
 ;    END:      String   ; the max time value
 ;    RES:      String   ; The resolution requested if any
-;    EXTRA:    String   ; Any extra arguments sent to the server
+;    PARAMS:   String   ; Any extra arguments sent to the server
 ;
 ; EXAMPLES:
 ;  List summary information on all stored results
@@ -216,38 +216,49 @@ static const QueryDbEnt* das2c_arg_to_ent(int argc, IDL_VPTR* argv, int iArg)
 ;    das2c_queries(23);
 ;
 ; MODIFICATION HISTORY:
-;  Written by: Chris Piker, 2020-03-11
+;  C. Piker, 2020-03-11 - Original
+;  C. Piker, 2023-12-02 - Changed to a less confusing name prior to tracers usage
 ;-
 */
-static IDL_VPTR das2c_api_queries(int argc, IDL_VPTR* argv)
+static IDL_VPTR das2c_api_results(int argc, IDL_VPTR* argv)
 {
 	/* If no queries are stored, return the !NULL variable */
 	if(g_nDbStored == 0) return IDL_GettmpNULL();
 	
-	IDL_LONG iQueryId = 0;
+	IDL_LONG nResultId = 0;  // 0 never valid
 	IDL_VPTR pTmpVar = NULL;
 	if(argc > 0){
-		/* They only want to ask about a specific query */
+		/* They only want to ask about a specific result */
 		
 		/* the idl function calls ensure simple in the background so we know that
  		   we don't have an array variable, though handling that should probably
 		   be done at some point. */
 		pTmpVar = IDL_BasicTypeConversion(1, argv, IDL_TYP_LONG);
-		iQueryId = pTmpVar->value.l;
+		nResultId = pTmpVar->value.l;
 		
 		/* Always use the DELTMP macro wrapper instead of blindly calling 
 		   IDL_Deltmp() on variables */
 		IDL_DELTMP(pTmpVar);
+
+		/* If the result ID requested is 0, then bail out */
+		if(nResultId == 0){
+			das2c_IdlMsgExit("0 is never a valid result ID");
+		}
 	}
 	
+	/* Count matching results, 0 matches everything */
 	size_t u;
-	int nFound = 0;     /* used to cut off the search early */
-	for(u = 0; u < g_nLastQueryId && nFound < g_nDbStored; ++u){		
+	int nFound = 0;
+
+	/* used to cut off the search early, initially g_nLastResultId is way
+	 * less then g_nDbStored, though if many results are read and freed
+	 * then g_nDbStored becomes the limiting factor */
+	for(u = 0; (u < g_nLastResultId) && (u < g_nDbStored); ++u){		
 		if(g_pDasIdlDb[u] == NULL) continue;
 		
-		if(iQueryId == 0){ ++nFound; }
+		if(nResultId == 0){ ++nFound; }
 		else{
-			if(g_pDasIdlDb[u]->nQueryId == iQueryId){
+			if(g_pDasIdlDb[u]->nResultId == nResultId){
 				++nFound;
 				break;
 			}
@@ -260,8 +271,8 @@ static IDL_VPTR das2c_api_queries(int argc, IDL_VPTR* argv)
 	IDL_VPTR pRet;
 	
 	/* Returns pRet->value.s.arr.data */
-	DAS2C_QUERY_data* pData = (DAS2C_QUERY_data*) IDL_MakeTempStruct(
-		DAS2C_QUERY_pdef, 1, /* ary dims */ &dims,  /* Sz of each dim */
+	DAS2C_RESULT_data* pData = (DAS2C_RESULT_data*) IDL_MakeTempStruct(
+		DAS2C_RESULT_pdef, 1, /* ary dims */ &dims,  /* Sz of each dim */
 		&pRet,  /* Actual idl varabile */  TRUE    /* Zero out the array */
 	);
 	
@@ -269,18 +280,16 @@ static IDL_VPTR das2c_api_queries(int argc, IDL_VPTR* argv)
 	   screwed up the query database */
 	nFound = 0;
 	
-	QueryDbEnt* pEnt = NULL;
-	for(u = 0; u < g_nLastQueryId && nFound < g_nDbStored; ++u){		
+	ResultDbEnt* pEnt = NULL;
+	for(u = 0; (u < g_nLastResultId) && (u < g_nDbStored); ++u){		
 		if(g_pDasIdlDb[u] == NULL) continue;
 	
-				
-		if((iQueryId == 0)||(pEnt->nQueryId == iQueryId)){
+		if((nResultId == 0)||(g_pDasIdlDb[u]->nResultId == nResultId)){
 			pEnt = g_pDasIdlDb[u];
-			das2c_ent2query(pData, pEnt);	
+			das2c_ent2result(pData, pEnt);	
 					
 			++pData;
-			++nFound;
-			if(iQueryId != 0) break;
+			if(nResultId != 0) break;
 		}
 	}
 	

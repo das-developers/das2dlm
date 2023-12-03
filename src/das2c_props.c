@@ -157,9 +157,9 @@ IDL_VPTR das2c_props_from_desc(const DasDesc* pDesc, const char* sKey)
 ;  then !NULL is retured when the the full property list is requested.
 ;
 ; EXAMPLES:
-;  Get all the properties for dataset 1 from query result 48:
-;    query = das2c_queries(48)
-;    ds = das2c_datasets(query, 1)
+;  Get all the properties for dataset 1 from result 48:
+;    result = das2c_results(48)
+;    ds = das2c_datasets(result, 1)
 ;    das2c_dsprops(ds)
 ;
 ;  Get the label property for the time dimension from the dataset above:
@@ -173,9 +173,9 @@ IDL_VPTR das2c_props_from_desc(const DasDesc* pDesc, const char* sKey)
 static IDL_VPTR das2c_api_props(int argc, IDL_VPTR* argv)
 {
 	
-	int iQuery = -1;
+	int iResult = -1;
 	int iDs = -1;
-	const DasDs* pDs = das2c_arg_to_ds(argc, argv, 0, &iQuery, &iDs);
+	const DasDs* pDs = das2c_arg_to_ds(argc, argv, 0, &iResult, &iDs);
 	const DasDim* pDim = NULL;
 	const char* sDim = NULL;
 	UCHAR* pData = NULL;
@@ -213,8 +213,8 @@ static IDL_VPTR das2c_api_props(int argc, IDL_VPTR* argv)
 		pDim = DasDs_getDimById(pDs, sDim);
 		if(pDim == NULL)
 			das2c_IdlMsgExit(
-				"Mismatch PDIM '%s' is not present in query %d, dataset %d",
-				sDim, iQuery, iDs
+				"Mismatch PDIM '%s' is not present in result %d, dataset %d",
+				sDim, iResult, iDs
 			);
 		
 		return das2c_props_from_desc((DasDesc*)pDim, sKey);
