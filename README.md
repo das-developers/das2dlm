@@ -1,9 +1,9 @@
 # das2dlm
 Das2dlm is an IDL (Interactive Data Language) DLM (Dynamically Loadable Module) that
 provides bindings for the [das2C](https://github.com/das-developers/das2C) library.  It
-is compatable with IDL 8.0 or newer.  Once installed, das2dlm functions are new IDL
+is compatable with IDL 8.7 or newer.  Once installed, das2dlm functions are new IDL
 system rountines and thus do not require any specific initialization calls such as
-[linkimage](https://www.harrisgeospatial.com/docs/using_idl_LinkImage.html).
+"linkimage".
 
 ## Current Functionality
 
@@ -15,9 +15,8 @@ This DLM is not tied to an specific query API, such as das2 or HAPI.  It issues
 an HTTP request to a URL that you format.  On the other hand, this DLM very much
 cares about the format of the data stream output by the server.  The supported
 stream formats are limited to those that are parseable by the [das2C](https://github.com/das-developers/das2C)
-library.  At the time of writing only das2.2.2 (or lower) streams
-are supported, though once das2C supports das2.3 and HAPI 2.0 streams, this
-module will too.
+library.  At the time of writing only das2.2 streams are supported, though once
+das2C supports das v3.0 streams, this module will too.
   
 ## Build/Download
 
