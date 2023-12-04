@@ -142,6 +142,7 @@ static IDL_VPTR das2c_api_srclist(int argc, IDL_VPTR* argv)
 
    if(uRead < 2){
       snprintf(sError, 1023, "%s appears to have no data sources", sSrvRoot);
+      del_DasBuf(pBuf);
       IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, sError);
    }
 
@@ -237,5 +238,6 @@ static IDL_VPTR das2c_api_srclist(int argc, IDL_VPTR* argv)
       ++pData;
    }
 
+   del_DasBuf(pBuf);
    return pRet;
 }

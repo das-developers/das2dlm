@@ -41,9 +41,14 @@ das2c_loglevel('debug')   ; turn on debug logging (optional)
 
 sServer  = 'https://tracers-dev.physics.uiowa.edu/stream'
 
-; We could get a list of all data sources on the server like so, but we
-; already know what we want, so skip it
-;aSources = das2c_srclist(sServer)
+; Just to show how it's done, let's print a list of the MAG Coverage datasets
+aSources = das2c_srclist(sServer, 'coverage', '/MAG/')
+foreach ent, aSources do begin 
+	if ent.path.Contains('coverage', /fold_case) and $
+		ent.path.Contains('/MAG/', /fold_case) then begin
+		print, ent.path ' --> ', s.provides
+	endif
+endforeach
 
 sFm1Cover = 'PreFlight/L0/MAG/FM-1_Coverage'
 sFm2Cover = 'PreFlight/L0/MAG/FM-2_Coverage'
