@@ -81,7 +81,7 @@ static const DasDs* das2c_check_ds_id(const ResultDbEnt* pEnt, int iDs)
 			);
 	}
 	const DasDs* pDs = pEnt->lDs[iDs];
-	if(pDs == NULL) das2c_IdlMsgExit("Logic error, das2c_dsets.c");
+	if(pDs == NULL) das2c_IdlMsgExit("Logic error, das2c_datasets.c");
 	return pDs;
 }
 
@@ -181,14 +181,14 @@ static DasDs* das2c_arg_to_ds(
 /*
 ;+
 ; FUNCTION:
-;  das2c_dsets
+;  das2c_datasets
 ;
 ; PURPOSE:
 ;  List stored datasets in a das2 query result
 ;
 ; CALLING SEQUENCE:
-;  Result = das2c_dsets(query)
-;  Result = das2c_dsets(query, ds_index)
+;  Result = das2c_datasets(query)
+;  Result = das2c_datasets(query, ds_index)
 ;
 ; INPUTS:
 ;  query: A query structure as returned by das2c_readhttp() or das2c_queries()
@@ -246,7 +246,7 @@ static DasDs* das2c_arg_to_ds(
 ;    shape = ds.shape[8 - ds.rank : -1 ]
 ;
 ; MODIFICATION HISTORY:
-;  Written by: Chris Piker, 2020-03-10
+;  C. Piker, 2020-03-10 - Initial
 ;-
 */
 static IDL_VPTR das2c_api_datasets(int argc, IDL_VPTR* argv)

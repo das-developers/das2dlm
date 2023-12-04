@@ -1,26 +1,66 @@
 ; Annotated example of generating a coverage plot generation for TRACERS MAG
 ; data using das2dlm.
 
+;+
+; 
+function getData, sServer, sSource, sBeg, sEnd, inter=rInter, res=rRes, params=aParams
+	compile_opt idl2
 
-sServer  = 'https://tracers-dev.physics.uiowa.edu/stream?server=dataset'
-sSource1 = 'PreFlight/L0/MAG/FM-1_Coverage'
-sSource2 = 'PreFlight/L0/MAG/FM-2_Coverage'
-sBeg     = '2023-01-01'
-sEnd     = '2024-01-01'
-sInter   = '60.0'   ; We want to count packets per minute
+	sFmt = "%s?server=datest&dataset=%s&start_time=%s"
+	sUrl = string(sServer, sSource, sBeg, sEnd, format=sFmt)
 
-sFormat  = "%s&dataset=%s&start_time=%s&end_time=%s&interval=%s"
+	; Interval and resolution are mutually exclusive.  Interval is for exactly
+	; defined time periods, Resolution is an upper bound on the bin size.
+	if keyword_set(inter) then begin
+		sUrl = string(sUrl, rInter, format="%s&interval=%s")
+	else
+		if keyword_set(res) then begin
+			sUrl = string(sUrl, rRes, format="%s&resolution=%s")
+		endif
+	endif
 
-; Coverage for FM-1
-sQuery1  = string(sServer, sSource1, sBeg, sEnd, sInter, format=sFormat)
+	; If an extra parameters were provided, add them in.
+	if keyword_set(params) then begin
+		sUrl = string(sUrl, format="%s&params=")
+		for i = 0, n_elements(aParams) do begin
+
+			if i EQ 0 then begin
+				sUrl = string(sUrl, sParam, format="%s&params=%s")
+			else
+				sUrl = string(sUrl, sParam, format="%s,%s")
+			endif
+
+		endfor
+	endif
+	
+	result = das2c_readhttp(sUrl)
+	return result
+end
 
 das2c_loglevel('debug')   ; turn on debug logging (optional)
 
+sServer  = 'https://tracers-dev.physics.uiowa.edu/stream'
+
+; We could get a list of all data sources on the server like so, but we
+; already know what we want, so skip it
+;aSources = das2c_srclist(sServer)
+
+sFm1Cover = 'PreFlight/L0/MAG/FM-1_Coverage'
+sFm2Cover = 'PreFlight/L0/MAG/FM-2_Coverage'
+
+; Coverage for FM-1
 print, "Getting 2023 coverage data for MAG FM-1"
-result1  = das2c_readhttp(sQuery1)
+result1 = getData(sServer, sFm1Cover, '2023-01-01', '2024-01-01', inter=60.0)
 
 print, "Getting 2023 coverage data for MAG FM-2"
-result2  = das2c_readhttp(sQuery2)
+result2  = getData(sServer, sSource2, sBeg, sEnd, inter=60.0)
+
+aPlots = coveragePlot(result1, result2)
+
+sFile = "ex01_tracers_mag_coverage.png"
+aPlots[0].save, sFile, width=1024, height=800, resolution=300
+
+print, 'Plot', sFile, ' written to current directory'
 
 ; There are various dataset inspection routines that could be used here
 ; but since we know what the form of the data are, we can skip them.
@@ -46,6 +86,10 @@ xTime1 = das2c_data(das2c_vars(das2c_pdims(ds1, 'time'), 'center'))
 xTime2 = das2c_data(das2c_vars(das2c_pdims(ds2, 'time'), 'center'))
 
 ; Make a two panel plot with Y values from the pre/APID rates
+; We're going to stack all
 barplot(
+	
 )
 
+
+; Helper function

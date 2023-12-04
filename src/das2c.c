@@ -50,7 +50,7 @@
 #define D2C_OVER_RANK_FLAG -99
 
 /* Set the version number advertised in user agent strings by default */
-#define DAS2DLM_S_VER "0.2"
+#define DAS2DLM_S_VER "0.5"
 
 /*
 / * Include IDL_GettmpNULL if needed * /
@@ -87,6 +87,7 @@ static IDL_MEMINT g_aShape8[2];
 /*#include "das2c_convert.c"*/
 #include "das2c_free.c"
 #include "das2c_readhttp.c"
+#include "das2c_srclist.c"
 /*
 #include "das2c_null_test.c" // Test of the null pointer
 */
@@ -109,6 +110,7 @@ int IDL_Load(void){
 	g_aShape8[0] = 1;  g_aShape8[1] = 8;
 
 	/* Define our structures */
+	define_DAS2C_SRCENT();
 	define_DAS2C_RESULT();
 	define_DAS2C_DSET();
 	define_DAS2C_PDIM();
@@ -117,6 +119,10 @@ int IDL_Load(void){
 	define_DAS_TIME();
 		
  	static IDL_SYSFUN_DEF2 function_addr[] = {
+ 		{
+ 			{(IDL_SYSRTN_GENERIC)das2c_api_srclist}, "DAS2C_SRCLIST",
+			D2C_SRCLIST_MINA, D2C_SRCLIST_MAXA, D2C_SRCLIST_FLAG, NULL
+ 		},
 		{ 
 			{(IDL_SYSRTN_GENERIC)das2c_api_results}, "DAS2C_RESULTS",
 			D2C_RESULTS_MINA, D2C_RESULTS_MAXA, D2C_RESULTS_FLAG, NULL
