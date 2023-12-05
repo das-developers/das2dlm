@@ -171,7 +171,7 @@ static const ResultDbEnt* das2c_arg_to_ent(int argc, IDL_VPTR* argv, int iArg)
 /*
 ;+
 ; FUNCTION:
-;  das2c_queries
+;  das2c_results
 ;
 ; PURPOSE:
 ;  List stored das2 query results

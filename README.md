@@ -1,7 +1,7 @@
 # das2dlm
 Das2dlm is an IDL (Interactive Data Language) DLM (Dynamically Loadable Module) that
 provides bindings for the [das2C](https://github.com/das-developers/das2C) library.  It
-is compatable with IDL 8.7 or newer.  Once installed, das2dlm functions are new IDL
+is compatable with IDL 8.5 or newer.  Once installed, das2dlm functions are new IDL
 system rountines and thus do not require any specific initialization calls such as
 "linkimage".
 
@@ -11,17 +11,51 @@ Reading local files and command pipes is not yet implemented.  Only queries
 to HTTP servers providing a GET API are currently supported.  Caching query
 output in local data files is also not supported in this early version.
 
-This DLM is not tied to an specific query API, such as das2 or HAPI.  It issues
-an HTTP request to a URL that you format.  On the other hand, this DLM very much
-cares about the format of the data stream output by the server.  The supported
-stream formats are limited to those that are parseable by the [das2C](https://github.com/das-developers/das2C)
-library.  At the time of writing only das2.2 streams are supported, though once
-das2C supports das v3.0 streams, this module will too.
-  
-## Build/Download
+## Package Install
 
-The easiest way to get das2dlm is to download a [binary release](https://github.com/das-developers/das2dlm/releases).
-The most recent release is version [0.4.1](https://github.com/das-developers/das2dlm/releases/tag/0.4.1).
+**das2dlm** is an IDL package and may be installed using the,
+[IDL Package Manager (IPM)](https://www.nv5geospatialsoftware.com/docs/ipm.html). 
+The IPM command only installs github.com releases (does not use clone).  If you
+are using IDL 8.7.1 or higher, das2pro can be downloaded and installed by issuing
+the single IDL command:
+
+`IPM, /install, 'https://github.com/das-developers/das2dlm'`
+
+The `IPM` command automatically handles updating your `IDL_DLM_PATH`.
+
+To update das2pro to the latest version run the IPM command:
+
+`IPM, /update, 'das2dlm'`
+
+and to remove das2pro from your packages directory issue:
+
+`IPM, /remove, 'das2dlm'`
+  
+## Manual Binary Install
+
+If you are not running IDL 8.7.1 or higher, but are using at least IDL 8.5, 
+das2dlm [binary releases](https://github.com/das-developers/das2dlm/releases)
+will still work, but you'll have to download and unzip them manually.  The
+contents of the zip file must be placed somewhere on your `IDL_DLM_PATH`. 
+Note, the contents of the zip go directly into the directory, 
+*do not make a sub-directory*.
+
+To find your current IDL_DLM_PATH issue:
+```idl
+print, !DLM_PATH
+```
+If none of the directories output above seem suitable (or you just can't)
+write to them, then add a custom directory to the IDL_DLM_PATH.  Here's
+an example of doing so:
+```bash
+export IDL_DLM_PATH="$HOME/my_dlms:<IDL_DEFAULT>"
+```
+The text `<IDL_DEFAULT>` is a flag that must be included as the last item in the
+path or else IDL will not be able to find it's own modules. See
+[DLMs](https://www.nv5geospatialsoftware.com/docs/DLM.html) in the IDL documentation
+for details.
+
+## Building
 
 If you would like to compile das2dlm from source code, instructions for doing so may be
 found in:
@@ -30,45 +64,38 @@ found in:
   * [doc/build_windows.md](https://github.com/das-developers/das2dlm/blob/master/doc/build_windows.md)
   * [doc/build_mac.md](https://github.com/das-developers/das2dlm/blob/master/doc/build_mac.md)
 
-Follow one of the files above to create the DLM.
-
-## Install
-After downloading the DLM or building it from source, you have two installation choices:
-  1. Copy the contents into the IDL default extension location.  Since IDL can be installed
-     in a variety of locations an exact path can't be provided here, but example 
-     locations for various operating systems follow:
-     ```
-     /usr/local/harris/idl87/bin/bin.linux.x86_64    (Linux example)
-     /Applications/harris/idl/bin/bin.darwin.x86_64  (MacOS example)
-     C:\Program Files\Harris\IDL87\bin\bin.x86_64    (Windows example)
-     ```
-     Only the contents of the dlm directory should be copied in, not the whole directory
-     itself.  So for example copy in `das2c.darwin.x86_64.so` and `das2c.dlm` not the
-     whole directory `das2dlm-dsym-0.4.0`.
-     
-  2. Alternatively, you can copy the contents of the DLM to some other directory and update
-     your `IDL_DLM_PATH` environment variable.  The default IDL path must be retained in
-     the environment variable.  Examples of setting `IDL_DLM_PATH` for various operating
-     systems follow:
-     ```
-     export IDL_DLM_PATH="/home/myname/das2dlm-dsym-0.4.0:<IDL_DEFAULT>"   (Linux/MacOS)
-     set IDL_DLM_PATH=C:\Users\myname\das2dlm-dsym-0.4.0:<IDL_DEFAULT>     (Windows)
-     ```
-     The text `<IDL_DEFAULT>` is a flag  that must be included as the last item in the
-     path or else IDL will not be able to find it's own modules. See
-     [DLMs](https://www.harrisgeospatial.com/docs/DLM.html) in the IDL documentation
-     for details.
-
-  3. Within IDL you can set the IDL_DLM_PATH as follows:
-     ```idl
-     PREF_SET, 'IDL_DLM_PATH', '/Users/me/my_dlms:<IDL_DEFAULT>', /COMMIT   ;posix example
-     PREF_SET, 'IDL_DLM_PATH', 'C:\Users\me\my_dlms:<IDL_DEFAULT>', /COMMIT ;windows example
-     ```
+Follow one of the files above to create the DLM.  After creating the shared object (.so)
+or dynamic load library (.dll), copy it, along with the `das2c.dlm` file into some
+directory on your `IDL_DLM_PATH`.
      
 ## Usage
 
-The following will download data from a Galileo mission das2 data source
-at the University of Iowa, save the results, and output a DAS2C_RESULT
+The das2 DLM communicates with das2 servers.  Each server provides access
+to one or more data sources, each of which can produce a data stream.  The
+following example lists all the data sources on a server commonly used for
+the Juno Mission to Jupiter.
+```idl
+IDL> das2c_srclist("https://jupiter.physics.uiowa.edu/das/server")
+```
+Outputs...
+```
+  {
+    "PATH": "Juno/Ephemeris/GanymedeCoRotational",
+    "PROVIDES": "Juno Ganymede Co-Rotational orbit parameters"
+  },
+  {
+    "PATH": "Juno/WAV/Survey",
+    "PROVIDES": "Survey Mode Electric or Magnetic Spectral Densities"
+  },
+  ...
+```
+among other items.
+
+Once a server and data source are known, HTTP GET URLs can be formed to 
+retrieve data from a particular resource.
+
+The following exmaples downloads data from a Galileo mission data source 
+at the University of Iowa, saves the results, and outputs a DAS2C_RESULT
 structure that can be used to access the data values.
 
 ```idl
@@ -79,8 +106,8 @@ IDL> result
 ```
 You should get the output:
 ```
-% DAS2C_READHTTP: Redirected to http://jupiter.physics.uiowa.edu/das/server?server=dataset&dataset=Galileo/PWS/Survey_Electri
-                  c&start_time=2001-001&end_time=2001-002
+% DAS2C_READHTTP: Redirected to http://jupiter.physics.uiowa.edu/das/server?server=dataset&
+  dataset=Galileo/PWS/Survey_Electric&start_time=2001-001&end_time=2001-002
 {
     "RESULT": 1,
     "SERVER": "jupiter.physics.uiowa.edu",

@@ -187,8 +187,8 @@ static DasDs* das2c_arg_to_ds(
 ;  List stored datasets in a das2 query result
 ;
 ; CALLING SEQUENCE:
-;  Result = das2c_datasets(query)
-;  Result = das2c_datasets(query, ds_index)
+;  Result = das2c_datasets(result)
+;  Result = das2c_datasets(result, ds_index)
 ;
 ; INPUTS:
 ;  query: A query structure as returned by das2c_readhttp() or das2c_queries()

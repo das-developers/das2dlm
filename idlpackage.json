@@ -1,0 +1,13 @@
+{
+	"Name":"das2dlm",
+	"Version":"0.5",
+	"Author":"Chris Piker",
+	"Date":"2023-12-05",
+	"URL":"http://github.com/das-developers/das2dlm",
+	"Dependencies":[
+		{
+			"Name":"IDL",
+			"Version":">=8.5"
+		}
+	]
+}

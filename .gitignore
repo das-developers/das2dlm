@@ -4,3 +4,6 @@ dlm/*.dll
 dlm/*.exp
 dlm/*.lib
 *.swp
+/.metadata/
+coverage_plot.png
+ex*.png
