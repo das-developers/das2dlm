@@ -12,6 +12,7 @@
 
 tInfo = routine_info('make', /source)
 sProjDir = file_dirname(tInfo.path)
+sDirSep=path_sep()
 
 print, 'Project directory is: ', sProjDir
 
@@ -20,8 +21,9 @@ cd, sProjDir
 make
 
 ; Add in the dlm
-dlm_register, string(sProjDir, path_sep(), path_sep(), format='%s%sdlm%sdas2c.dlm')
-dlm_load, 'das2c'
+sDLM = string(sProjDir, sDirSep, sDirSep, format='%s%sdlm%sdas2c.dlm')
+print, 'dlm_load ', sDLM
+dlm_load, sDLM
 
 ;Compile project files
 .COMPILE examples/tra_l0_coverage

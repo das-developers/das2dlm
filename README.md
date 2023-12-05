@@ -5,6 +5,12 @@ is compatable with IDL 8.5 or newer.  Once installed, das2dlm functions are new 
 system rountines and thus do not require any specific initialization calls such as
 "linkimage".
 
+*Note: This project has submodules, to clone them to use `--recursive`.*
+```bash
+git clone --recursive
+
+```
+
 ## Current Functionality
 
 Reading local files and command pipes is not yet implemented.  Only queries
@@ -57,8 +63,16 @@ for details.
 
 ## Building
 
-If you would like to compile das2dlm from source code, instructions for doing so may be
-found in:
+This repository has submodules.  To get them automatically issue:
+```bash
+git clone --recursive git@github.com:das-developers/das2dlm.git
+```
+or http equilavent.  If you forget to use `--recursive` then issue:
+```bash
+git submodule update --init --recursive
+```
+
+To compile das2dlm from source code, instructions for doing so may be found in:
 
   * [doc/build_linux.md](https://github.com/das-developers/das2dlm/blob/master/doc/build_linux.md)
   * [doc/build_windows.md](https://github.com/das-developers/das2dlm/blob/master/doc/build_windows.md)
