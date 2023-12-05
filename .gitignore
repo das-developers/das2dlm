@@ -6,4 +6,3 @@ dlm/*.lib
 *.swp
 /.metadata/
 coverage_plot.png
-ex*.png
