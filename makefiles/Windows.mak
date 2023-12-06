@@ -7,44 +7,51 @@ CC=cl.exe /nologo /DWIN32
 # Set default locations or use environment overrides.  To override any of 
 # the macros below use (for example):
 #
-#  set I_IDL="C:\Program Files\Harris\IDL87\bin\bin.x86_64\external\include"
-#
+#  set IDL_DIR="C:\Program Files\Harris\IDL87"
+#  
+!IFNDEF VCPKG_DIR
+VCPKG_DIR=$(USERPROFILE)\git\vcpkg
+!ENDIF
+
+!IFNDEF LIBRARY_INC
+LIBRARY_INC=$(VCPGK_DIR)\installed\x64-windows-static\include
+!ENDIF
+
+!IFNDEF LIBRARY_LIB
+LIBRARY_INC=$(VCPGK_DIR)\installed\x64-windows-static\lib
+!ENDIF
 
 # The directory containing idl_export.h
+!IFNDEF IDL_DIR
+IDL_DIR=C:\Program Files\Exelis\IDL89
+!ENDIF
+
 !IFNDEF I_IDL
-I_IDL=C:\Program Files\Exelis\IDL84\external\include
+I_IDL=$(IDL_DIR)\external\include
 !ENDIF
 
 !IFNDEF L_IDL
-L_IDL=C:\Program Files\Exelis\IDL84\bin\bin.x86_64\idl.lib
+L_IDL=$(IDL_DIR)\bin\bin.x86_64\idl.lib
 !ENDIF
 
 !IFNDEF I_DAS2
-I_DAS2=$(USERPROFILE)\git\das2C
+I_DAS2=deps\das2C
 !ENDIF
 
 # libdas2.3.lib file or equivalent
 !IFNDEF L_DAS2
-L_DAS2=$(USERPROFILE)\git\das2C\build\libdas2.3.lib
+L_DAS2=deps\das2C\build.windows\libdas2.3.lib
 !ENDIF
 
-# Directory containing vcpkg static libraries
-!IFNDEF L_VCPKG
-L_VCPKG=$(USERPROFILE)\git\vcpkg\installed\x64-windows-static\lib
-!ENDIF
-
-# Directory containing vcpkg header files
-!IFNDEF I_VCPKG
-I_VCPKG=$(USERPROFILE)\git\vcpkg\installed\x64-windows-static\include
-!ENDIF
 
 # Derived definitions ##########################################################
 
-ALL_INC=/I "$(I_DAS2)" /I "$(I_IDL)" /I "$(I_VCPKG)"
+INC=/I "$(I_DAS2)" /I "$(I_IDL)" /I "$(LIBRARY_INC)"
 
-STATIC_LIBS="$(L_DAS2)" "$(L_IDL)" "$(L_VCPKG)\expat.lib" \
- "$(L_VCPKG)\fftw3.lib" "$(L_VCPKG)\libssl.lib" "$(L_VCPKG)\libcrypto.lib" \
- "$(L_VCPKG)\zlib.lib" "$(L_VCPKG)\pthreadVC3.lib"
+ED=$(LIBRARY_LIB)
+STATIC_LIBS="$(L_DAS2)" "$(L_IDL)" "$(ED)\libexpatMD.lib" \
+ "$(ED)\fftw3.lib" "$(ED)\libssl.lib" "$(ED)\libcrypto.lib" \
+ "$(ED)\zlib.lib" "$(ED)\pthreadVC3.lib"
 
 ALL_LIBS= $(STATIC_LIBS) Advapi32.lib User32.lib Crypt32.lib ws2_32.lib
 
@@ -53,9 +60,10 @@ ALL_LIBS= $(STATIC_LIBS) Advapi32.lib User32.lib Crypt32.lib ws2_32.lib
 # Warning: keep das2c.c first in the list below!  Since we are usin a wierd
 #          #include scheme
 
-SRCS=src\das2c.c src\das2c_message.c src\das2c_db.c src\das2c_queries.c \
+SRCS=src\das2c.c src\das2c_message.c src\das2c_db.c src\das2c_results.c \
  src\das2c_datasets.c src\das2c_dsinfo.c src\das2c_pdims.c src\das2c_vars.c \
- src\das2c_data.c src\das2c_readhttp.c src\das2c_null_test.c src\das2c_GettmpNull.c
+ src\das2c_data.c src\das2c_readhttp.c src\das2c_srclist.c
+ #src\das2c_null_test.c src\das2c_GettmpNull.c
  
 BD=build.windows
 
@@ -63,7 +71,7 @@ BD=build.windows
 # include all the .c files in one.
 OBJS=$(BD)\das2c.obj
 
-CFLAGS=$(CFLAGS) $(ALL_INC)
+CFLAGS=$(CFLAGS) $(INC)
 
 DLM_SUFFIX=.x86_64
 

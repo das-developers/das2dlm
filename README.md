@@ -7,9 +7,9 @@ system rountines and thus do not require any specific initialization calls such 
 
 *Note: This project has submodules, to clone them to use `--recursive`.*
 ```bash
-git clone --recursive
-
+git clone --recursive git@github.com:das-developers/das2dlm.git
 ```
+(or the https equivalent)
 
 ## Current Functionality
 

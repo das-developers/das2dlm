@@ -2,10 +2,20 @@
 ; 
 ; WARNING: This is as single statement mode file!
 ;
-; Run as: @build
+; For non-windows run as:
+; 
+;    .reset_session
+;    @build
+; 
+; Since Windows has no standard file locations, you need to provide the location
+; of your vcvars script and the vcpkg location.  Details vary, but an example
+; follows:
+; 
+;   .reset_session
+;   vcvars='C:\opt\vs\2019_community\VC\Auxiliary\Build\vcvars64.bat'
+;   vcpkg='C:\Users\login\git\vcpkg' 
+;   @build
 
-; Get a new session
-.RESET_SESSION
 
 ; Make C program libaries
 .COMPILE make
@@ -18,7 +28,7 @@ print, 'Project directory is: ', sProjDir
 
 cd, sProjDir
 
-make
+if version.os_family eq 'Windows' then make, vcvars=vcvars, vcpkg=vcpgk else make
 
 ; Add in the dlm
 sDLM = string(sProjDir, sDirSep, sDirSep, format='%s%sdlm%sdas2c.dlm')

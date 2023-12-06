@@ -1,7 +1,7 @@
 # IDL Location ################################################################
 
 ifeq ($(I_IDL),)
-I_IDL=/usr/local/harris/idl87/external/include
+I_IDL=/usr/local/harris/idl89/external/include
 endif
 
 # das2C location ##############################################################
