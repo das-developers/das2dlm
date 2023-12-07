@@ -165,7 +165,7 @@ static DasDim* das2c_arg_to_dim(
 	DasDim* pDim = NULL;
 	for(size_t u = 0; u < pDs->uDims; ++u){
 		sIterDim = DasDim_id(pDs->lDims[u]);
-		if(strcmp(sDim, sIterDim) == 0){ pDim = pDs->lDims[u]; break; }
+		if(strcasecmp(sDim, sIterDim) == 0){ pDim = pDs->lDims[u]; break; }
 	}
 		
 	if(pDim == NULL)

@@ -455,7 +455,7 @@ static void _das2c_data_free(UCHAR* ptr)
 ;  Get all unique frequency values for a rank
 ;
 ; MODIFICATION HISTORY:
-;  In progress
+;  C. Piker, 2020-06-12 - Initial version
 ;-
 */
 static IDL_VPTR das2c_api_data(int argc, IDL_VPTR* argv)

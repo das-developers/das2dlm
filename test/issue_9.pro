@@ -1,6 +1,6 @@
 ; Tesh of the Cassini/MAG/Differential_C11 data set
 
-url = 'http://planet.physics.uiowa.edu/das/das2Server?server=dataset'
+url = 'https://planet.physics.uiowa.edu/das/das2Server?server=dataset'
 dataset = 'dataset=Cassini/MAG/Differential_C11'
 time1 = 'start_time=2013-01-01'
 time2 = 'end_time=2013-01-02'

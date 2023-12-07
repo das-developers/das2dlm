@@ -12,7 +12,7 @@ aPaths = [ $
 
 aPlots = tra_l0_coverage(sServer, aPaths, '2023-08-01', '2023-12-01', 86400.0)
 
-sFile = "coverage_plot.png"
+sFile = "ex03_tra-ace_coverage.png"
 aPlots[0].save, sFile, width=1024, height=800, resolution=300
 
 print, "File ", sFile, " written"

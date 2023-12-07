@@ -1,21 +1,6 @@
 ; TRACERS L0 Coverage Plotter ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ;
 
 
-; Convert to modified julian dates
-; FIXME: update das2c to generate these efficently
-function toJulian, vTime
-	aTime = das2c_data(vTime)
-	if vTime.units eq 'us2000' then begin
-		aJulian = make_array(n_elements(aTime), /double)
-		for iTime = 0, n_elements(aTime) - 1 do begin
-			; converts us2000 -> t1970 then t1970 -> modified-julian
-			aJulian[iTime] = systime(elapsed=(aTime[iTime]*1e-6 + 946684800.0), /julian, /utc)
-		endfor
-	endif
-	return, aJulian
-end
-	
-
 ;+
 ; FUNCTION:
 ;   tra_l0_coverage
