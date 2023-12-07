@@ -113,15 +113,13 @@ at the University of Iowa, saves the results, and outputs a DAS2C_RESULT
 structure that can be used to access the data values.
 
 ```idl
-IDL> s = 'http://planet.physics.uiowa.edu/das/das2Server?server=dataset' + $
+IDL> s = 'https://jupiter.physics.uiowa.edu/das/server?server=dataset' + $
 IDL> '&dataset=Galileo/PWS/Survey_Electric&start_time=2001-001&end_time=2001-002'
 IDL> result = das2c_readhttp(s)
 IDL> result
 ```
 You should get the output:
 ```
-% DAS2C_READHTTP: Redirected to http://jupiter.physics.uiowa.edu/das/server?server=dataset&
-  dataset=Galileo/PWS/Survey_Electric&start_time=2001-001&end_time=2001-002
 {
     "RESULT": 1,
     "SERVER": "jupiter.physics.uiowa.edu",
