@@ -13,9 +13,8 @@ git clone --recursive git@github.com:das-developers/das2dlm.git
 
 ## Current Functionality
 
-Reading local files and command pipes is not yet implemented.  Only queries
-to HTTP servers providing a GET API are currently supported.  Caching query
-output in local data files is also not supported in this early version.
+As of v0.5, three intended API functions have not been written 
+(see [the wiki](https://github.com/das-developers/das2dlm/wiki)) for details.
 
 ## Package Install
 
