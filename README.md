@@ -28,11 +28,11 @@ the single IDL command:
 
 The `IPM` command automatically handles updating your `IDL_DLM_PATH`.
 
-To update das2pro to the latest version run the IPM command:
+To update das2dlm to the latest version run the IPM command:
 
 `IPM, /update, 'das2dlm'`
 
-and to remove das2pro from your packages directory issue:
+and to remove das2dlm from your packages directory issue:
 
 `IPM, /remove, 'das2dlm'`
   
