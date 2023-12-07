@@ -28,7 +28,7 @@ print, 'Project directory is: ', sProjDir
 
 cd, sProjDir
 
-if version.os_family eq 'Windows' then make, vcvars=vcvars, vcpkg=vcpgk else make
+if !version.os_family eq 'Windows' then make, vcvars=vcvars, vcpkg=vcpgk else make
 
 ; Add in the dlm
 sDLM = string(sProjDir, sDirSep, sDirSep, format='%s%sdlm%sdas2c.dlm')

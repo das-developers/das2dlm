@@ -1,3 +1,14 @@
+$(info   )
+$(info >>>>>>>>>>>>>>> RedHat & Compatable System Dependencies <<<<<<<<<<<<<<<<)
+$(info >>>                                                                  <<<)
+$(info >>>                dnf --enablerepo=devel install \                  <<<)
+$(info >>>                    expat-devel expat-static \                    <<<)
+$(info >>>                    openssl-devel openssl-static \                <<<)
+$(info >>>                    fftw-devel fftw-static                        <<<)
+$(info >>>                                                                  <<<)
+$(info >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<)
+$(info   )
+
 # IDL Location ################################################################
 
 ifeq ($(I_IDL),)
@@ -9,12 +20,12 @@ endif
 # Defaults assume you have das2C in $HOME/git/das2C, and that you 
 # built it with "export N_ARCH=/".  Update as needed.
 ifeq ($(L_DAS2),)
-L_DAS2=$(HOME)/git/das2C/build./libdas2.3.a
+L_DAS2=deps/das2C/build.Linux.x86_64/libdas2.3.a
 endif
 
 # Directory containing das2 with contains core.h
 ifeq ($(I_DAS2),)
-I_DAS2=$(HOME)/git/das2C
+I_DAS2=deps/das2C
 endif
 
 # Library locations ###########################################################
@@ -58,9 +69,9 @@ P_SUFFIX=linux.x86_64.so
 
 # Warning: keep das2c.c first in the list below!  Since we are usin a wierd
 #          #include scheme
-SRCS=das2c.c das2c_message.c das2c_db.c das2c_readhttp.c das2c_queries.c \
- das2c_dsinfo.c das2c_datasets.c das2c_pdims.c das2c_vars.c das2c_props.c \
- das2c_data.c das2c_free.c
+SRCS=das2c.c das2c_message.c das2c_db.c das2c_srclist.c das2c_readhttp.c  \
+ das2c_results.c das2c_dsinfo.c das2c_datasets.c das2c_pdims.c das2c_vars.c \
+ das2c_props.c das2c_data.c das2c_free.c
  
 SRCS_IN=$(patsubst %, src/%, $(SRCS))
 

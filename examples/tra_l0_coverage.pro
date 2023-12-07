@@ -33,7 +33,7 @@
 ; MODIFICATION HISTORY:
 ;   C. Piker, 2023-12-04 - Initial
 ;
-function tra_l0_coverage, sServer, aPaths, sBeg, sEnd, rBinSec
+function tra_l0_coverage, sServer, aPaths, sBeg, sEnd, rBinSec, buffer=buffer
 
 	if n_elements(aPaths) eq 0 then message, 'No data source paths provided'
 
@@ -121,7 +121,7 @@ function tra_l0_coverage, sServer, aPaths, sBeg, sEnd, rBinSec
 
 			if iApid eq 0 then begin
 				aGraphic[iApid] = barplot( $
-					/current, /buffer, position=[x0, y0, x1, y1], $
+					/current,  buffer=buffer, position=[x0, y0, x1, y1], $
 					aJulian, aRate, width=rBinSec, fill_color=aColors[iApid], $
 					title=aPaths[iPanel], xtickunits='time', xtickformat='label_date', $
 					xtickdir=0, ytickdir=0, xrange=[rMin, rMax], bottom_color='white', $
