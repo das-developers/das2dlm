@@ -261,8 +261,8 @@ static IDL_VPTR das2c_api_datasets(int argc, IDL_VPTR* argv)
 		das2c_check_ds_id(pEnt, iDs);
 	}
 		
-	IDL_MEMINT dims = pEnt->uDs;
-	if(iDs == -1) dims = 1;
+	IDL_MEMINT dims = 1;
+	if(iDs == -1) dims = pEnt->uDs;
 	
 	IDL_VPTR pRet;
 	
