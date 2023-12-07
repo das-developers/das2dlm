@@ -1,4 +1,4 @@
-# das2dlm
+# Das2DLM
 Das2dlm is an IDL (Interactive Data Language) DLM (Dynamically Loadable Module) that
 provides bindings for the [das2C](https://github.com/das-developers/das2C) library.  It
 is compatable with IDL 8.5 or newer.  Once installed, das2dlm functions are new IDL
@@ -387,3 +387,10 @@ associated with the result; however, it will not pull the rug out from under you
 Any internal data arrays that have been wrapped by
 [IDL_ImportArray](https://www.harrisgeospatial.com/docs/CreateArrayFromExistingData.html)
 will not be deleted until IDL is done with them.
+
+
+## Next Steps
+
+The [das2dlm wiki](https://github.com/das-developers/das2dlm/wiki) provides documentation for each function.  
+
+The examples directory contains working examples of using this module to generate various plots.
