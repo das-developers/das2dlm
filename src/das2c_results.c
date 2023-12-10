@@ -76,7 +76,7 @@ static bool das2c_ent2result(DAS2C_RESULT_data* pDest, const ResultDbEnt* pSrc)
 	for(u = 0; u < pSrc->uParam; ++u){
 				
 		/* WARNING: Knowledge of das2 server interface used here
-		   may need updates for das2.3 compatability */
+		   may need updates for das3 compatability */
 		if(strcmp(pSrc->psKey[u], "dataset") == 0){
 			if(pSrc->psVal[u] != NULL) 
 				IDL_StrStore(&(pDest->source), pSrc->psVal[u]);

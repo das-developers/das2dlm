@@ -9,9 +9,9 @@
 ;   Produce an N-panel plot of packets per bin by APID
 ;
 ; CALLING SEQUENCE:
-;   plot_array = l0_coverage_plots(sServiceRoot, aPaths, sBegin, sEnd, rBinSz)
+;   plot_array = tra_coverage(sServiceRoot, aPaths, sBegin, sEnd, rBinSz)
 ;
-; INPUTS:
+; PARAMETERS:
 ;   sServiceRoot: A string providing the root URL of a das2 server providing x-y data
 ;
 ;   aPaths:       An array of strings providing data sources paths on the server
@@ -21,19 +21,23 @@
 ;   sEnd:         The exclusive upper bound data-time in ISO-8601 format as a string
 ;
 ;   rBinSz:       The size of each packet count bin in seconds, 60.0 is recommended
+;
+; KEYWORDS:
+;   buffer:       If set to 0, plots will display to the current graphic which
+;                 defaults to the screen
 ;   
 ; OUTPUT:
-;   An array of BARPLOT structures which can be used to write to the plot to a file
+;   An array of BARPLOT graphics which can be used to write to the plot to a file
 ;
 ; EXAMPLE:
 ;   sServer = 'https://tracers-dev.physics.uiowa.edu/stream'
 ;   aPaths  = ['PreFlight/L0/MAG/FM-1_Coverage', 'PreFlight/L0/MAG/FM-2_Coverage' ]
-;   aPlots = tra_l0_coverage(sServer, aPaths, '2023-01-01', '2024-01-01', 60.0)
+;   aPlots = tra_coverage(sServer, aPaths, '2023-01-01', '2024-01-01', 60.0)
 ;   
 ; MODIFICATION HISTORY:
 ;   C. Piker, 2023-12-04 - Initial
-;
-function tra_l0_coverage, sServer, aPaths, sBeg, sEnd, rBinSec, buffer=buffer
+;-
+function tra_coverage, sServer, aPaths, sBeg, sEnd, rBinSec, buffer=buffer
 
 	if n_elements(aPaths) eq 0 then message, 'No data source paths provided'
 
@@ -92,6 +96,9 @@ function tra_l0_coverage, sServer, aPaths, sBeg, sEnd, rBinSec, buffer=buffer
 	; Make a barplot for each result, we're going to skip the totals
 	yYSz = 0.9 / nPanels
 	aColors = ['red','orange','green','cyan', 'blue','purple']
+	
+	nBuffer = 0
+	if keyword_set(buffer) then nBuffer = buffer
 
 	for iPanel = 0, nPanels - 1 do begin
 
@@ -121,7 +128,7 @@ function tra_l0_coverage, sServer, aPaths, sBeg, sEnd, rBinSec, buffer=buffer
 
 			if iApid eq 0 then begin
 				aGraphic[iApid] = barplot( $
-					/current,  buffer=buffer, position=[x0, y0, x1, y1], $
+					/current,  buffer=nBuffer, position=[x0, y0, x1, y1], $
 					aJulian, aRate, width=rBinSec, fill_color=aColors[iApid], $
 					title=aPaths[iPanel], xtickunits='time', xtickformat='label_date', $
 					xtickdir=0, ytickdir=0, xrange=[rMin, rMax], bottom_color='white', $
@@ -151,7 +158,7 @@ function tra_l0_coverage, sServer, aPaths, sBeg, sEnd, rBinSec, buffer=buffer
 		aPanels[iPanel] = aGraphic[0]
 	endfor
 	
-	; turn on the time lables for the bottom plot only
+	; turn on the time labels for the bottom plot only
 	(aPanels[nPanels - 1])['axis0'].showtext = 1
 
 	; Free the data, we're done with it
