@@ -27,8 +27,8 @@ static IDL_STRUCT_TAG_DEF DAS2C_RESULT_tags[] = {
 
 	{"SERVER",   0, (void*)IDL_TYP_STRING},
 	{"SOURCE",   0, (void*)IDL_TYP_STRING},
-	{"BEGIN",    0, (void*)IDL_TYP_STRING},
-	{"END",      0, (void*)IDL_TYP_STRING},
+	{"MIN_TIME", 0, (void*)IDL_TYP_STRING},
+	{"MAX_TIME", 0, (void*)IDL_TYP_STRING},
 	{"RES",      0, (void*)IDL_TYP_STRING},
 	{"PARAMS",   0, (void*)IDL_TYP_STRING},
 
@@ -203,8 +203,8 @@ static const ResultDbEnt* das2c_arg_to_ent(int argc, IDL_VPTR* argv, int iArg)
 ;
 ;    SERVER:   String   ; The network URL from which data were loaded
 ;    SOURCE:   String   ; The data source ID string on the server, if known
-;    BEGIN:    String   ; The min time value
-;    END:      String   ; the max time value
+;    MIN:      String   ; The min time value
+;    MAX:      String   ; the max time value
 ;    RES:      String   ; The resolution requested if any
 ;    PARAMS:   String   ; Any extra arguments sent to the server
 ;

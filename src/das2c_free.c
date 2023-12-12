@@ -35,7 +35,8 @@
 ;  Delete resources associated with a single das2 query result from memory
 ;
 ; CALLING SEQUENCE:
-;  Result = das2c_free(result)
+;  num_remaining = das2c_free(result)
+;  num_remaining = das2c_free(result_id)
 ;
 ; INPUTS:
 ;  result:  An integer result ID, or a DAS2C_RESULT structure as return by

@@ -117,6 +117,7 @@ int IDL_Load(void){
 	define_DAS2C_VAR();
 	define_DAS2C_PROP();
 	define_DAS_TIME();
+	define_DAS2C_CREDS();
 		
  	static IDL_SYSFUN_DEF2 function_addr[] = {
  		{
@@ -166,6 +167,22 @@ int IDL_Load(void){
 		{
 			{(IDL_SYSRTN_GENERIC)das2c_api_loglevel}, "DAS2C_LOGLEVEL",
 			D2C_LOGLEVEL_MINA, D2C_LOGLEVEL_MAXA, D2C_LOGLEVEL_FLAG, NULL
+		},
+		{
+			{(IDL_SYSRTN_GENERIC)das2c_api_loglevel}, "DAS2C_CREDS",
+			D2C_CREDS_MINA, D2C_CREDS_MAXA, D2C_CREDS_FLAG, NULL
+		},
+		{
+			{(IDL_SYSRTN_GENERIC)das2c_api_loglevel}, "DAS2C_CREDSET",
+			D2C_CREDSET_MINA, D2C_CREDSET_MAXA, D2C_CREDSET_FLAG, NULL
+		},
+		{
+			{(IDL_SYSRTN_GENERIC)das2c_api_loglevel}, "DAS2C_CREDSAVE",
+			D2C_CREDSAVE_MINA, D2C_CREDSAVE_MAXA, D2C_CREDSAVE_FLAG, NULL
+		},
+		{
+			{(IDL_SYSRTN_GENERIC)das2c_api_loglevel}, "DAS2C_CREDLOAD",
+			D2C_CREDLOAD_MINA, D2C_CREDLOAD_MAXA, D2C_CREDLOAD_FLAG, NULL
 		}
 /*					
 		{
@@ -190,9 +207,22 @@ int IDL_Load(void){
 	das_init("das2c DLM", DASERR_DIS_RET, 0, DASLOG_INFO, das2c_log2idl);
 	
 	
-	/* Make a default credentials manager, it will not be able to 
-	   store keys to disk, but we can fix that */
-	g_pDefCred = new_CredMngr(NULL);
+	/* Make a default credentials manager, and set it's default location
+	 * for credentials data */
+	char sAuthBuf[128] = {'\0'};
+	const char* sAuthFile = sAuthBuf;
+#ifdef _WIN32
+	if(getenv('USERPROFILE'))
+		snprintf("%s\\.das2_auth", getenv('USERPROFILE'));
+	else
+		sAuthFile = NULL;
+#else
+	if(getenv('HOME'))
+		snprintf("%s\\.das2_auth", getenv('HOME'));
+	else
+		sAuthFile = NULL;
+#endif
+	g_pDefCred = new_CredMngr(sAuthFile);
 	
 	/* Initialze the query result database.  Searches are linear so
 	 * start small */
