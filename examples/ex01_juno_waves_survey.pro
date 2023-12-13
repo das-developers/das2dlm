@@ -1,5 +1,30 @@
 ; Plot four section Juno Waves electric Survey data
-pro ex01_juno_waves_survey, display=display
+;
+; Note: 
+;   If you request newer data that have not been released to the PDS then
+;   the das2 server will ask for authenticiation.  Authentication sessions
+;   do not work in IDLDE (since it's not a real terminal).  To save your
+;   authentication so you don't have to enter it each time:
+;
+;     1. Start IDL in a terminal (or cmd.exe shell)
+;
+;     2. Run this procedure with a recent time range (you'll be prompted for
+;        a password)
+;
+;     3. Run the following to save your password:
+;        das2c_credsave()  ; Saves to $HOME/.das2_auth by default.
+;
+;   Before reading data in a new session run:
+;
+;      das2c_credload()
+;
+;   to load your saved passwords to memory.  Since you're not prompted for
+;   authentication, this procedure will work in IDLDE.
+;
+;   For more detail, see the das2c_cred* functions in the API reference @
+;   https://github.com/das-developers/das2dlm/wiki
+   
+pro ex01_juno_waves_survey, tmin=tmin, tmax=tmax, display=display
 	compile_opt idl2
 
 	; Generate a URL for the desired subset, we'll use a low-level
@@ -10,8 +35,16 @@ pro ex01_juno_waves_survey, display=display
 	; Print interface info about this data source
 	;print, das2c_srcinfo(sServer, sDataset) ; Not implemented in v0.5
 
-	sBeg = '2017-02-02'
-	sEnd = '2017-02-03'
+	
+	if ~keyword_set(tmin) then begin 
+		sBeg = '2017-02-02'
+		sRegion = ', Perijove 4'
+	endif else begin
+		sBeg = tmin;
+		sRegion = ''
+	endelse
+
+	if ~keyword_set(tmax) then sEnd = '2017-02-03' else sEnd = tmax;
 	
 	; ask for 60 second time bins ... or see below
 	sRes = '60.0'  
@@ -68,8 +101,8 @@ pro ex01_juno_waves_survey, display=display
 	)
 	
 	; fix up the plot a bit
-	cont.title = string( sServer, sDataSet $
-		, format='Juno Waves Electric Survey, Perijove 4!c!d %s, %s' $
+	cont.title = string( sServer, sDataSet, sRegion, $
+		format='Juno Waves Electric Survey%s!c!d %s, %s' $
 	)
 	ax = cont.axes
 	ax[1].log = 1

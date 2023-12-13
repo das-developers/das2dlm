@@ -67,7 +67,7 @@ SRCS_IN=$(patsubst %, src/%, $(SRCS))
 # Composite Defs ##############################################################
 
 CC=gcc
-CFLAGS=-ggdb -std=c99 -Wall -Wno-unused-function -fPIC -I$(I_IDL) -I$(I_DAS2)
+CFLAGS=-ggdb -O0 -fstack-protector -std=c99 -Wall -Wno-unused-function -fPIC -I$(I_IDL) -I$(I_DAS2)
 #CFLAGS=-O2 -std=c99 -Wall -Wno-unused-function -fPIC -I$(I_IDL) -I$(I_DAS2)
 
 STATIC_LIBS=$(L_DAS2) $(L_FFTW3) $(L_EXPAT) $(L_SSL) $(L_CRYPTO) $(L_Z)

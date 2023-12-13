@@ -88,6 +88,7 @@ static IDL_MEMINT g_aShape8[2];
 #include "das2c_free.c"
 #include "das2c_readhttp.c"
 #include "das2c_srclist.c"
+#include "das2c_creds.c"
 /*
 #include "das2c_null_test.c" // Test of the null pointer
 */
@@ -117,7 +118,7 @@ int IDL_Load(void){
 	define_DAS2C_VAR();
 	define_DAS2C_PROP();
 	define_DAS_TIME();
-	define_DAS2C_CREDS();
+	define_DAS2C_CRED();
 		
  	static IDL_SYSFUN_DEF2 function_addr[] = {
  		{
@@ -169,19 +170,19 @@ int IDL_Load(void){
 			D2C_LOGLEVEL_MINA, D2C_LOGLEVEL_MAXA, D2C_LOGLEVEL_FLAG, NULL
 		},
 		{
-			{(IDL_SYSRTN_GENERIC)das2c_api_loglevel}, "DAS2C_CREDS",
+			{(IDL_SYSRTN_GENERIC)das2c_api_creds},    "DAS2C_CREDS",
 			D2C_CREDS_MINA, D2C_CREDS_MAXA, D2C_CREDS_FLAG, NULL
 		},
 		{
-			{(IDL_SYSRTN_GENERIC)das2c_api_loglevel}, "DAS2C_CREDSET",
+			{(IDL_SYSRTN_GENERIC)das2c_api_credset}, "DAS2C_CREDSET",
 			D2C_CREDSET_MINA, D2C_CREDSET_MAXA, D2C_CREDSET_FLAG, NULL
 		},
 		{
-			{(IDL_SYSRTN_GENERIC)das2c_api_loglevel}, "DAS2C_CREDSAVE",
+			{(IDL_SYSRTN_GENERIC)das2c_api_credsave}, "DAS2C_CREDSAVE",
 			D2C_CREDSAVE_MINA, D2C_CREDSAVE_MAXA, D2C_CREDSAVE_FLAG, NULL
 		},
 		{
-			{(IDL_SYSRTN_GENERIC)das2c_api_loglevel}, "DAS2C_CREDLOAD",
+			{(IDL_SYSRTN_GENERIC)das2c_api_credload}, "DAS2C_CREDLOAD",
 			D2C_CREDLOAD_MINA, D2C_CREDLOAD_MAXA, D2C_CREDLOAD_FLAG, NULL
 		}
 /*					
@@ -212,13 +213,13 @@ int IDL_Load(void){
 	char sAuthBuf[128] = {'\0'};
 	const char* sAuthFile = sAuthBuf;
 #ifdef _WIN32
-	if(getenv('USERPROFILE'))
-		snprintf("%s\\.das2_auth", getenv('USERPROFILE'));
+	if(getenv("USERPROFILE"))
+		snprintf(sAuthBuf, 127, "%s\\.das2_auth", getenv("USERPROFILE"));
 	else
 		sAuthFile = NULL;
 #else
-	if(getenv('HOME'))
-		snprintf("%s\\.das2_auth", getenv('HOME'));
+	if(getenv("HOME"))
+		snprintf(sAuthBuf, 127, "%s/.das2_auth", getenv("HOME"));
 	else
 		sAuthFile = NULL;
 #endif

@@ -29,7 +29,7 @@ static IDL_STRUCT_TAG_DEF DAS2C_CRED_tags[] = {
    {"PARAM",    0, (void*)IDL_TYP_STRING},
    {"VALUE",    0, (void*)IDL_TYP_STRING},
    {"HASH",     0, (void*)IDL_TYP_STRING},
-   {"VALID",    0, (void*)IDL_TYPE_LONG }
+   {"VALID",    0, (void*)IDL_TYP_LONG  },
    {0}
 };
 
@@ -52,20 +52,23 @@ typedef struct das2c_cred_data_s{
 } DAS2C_CRED_data;
 
 /* Provide strcasestr so we have it, it's not in the POSIX spec */
-char* loc_strcasestr(const char *haystack, const char *needle)
+const char* loc_strcasestr(const char *haystack, const char *needle)
 {
    if(!haystack || !needle) 
       return NULL;
 
    size_t n = strlen(needle);  /* Length of needle */
    size_t i = 0;               /* Position in needle */
-   
+   char c   = '\0';
    while(*haystack != '\0'){
 
       c = *(needle+i);  
 
       /* Comparison, assume ASCII encoding so to lowcase a character, add 32 (0x20) */
-      if((c == *haystack)||( (c > '@')&&(c < '[')&&(c+0x20 == *haystack) ) ){
+      if((c == *haystack)||
+         ( (c > '@')&&(c < '[')&&((c+0x20) == *haystack) ) ||
+         ( (c > '`')&&(c < '{')&&((c-0x20) == *haystack) )
+      ){
          /* Matched one */
          ++i;
          if(i == n)
@@ -171,60 +174,71 @@ static IDL_VPTR das2c_api_creds(int argc, IDL_VPTR* argv)
    const char* sCkParam = NULL;
    const char* sCkValue = NULL;
 
-   if(argc > 0){
+   if((argc > 0)&&(!IDL_NULL(argv[0]))){
       sCkUrl = IDL_VarGetString(argv[0]);
-      if((sCkUrl == NULL)||(*sCkUrl == '\0')){
-         das2c_IdlMsgExit("URL match string is empty");
+      if((sCkUrl != NULL)&&(*sCkUrl == '\0')){
+         sCkUrl = NULL;
       }
    }
-   if(argc > 1){
+   if((argc > 1)&&(!IDL_NULL(argv[1]))){
       sCkRealm = IDL_VarGetString(argv[1]);
-      if((sCkRealm == NULL)||(*sCkRealm == '\0')){
-         das2c_IdlMsgExit("Realm match string is empty");
+      if((sCkRealm != NULL)&&(*sCkRealm == '\0')){
+         sCkRealm = NULL;
       }
    }
-   if(argc > 2){
+   if((argc > 2)&&(!IDL_NULL(argv[2]))){
       sCkParam = IDL_VarGetString(argv[2]);
-      if((sCkParam == NULL)||(*sCkParam == '\0')){
-         das2c_IdlMsgExit("Parameter match string is empty");
-      }
-      if(argc < 4){
-         das2c_IdlMsgExit("Value argument missing, though parameter name is present");  
+      if((sCkParam != NULL)&&(*sCkParam == '\0')){
+         sCkParam = NULL;
       }
    }
-   if(argc > 3){
+   if((argc > 3)&&(!IDL_NULL(argv[3]))){
       sCkValue = IDL_VarGetString(argv[3]);
-      if((sCkValue == NULL)||(*sCkValue == '\0')){
-         das2c_IdlMsgExit("Parameter-Value match string is empty");
+      if((sCkValue != NULL)&&(*sCkValue == '\0')){
+         sCkValue = NULL;
       }
    }
+
+   /* Make sure both param and value are non-null, or both null */
+   if( ((sCkParam == NULL)&&(sCkValue != NULL) ) ||
+       ((sCkParam != NULL)&&(sCkValue == NULL) ) )
+      das2c_IdlMsgExit("Must supply a parameter name when providing a parameter value and vice versa.");
 
    DasAry* pCreds = g_pDefCred->pCreds; /* This is initialized in das2c.c */
 
    /* Pass-1, figure out how big to make the output */
-   size_t uOut = 0;
    das_credential* pCred = NULL;
-   for(ptrdiff_t i = 0; i < DasAry_size(pCreds); ++i){
+   size_t uOut = 0;
+   ptrdiff_t aMatch[64] = {0};
+   for(ptrdiff_t i = 0; (i < DasAry_size(pCreds)) && (uOut < 64); ++i){
       pCred = (das_credential*)DasAry_getAt(pCreds, vtUnknown, IDX0(i));
 
-      if(sCkUrl && (loc_strcasestr(sCkUrl, pCred->sServer) == NULL))
+      if(sCkUrl && (loc_strcasestr(pCred->sServer, sCkUrl) == NULL))
          continue;
-      if(sCkRealm && (loc_strcasestr(sCkRealm, pCred->sRealm) == NULL))
+      if(sCkRealm && (loc_strcasestr(pCred->sRealm, sCkRealm) == NULL))
          continue;
-      // das2.2 hack: For v3.0, allow params other then 'dataset'
-      if(sCkParam && (loc_strcasestr(sCkParam, "dataset") == NULL))
-         continue;  
-      if(sCkValue && (loc_strcasestr(sCkValue, pCred->sDataset) == NULL))
+      
+      // das2.2 hack.  Later for v3.0 we can allow params other then 'dataset'
+      if(sCkParam && (loc_strcasestr("dataset", sCkParam) == NULL))
          continue;
 
-      ++uOut; // It matched
+      if(sCkValue && (pCred->sDataset[0] != '\0') &&
+         (loc_strcasestr(pCred->sDataset, sCkValue) == NULL))
+         continue;
+      if(sCkValue && (pCred->sDataset[0] == '\0'))
+         continue;
+
+      aMatch[uOut] = i;  // It matched
+      ++uOut;
    }
+
+   if(uOut == 0) return IDL_GettmpNULL();
 
    /* make output structure */
    IDL_MEMINT dims = uOut;
    IDL_VPTR pRet;
 
-   DAS2C_CRED_data* pData = (DAS2C_CRED_data*) IDL_MakeTmpStruct(
+   DAS2C_CRED_data* pData = (DAS2C_CRED_data*) IDL_MakeTempStruct(
       DAS2C_CRED_pdef,  /* the opaque structure def */
       1,                /* number of dimensions */
       &dims,            /* the size of our dimensions (one dim) */
@@ -233,19 +247,8 @@ static IDL_VPTR das2c_api_creds(int argc, IDL_VPTR* argv)
    );
 
    /* Do it again, this time creating output */
-   uOut = 0;
-   for(ptrdiff_t i = 0; i < DasAry_size(pCreds); ++i){
-      pCred = (das_credential*)DasAry_getAt(pCreds, vtUnknown, IDX0(i));
-
-      if(sCkUrl && (loc_strcasestr(sCkUrl, pCred->sServer) == NULL))
-         continue;
-      if(sCkRealm && (loc_strcasestr(sCkRealm, pCred->sRealm) == NULL))
-         continue;
-      // das2.2 hack: For v3.0, allow params other then 'dataset'
-      if(sCkParam && (loc_strcasestr(sCkParam, "dataset") == NULL))
-         continue;  
-      if(sCkValue && (loc_strcasestr(sCkValue, pCred->sDataset) == NULL))
-         continue;
+   for(size_t u = 0; u < uOut; ++u){
+      pCred = (das_credential*)DasAry_getAt(pCreds, vtUnknown, IDX0(aMatch[u]));
 
       IDL_StrStore(&(pData->url),   pCred->sServer);
       IDL_StrStore(&(pData->realm), pCred->sRealm);
@@ -258,7 +261,6 @@ static IDL_VPTR das2c_api_creds(int argc, IDL_VPTR* argv)
       }
  
       ++pData;
-      ++uOut; // It matched
    }
 
    return pRet;
@@ -268,7 +270,7 @@ static IDL_VPTR das2c_api_creds(int argc, IDL_VPTR* argv)
 /* API Function, careful with changes! */
 
 #define D2C_CREDSET_MINA 2
-#define D2C_CREDSET_MAXA 5
+#define D2C_CREDSET_MAXA 6
 #define D2C_CREDSET_FLAG 0
 
 /*
@@ -281,8 +283,8 @@ static IDL_VPTR das2c_api_creds(int argc, IDL_VPTR* argv)
 ;
 ; CALLING SEQUENCE:
 ;  did_store = das2c_credset(url, realm)
-;  did_store = das2c_credset(url, realm, dataset)
-;  did_store = das2c_credset(url, realm, dataset, user, password)
+;  did_store = das2c_credset(url, realm, param, value)
+;  did_store = das2c_credset(url, realm, param, value, user, password)
 ;
 ; INPUTs:
 ;  url:      A URL string without a fragment or query parameters
@@ -291,7 +293,11 @@ static IDL_VPTR das2c_api_creds(int argc, IDL_VPTR* argv)
 ;            when requesting authentication.
 ;
 ; OPTIONAL INPUTS:
-;   dataset:  Applies to das2.2, the value of the 'dataset=' query parameter
+;   param:    Applies to das2.2.  Set this to 'dataset' to only send this
+;             credential when the HTTP GET param 'dataset' is present in 
+;             the data request.  May use !NULL to skip this.
+;
+;   value:    Applies to das2.2, Set value of the 'dataset=' query parameter
 ;             for which this authentication token will apply.  May use !NULL
 ;             to skip this.
 ;
@@ -334,10 +340,10 @@ static IDL_VPTR das2c_api_creds(int argc, IDL_VPTR* argv)
 ;     sDataset = 'DE/de-1/pwi_lowrate'
 ;     sUser = 'drjfever'
 ;     sPass = 'really~4disco'
-;     nCreds = das2c_credsave(sUrl, sRealm, sDataset, sUser, sPass)
+;     nCreds = das2c_credsave(sUrl, sRealm, 'dataset', sDataset, sUser, sPass)
 ;
 ; MODIFICATION HISTORY:
-;   C. Piker, 2023-12-11 - Initial Version
+;   C. Piker, 2023-12-12 - Initial Version
 ;-
 */
 static IDL_VPTR das2c_api_credset(int argc, IDL_VPTR* argv)
@@ -353,26 +359,34 @@ static IDL_VPTR das2c_api_credset(int argc, IDL_VPTR* argv)
    if((sRealm == NULL)||(sRealm[0] == '\0'))
       das2c_IdlMsgExit("Security realm string is empty");
    
+   const char* sParam = NULL;
+   if((argc > 2)&&(!IDL_NULL(argv[2]))){
+      sParam = IDL_VarGetString(argv[2]);
+      /* Restricted for now */
+      if(strcmp(sParam, "dataset") != 0)
+         das2c_IdlMsgExit("Currently only the param 'dataset' is supported");
+   }
+
    const char* sDataset = NULL;
-   if((argc > 2)&&(!IDL_NULL(argv[2])))
-      sDataset = IDL_VarGetString(argv[2]);
+   if((argc > 3)&&(!IDL_NULL(argv[3])))
+      sDataset = IDL_VarGetString(argv[3]);
 
    char sUser[128] = {'\0'};
    char sPass[128] = {'\0'};
    
-   if((argc == 4))
+   if((argc == 5))
       das2c_IdlMsgExit("Must supply a password when providing a username");
    
-   if(argc > 4){
-      const char* sTmp = IDL_VarGetString(argv[3]);
-      strncpy(sUserBuf, sTmp, 127);
-      sTmp = IDL_VarGetString(argv[4]);
-      strncpy(sPassBuf, sTmp, 127);
+   if(argc > 5){
+      const char* sTmp = IDL_VarGetString(argv[4]);
+      strncpy(sUser, sTmp, 127);
+      sTmp = IDL_VarGetString(argv[5]);
+      strncpy(sPass, sTmp, 127);
    }
    else{
       /* If no password or username given then run a prompt */
       bool bGotOne = g_pDefCred->prompt(
-         g_pDefCred, sServer, sRealm, sDataset, sUser, sPass
+         sServer, sRealm, sDataset, NULL, sUser, sPass
       );
 
       if(!bGotOne)
