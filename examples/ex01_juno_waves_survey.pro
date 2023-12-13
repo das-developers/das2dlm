@@ -1,28 +1,37 @@
 ; Plot four section Juno Waves electric Survey data
 ;
 ; Note: 
-;   If you request newer data that have not been released to the PDS then
-;   the das2 server will ask for authenticiation.  Authentication sessions
-;   do not work in IDLDE (since it's not a real terminal).  To save your
-;   authentication so you don't have to enter it each time:
+;   If you request newer data that have not been released to the PDS
+;   the das2 server will ask for authenticiation.  The following 
+;   procedure can be used to save and load your credentials.
 ;
-;     1. Start IDL in a terminal (or cmd.exe shell)
+;   1. Run the following to set and save your access information:
+;      
+;       das2c_credset(  $
+;          'https://jupiter.physics.uiowa.edu/das/server',  $
+;          'Juno Magnetospheric Working Group',  $
+;          !null, !null, 'A_USER_NAME', 'A_PASSWORD'  $
+;       )
+;       das2c_credsave()
 ;
-;     2. Run this procedure with a recent time range (you'll be prompted for
-;        a password)
+;      subsituting in a real username and password of course.
 ;
-;     3. Run the following to save your password:
-;        das2c_credsave()  ; Saves to $HOME/.das2_auth by default.
-;
-;   Before reading data in a new session run:
+;   2. Each time you re-start IDL, run the following once to load all
+;      your stored credentials and associated matching conditions.
 ;
 ;      das2c_credload()
 ;
-;   to load your saved passwords to memory.  Since you're not prompted for
-;   authentication, this procedure will work in IDLDE.
+;   3. If you need to delete your credentials remove the file named
+;      '.das2_auth' from your $HOME (POSIX) or %USERPROFILE% (Windows)
+;      directory
 ;
-;   For more detail, see the das2c_cred* functions in the API reference @
-;   https://github.com/das-developers/das2dlm/wiki
+;   Das2DLM only hands out the cerdentials you specify when data
+;   requests match the server root and authentication realm you 
+;   specified.  That way random servers don't end up getting access
+;   to your passwords.
+;
+;   For more detail, see the das2c_cred* functions in the API reference 
+;   @ https://github.com/das-developers/das2dlm/wiki
    
 pro ex01_juno_waves_survey, tmin=tmin, tmax=tmax, display=display
 	compile_opt idl2

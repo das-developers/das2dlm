@@ -54,8 +54,8 @@ pro make, vcvars=vcvars, vcpkg=vcpkg
 		sInc = 'set "LIBRARY_INC='+vcpkg+'\'+sStatic+'\include"'
 		sFmtTest = '%s && %s && %s && %s && %s'
 		sFmt =     '%s && %s && %s && %s'
-		;sCmd = string(vcvars, sLib, sInc, sMakeCmd, sTestCmd, format=sFmtTest)
-		sCmd = string(vcvars, sLib, sInc, sMakeCmd, format=sFmt)
+		sCmd = string(vcvars, sLib, sInc, sMakeCmd, sTestCmd, format=sFmtTest)
+		;sCmd = string(vcvars, sLib, sInc, sMakeCmd, format=sFmt)
 		print, sCmd 
 		cd, 'deps\das2C'
 		spawn, sCmd, /log_output

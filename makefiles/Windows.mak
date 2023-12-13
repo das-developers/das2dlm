@@ -14,11 +14,11 @@ VCPKG_DIR=$(USERPROFILE)\git\vcpkg
 !ENDIF
 
 !IFNDEF LIBRARY_INC
-LIBRARY_INC=$(VCPGK_DIR)\installed\x64-windows-static\include
+LIBRARY_INC=$(VCPKG_DIR)\installed\x64-windows-static\include
 !ENDIF
 
 !IFNDEF LIBRARY_LIB
-LIBRARY_INC=$(VCPGK_DIR)\installed\x64-windows-static\lib
+LIBRARY_LIB=$(VCPKG_DIR)\installed\x64-windows-static\lib
 !ENDIF
 
 # The directory containing idl_export.h
@@ -62,7 +62,7 @@ ALL_LIBS= $(STATIC_LIBS) Advapi32.lib User32.lib Crypt32.lib ws2_32.lib
 
 SRCS=src\das2c.c src\das2c_message.c src\das2c_db.c src\das2c_results.c \
  src\das2c_datasets.c src\das2c_dsinfo.c src\das2c_pdims.c src\das2c_vars.c \
- src\das2c_data.c src\das2c_readhttp.c src\das2c_srclist.c
+ src\das2c_data.c src\das2c_readhttp.c src\das2c_srclist.c src\das2c_creds.c
  #src\das2c_null_test.c src\das2c_GettmpNull.c
  
 BD=build.windows
