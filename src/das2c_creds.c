@@ -374,7 +374,7 @@ static IDL_VPTR das2c_api_credset(int argc, IDL_VPTR* argv)
    char sUser[128] = {'\0'};
    char sPass[128] = {'\0'};
    
-   if((argc == 5))
+   if(argc == 5)
       das2c_IdlMsgExit("Must supply a password when providing a username");
    
    if(argc > 5){

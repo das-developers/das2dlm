@@ -14,7 +14,7 @@ endif
 
 # Directory containing das2 with contains core.h
 ifeq ($(I_DAS2),)
-I_DAS2=$(HOME)/git/das2C
+I_DAS2=deps/das2C
 endif
 
 # Library locations ###########################################################
@@ -60,14 +60,15 @@ P_SUFFIX=so
 #          #include scheme
 SRCS=das2c.c das2c_message.c das2c_db.c das2c_srclist.c das2c_readhttp.c  \
  das2c_results.c das2c_dsinfo.c das2c_datasets.c das2c_pdims.c das2c_vars.c \
- das2c_props.c das2c_data.c das2c_free.c
+ das2c_props.c das2c_data.c das2c_free.c das2c_creds.c
  
 SRCS_IN=$(patsubst %, src/%, $(SRCS))
 
 # Composite Defs ##############################################################
 
 CC=clang
-CFLAGS=-g -std=c99 -arch x86_64 -Wall -I$(I_IDL) -I$(I_DAS2)
+#CFLAGS=-g -std=c99 -arch x86_64 -Wall -I$(I_IDL) -I$(I_DAS2)
+CFLAGS=-O2 -DNDEBUG -std=c99 -arch x86_64 -Wall -I$(I_IDL) -I$(I_DAS2)
 
 STATIC_LIBS=$(L_DAS2) $(L_FFTW3) $(L_EXPAT) $(L_SSL) $(L_CRYPTO) $(L_Z)
 LFLAGS=-undefined dynamic_lookup -Wl,-no_compact_unwind $(STATIC_LIBS) $(DYN_LIBS)
