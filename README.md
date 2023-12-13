@@ -19,28 +19,28 @@ Furthermore FFTW based spectral densities from das2C are not yet accessable.
 
 ## Package Install
 
-**das2dlm** is an IDL package and may be installed using the,
+**Das2DLM** is an IDL package and may be installed using the,
 [IDL Package Manager (IPM)](https://www.nv5geospatialsoftware.com/docs/ipm.html). 
 The IPM command only installs github.com releases (does not use clone).  If you
 are using IDL 8.7.1 or higher, das2pro can be downloaded and installed by issuing
 the single IDL command:
 
-`IPM, /install, 'https://github.com/das-developers/das2dlm'`
+`IPM, /install, 'https://das2.org/das2dlm/Das2DLM-latest.zip'`
 
 The `IPM` command automatically handles updating your `IDL_DLM_PATH`.
 
-To update das2dlm to the latest version run the IPM command:
+To update Das2DLM to the latest version run the IPM command:
 
-`IPM, /update, 'das2dlm'`
+`IPM, /update, 'Das2DLM'`
 
-and to remove das2dlm from your packages directory issue:
+and to remove Das2DLM from your packages directory issue:
 
-`IPM, /remove, 'das2dlm'`
+`IPM, /remove, 'Das2DLM'`
   
 ## Manual Binary Install
 
 If you are not running IDL 8.7.1 or higher, but are using at least IDL 8.5, 
-das2dlm [binary releases](https://github.com/das-developers/das2dlm/releases)
+Das2DLM [binary releases](https://github.com/das-developers/das2dlm/releases)
 will still work, but you'll have to download and unzip them manually.  The
 contents of the zip file must be placed somewhere on your `IDL_DLM_PATH`. 
 Note, the contents of the zip go directly into the directory, 
@@ -72,15 +72,28 @@ or http equilavent.  If you forget to use `--recursive` then issue:
 git submodule update --init --recursive
 ```
 
-To compile das2dlm from source code, instructions for doing so may be found in:
-
+To compile Das2DLM from source code, first install necessary dependencies first, as 
+described here,  
   * [doc/build_linux.md](https://github.com/das-developers/das2dlm/blob/master/doc/build_linux.md)
   * [doc/build_windows.md](https://github.com/das-developers/das2dlm/blob/master/doc/build_windows.md)
   * [doc/build_mac.md](https://github.com/das-developers/das2dlm/blob/master/doc/build_mac.md)
 
-Follow one of the files above to create the DLM.  After creating the shared object (.so)
-or dynamic load library (.dll), copy it, along with the `das2c.dlm` file into some
-directory on your `IDL_DLM_PATH`.
+Then start IDL at the root of the project directory and issue the following command
+to build on a POSIX system (Linux, MacOS).
+```idl
+.reset_session
+@build
+```
+Since Windows does not have standard install paths, you'll need to set a couple
+variable first.
+```idl
+.reset_session
+vcvars='C:\vs\2019_community\VC\Auxiliary\Build\vcvars64.bat' ; If on windows, path varies
+vcpkg='C:\Your\Vcpkg\Top\Directory'                           ; if on windows, path varies
+@build
+```
+After creating the shared object (.so) or dynamic load library (.dll), copy it,
+along with the `das2c.dlm` file into some directory on your `IDL_DLM_PATH`.
      
 ## Usage
 
@@ -389,6 +402,6 @@ will not be deleted until IDL is done with them.
 
 ## Next Steps
 
-The [das2dlm wiki](https://github.com/das-developers/das2dlm/wiki) provides documentation for each function.  
+The [Das2DLM wiki](https://github.com/das-developers/das2dlm/wiki) provides documentation for each function.  
 
 The examples directory contains working examples of using this module to generate various plots.
