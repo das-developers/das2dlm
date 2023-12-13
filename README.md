@@ -13,8 +13,9 @@ git clone --recursive git@github.com:das-developers/das2dlm.git
 
 ## Current Functionality
 
-As of v0.5, three intended API functions have not been written 
+As of v0.5, two intended API functions have not been written 
 (see [the wiki](https://github.com/das-developers/das2dlm/wiki)) for details.
+Furthermore FFTW based spectral densities from das2C are not yet accessable.
 
 ## Package Install
 
