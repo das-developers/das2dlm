@@ -36,5 +36,7 @@ print, 'dlm_load ', sDLM
 dlm_load, sDLM
 
 ;Compile project files
-.COMPILE examples/tra_l0_coverage
-
+.COMPILE examples/tra_coverage
+.COMPILE examples/tojulian
+.COMPILE examples/tra_vector
+.COMPILE examples/ex01_juno_waves_survey.pro
